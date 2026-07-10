@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la .design-sync)",
+      "Bash(ls -la design-sync.config.json)",
+      "Bash(git rev-parse *)"
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+Contact: mailto:johanmontealegre92@gmail.com
+Expires: 2027-07-06T00:00:00.000Z
+Preferred-Languages: es
+Canonical: https://www.plasticosespinal.com/.well-known/security.txt

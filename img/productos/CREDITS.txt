@@ -1,0 +1,21 @@
+Fotos de producto — Pexels (licencia libre, uso comercial permitido, sin atribución obligatoria).
+https://www.pexels.com/license/
+
+Origen (Pexels photo ID):
+  vasos.webp        33650332
+  platos.webp        9147802
+  contenedores.webp 37851490
+  cubiertos.webp     3718490
+  bolsas.webp        3900505
+  pitillos.webp       187498
+  servilletas.webp   9147812
+  empaques.webp      7608269
+  bandejas.webp      7220780
+  tapas.webp        29389696
+  eco.webp           6990484
+  bodega.webp        4487361
+  fiesta.webp         796606
+
+Son fotos genéricas de las categorías de producto (no de las marcas Darnel/Carvajal/Ajover).
+Para usar fotos oficiales de esas marcas se necesita su material o autorización; se
+reemplazan 1:1 conservando el mismo nombre de archivo.
