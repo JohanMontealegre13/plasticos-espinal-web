@@ -138,19 +138,6 @@ h1, h2 { font-family: var(--fuente-negra); font-weight: 400; text-transform: upp
   background: var(--noche); color: #e7ecfb;
   padding: 5.2rem 0 5.8rem;
 }
-
-/* Banner de envío gratis: franja de cartel sobre el borde superior de la portada */
-.promo-envios {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: center; gap: .55rem;
-  margin: 0 0 2.6rem;
-  padding: .8rem 1.25rem;
-  background: var(--amarillo); color: var(--tinta);
-  font-family: var(--fuente-negra); font-weight: 400; text-transform: uppercase;
-  letter-spacing: .01em; font-size: .88rem; text-align: center;
-  box-shadow: 0 4px 0 rgba(10, 18, 51, .22);
-}
-.promo-envios-icono { font-size: 1.1rem; }
 /* Ecos de pólvora: anillos concéntricos punteados en las esquinas. */
 .portada-chispas { position: absolute; inset: 0; pointer-events: none; }
 .portada-chispas::before,
@@ -471,7 +458,6 @@ html.js :is(.reveal, [data-escalonado] > *).is-visible { opacity: 1; transform: 
   .cabecera-cta { margin-left: auto; padding: .5rem .95rem; font-size: .86rem; }
   .seccion { padding: 3.4rem 0; }
   .contacto { padding: 4rem 0; }
-  .promo-envios { font-size: .78rem; padding: .7rem 1rem; text-align: center; }
   /* Área táctil mínima (WCAG 2.5.5) en enlaces de texto sobre pantalla táctil */
   .menu a, .contacto-datos a, .contacto-mapa, .resenas-cta a, .pie nav a {
     min-height: 44px; display: inline-flex; align-items: center;
@@ -481,7 +467,7 @@ html.js :is(.reveal, [data-escalonado] > *).is-visible { opacity: 1; transform: 
 /* ---------- Impresión ---------- */
 @media print {
   .cinta, .cabecera, .marquesina, .wa-flotante, .boton, .portada-chispas, .pie nav,
-  .polaroid, .tag-cotizar, .promo-envios { display: none; }
+  .polaroid, .tag-cotizar { display: none; }
   .portada, .sectores, .eco, .contacto, .pie { background: none; color: #000; }
   .portada h1, .sectores h2, .eco h2, .contacto h2 { color: #000; }
   body { font-size: 11pt; color: #000; }
