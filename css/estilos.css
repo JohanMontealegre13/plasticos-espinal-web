@@ -44,9 +44,9 @@
   --sombra-suave: 0 8px 24px rgba(14, 26, 71, .08);
   --sombra-alzada: 0 16px 36px rgba(14, 26, 71, .13);
 
-  /* Cinta tricolor en tercios: sello de sección y firma del pie */
+  /* Cinta bicolor azul/rojo en mitades: sello de sección y firma del pie */
   --cinta-tricolor: linear-gradient(90deg,
-    var(--amarillo) 0 33.4%, var(--azul) 33.4% 66.7%, var(--rojo) 66.7% 100%);
+    var(--azul) 0 50%, var(--rojo) 50% 100%);
 
   --fuente: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --fuente-negra: "Archivo Black", "Archivo", system-ui, sans-serif;
