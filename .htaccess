@@ -1,3 +1,8 @@
+# ⚠️  OJO (2026-08-18): este archivo NO se aplica hoy.
+#     Solo lo lee un servidor Apache (cPanel y similares). El sitio vive en
+#     GitHub Pages, que lo ignora por completo, igual que a _headers. Se
+#     conserva por si algún día se mueve el hosting a Apache.
+
 # Seguridad y rendimiento — hosting Apache (cPanel y similares).
 # Equivalente a _headers (Netlify/Cloudflare Pages). Mantener ambos sincronizados.
 

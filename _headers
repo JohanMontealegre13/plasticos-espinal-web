@@ -1,3 +1,14 @@
+# ⚠️  OJO (2026-08-18): GitHub Pages NO lee este archivo.
+#     El sitio se sirve hoy desde GitHub Pages (comprobado: la respuesta de
+#     https://plasticosespinal.com trae "server: GitHub.com" y NINGUNA de estas
+#     cabeceras). Esta sintaxis es de Netlify / Cloudflare Pages. Mientras el
+#     hosting sea GitHub Pages, lo único que protege al visitante es el
+#     <meta http-equiv="Content-Security-Policy"> de index.html — y un <meta>
+#     no puede aplicar HSTS, X-Frame-Options ni frame-ancestors.
+#     Para que esto sirva de verdad hay que mover el sitio a Cloudflare Pages
+#     (lee este archivo tal cual) o poner Cloudflare como proxy con Transform
+#     Rules. No borrar sin decidir una de las dos.
+
 # Cabeceras de seguridad — usadas por Netlify y Cloudflare Pages.
 # Si publicas en un hosting Apache (cPanel), las mismas reglas van en .htaccess.
 
