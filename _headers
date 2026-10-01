@@ -1,16 +1,10 @@
-# ⚠️  OJO (2026-08-18): GitHub Pages NO lee este archivo.
-#     El sitio se sirve hoy desde GitHub Pages (comprobado: la respuesta de
-#     https://plasticosespinal.com trae "server: GitHub.com" y NINGUNA de estas
-#     cabeceras). Esta sintaxis es de Netlify / Cloudflare Pages. Mientras el
-#     hosting sea GitHub Pages, lo único que protege al visitante es el
-#     <meta http-equiv="Content-Security-Policy"> de index.html — y un <meta>
-#     no puede aplicar HSTS, X-Frame-Options ni frame-ancestors.
-#     Para que esto sirva de verdad hay que mover el sitio a Cloudflare Pages
-#     (lee este archivo tal cual) o poner Cloudflare como proxy con Transform
-#     Rules. No borrar sin decidir una de las dos.
+# Desde el 18 de agosto de 2026 el sitio lo sirve Cloudflare Pages (proyecto
+# plasticos-espinal-web, rama main), que SÍ lee este archivo tal cual.
+# La <meta http-equiv="Content-Security-Policy"> de index.html y 404.html queda
+# de respaldo; HSTS, X-Frame-Options y frame-ancestors solo llegan por aquí.
 
-# Cabeceras de seguridad — usadas por Netlify y Cloudflare Pages.
-# Si publicas en un hosting Apache (cPanel), las mismas reglas van en .htaccess.
+# Cabeceras de seguridad (Cloudflare Pages; Netlify usa la misma sintaxis).
+# Si algún día se publica en Apache (cPanel), las mismas reglas van en .htaccess.
 
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
@@ -22,7 +16,9 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
 
-# Caché larga para recursos estáticos versionados
+# Caché larga para recursos estáticos. CSS y JS van versionados con ?v=N en el
+# HTML: al cambiarlos, subir N. Las imágenes no llevan versión: si se cambia una
+# (p. ej. img/ondas.svg), mejor publicarla con otro nombre.
 /css/*
   Cache-Control: public, max-age=604800
 /js/*
