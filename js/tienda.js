@@ -183,8 +183,8 @@
     var gratis = catalogo.domicilio.gratis_desde;
     envio.hidden = vacia;
     $('[data-envio-texto]').textContent = c.subtotal >= gratis
-      ? 'Su domicilio es gratis.'
-      : 'Le faltan ' + pesos(gratis - c.subtotal) + ' para el domicilio gratis.';
+      ? 'Sus productos pasan de ' + pesos(gratis) + ': el domicilio es gratis.'
+      : 'Agregue ' + pesos(gratis - c.subtotal) + ' más en productos y el domicilio le sale gratis.';
     $('[data-envio-barra]').value = Math.min(c.subtotal / gratis, 1);
 
     var enviar = $('[data-enviar]');
