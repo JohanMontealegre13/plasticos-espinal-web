@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Seguridad: respaldo por si el hosting no envía cabeceras (las reales van en _headers) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+
+  <title>Tienda en línea — Plásticos Espinal</title>
+  <meta name="description" content="Arme su pedido de desechables, plásticos y aseo con precios a la vista y envíelo por WhatsApp. Domicilio en El Espinal, gratis desde $60.000.">
+  <link rel="canonical" href="https://www.plasticosespinal.com/tienda.html">
+
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="img/favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="img/favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0e1a47">
+
+  <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/estilos.css?v=10">
+  <link rel="stylesheet" href="css/tienda.css?v=1">
+  <script src="js/tienda.js?v=1" defer></script>
+</head>
+<body class="pagina-tienda">
+  <svg hidden xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.1 4c-.2 0-.5 0-.7.3-.2.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.8 4.3 3.9 2.1.9 2.6.7 3 .7.5 0 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.5-.3-1.7-.8c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.6-.7c.1-.2.1-.3.2-.5v-.5L9.7 8.2c-.2-.4-.4-.4-.6-.4h-.2Z"/></symbol>
+    <symbol id="i-tel" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
+    <symbol id="i-canasta" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-menos" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-camion" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></symbol>
+  </svg>
+
+  <a class="saltar" href="#productos">Saltar a los productos</a>
+
+  <header class="cabecera">
+    <div class="contenedor">
+      <div class="capsula">
+        <a class="capsula-tel" href="tel:+573183555246" aria-label="Llamar al 318 355 5246">
+          <svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg>
+          <span class="capsula-tel__num">318 355 5246</span>
+        </a>
+        <a class="logo-caja" href="index.html">
+          <picture><source type="image/webp" srcset="img/logo-pe-480.webp"><img src="img/logo-pe-480.png" width="480" height="203" alt="Plásticos Espinal, volver al inicio"></picture>
+        </a>
+        <button class="boton boton-cabecera" type="button" data-abrir-canasta aria-controls="canasta">
+          <svg class="icono" aria-hidden="true"><use href="#i-canasta"/></svg>
+          <span class="boton-cabecera__texto">Canasta</span>
+          <span class="contador" data-contador hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido" class="tienda contenedor">
+    <section class="tienda__cabeza" aria-labelledby="titulo-tienda">
+      <h1 id="titulo-tienda">Arme su pedido</h1>
+      <ol class="pasos">
+        <li><b>1</b> Agregue lo que necesita</li>
+        <li><b>2</b> Envíe la canasta por WhatsApp</li>
+        <li><b>3</b> Pague con Bre-B o en efectivo al recibir</li>
+      </ol>
+      <p class="aviso-muestra" data-aviso-muestra hidden>Página de prueba: los productos y precios son de muestra.</p>
+    </section>
+
+    <div class="tienda__rejilla">
+      <section id="productos" aria-label="Productos">
+        <div class="filtros">
+          <label class="buscador" for="buscar">
+            <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
+            <span class="sr-only">Buscar producto</span>
+            <input id="buscar" type="search" placeholder="Buscar: vaso, bolsa, plato…" autocomplete="off">
+          </label>
+          <div class="categorias" role="group" aria-label="Categorías" data-categorias></div>
+        </div>
+        <p class="estado" data-estado role="status">Cargando productos…</p>
+        <ul class="vitrina" data-vitrina></ul>
+      </section>
+
+      <aside class="canasta" id="canasta" aria-labelledby="titulo-canasta" data-canasta>
+        <div class="canasta__cabeza">
+          <h2 id="titulo-canasta">Su canasta</h2>
+          <button class="canasta__cerrar" type="button" data-cerrar-canasta aria-label="Cerrar la canasta">
+            <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+          </button>
+        </div>
+        <p class="canasta__vacia" data-vacia>Todavía no ha agregado productos.</p>
+        <ul class="canasta__lista" data-lista></ul>
+        <div class="canasta__envio" data-envio hidden>
+          <svg class="icono" aria-hidden="true"><use href="#i-camion"/></svg>
+          <span data-envio-texto></span>
+          <progress max="1" value="0" data-envio-barra></progress>
+        </div>
+        <dl class="canasta__cuentas">
+          <div><dt>Productos</dt><dd data-subtotal>$0</dd></div>
+          <div><dt>Domicilio</dt><dd data-domicilio>$0</dd></div>
+          <div class="canasta__total"><dt>Total</dt><dd data-total>$0</dd></div>
+        </dl>
+        <a class="boton boton-wa boton-grande canasta__enviar" data-enviar href="https://wa.me/573183555246" target="_blank" rel="noopener" aria-disabled="true">
+          <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+          Enviar pedido por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+        </a>
+        <p class="canasta__nota">Le confirmamos el total y la entrega por WhatsApp. Domicilio en El Espinal: $4.000, gratis desde $60.000.</p>
+        <button class="enlace-vaciar" type="button" data-vaciar hidden>Vaciar canasta</button>
+      </aside>
+    </div>
+  </main>
+
+  <button class="barra-canasta" type="button" data-abrir-canasta aria-controls="canasta" hidden>
+    <span class="barra-canasta__cuenta"><svg class="icono" aria-hidden="true"><use href="#i-canasta"/></svg><span data-barra-items>0 productos</span></span>
+    <span class="barra-canasta__total" data-barra-total>$0</span>
+    <span class="barra-canasta__ver">Ver canasta</span>
+  </button>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p class="pie__lema">Plásticos Espinal · Calle 7 #5-35, Barrio Centro, El Espinal, Tolima · <a href="index.html">Volver al inicio</a></p>
+      <p class="pie__legal">© 2026 Plásticos Espinal. Los precios incluyen IVA.</p>
+    </div>
+  </footer>
+</body>
+</html>
