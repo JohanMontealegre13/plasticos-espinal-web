@@ -130,3 +130,23 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 4. **Diseño 4 «hermana del CRM, más sobria»** (actual, oct 2026) — la cápsula
    y los botones del CRM sin su lado festivo (morado, neón, vidrio,
    animaciones de entrada).
+
+## Tienda en línea (`/tienda`, en pruebas y con contraseña)
+
+- Vive en `tienda/` y se abre en `plasticosespinal.com/tienda`. Mientras está
+  en pruebas **no tiene enlaces desde el sitio** y la cuida
+  `functions/tienda/_middleware.js` (Cloudflare Pages Functions): pide la
+  contraseña de prueba, deja una galleta de 30 días y marca todo `noindex`.
+  La contraseña no está en el código, solo su huella (cómo cambiarla: ver el
+  comentario del archivo). Al abrirla al público se borra `functions/tienda/`.
+- Diseño «tienda primero»: búsqueda y canasta arriba, categorías en fotos,
+  combo, lo más pedido y compra por tipo de negocio; Plásticos Espinal queda en
+  el logo y el pie.
+- Lee `tienda/catalogo.json`. Hoy trae **productos de muestra**; en la fase 2 lo
+  publica el CRM cada noche con las 80 referencias marcadas «Se vende en línea».
+- Forma del archivo: `domicilio` (`tarifa`, `gratis_desde`), `whatsapp`,
+  `categorias` (`id`, `nombre`, `imagen`) y `productos` (`id`, `nombre`,
+  `categoria`, `precio` con IVA, `destacado` e `imagen` opcionales).
+- La canasta se guarda en el navegador y se envía a WhatsApp con un código
+  `PE-XXXX` y el `[#id]` de cada producto. El bot recalcula los precios con el
+  CRM: el total del mensaje es solo de referencia.
