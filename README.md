@@ -130,3 +130,15 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 4. **Diseño 4 «hermana del CRM, más sobria»** (actual, oct 2026) — la cápsula
    y los botones del CRM sin su lado festivo (morado, neón, vidrio,
    animaciones de entrada).
+
+## Tienda en línea (`tienda.html`)
+
+- Lee `datos/catalogo.json`. Hoy trae **productos de muestra** (`"muestra": true`
+  muestra el aviso amarillo); en la fase 2 lo publica el CRM cada noche con las
+  80 referencias marcadas «Se vende en línea».
+- Forma del archivo: `domicilio` (`tarifa`, `gratis_desde`), `whatsapp`,
+  `categorias` (`id`, `nombre`, `imagen`) y `productos` (`id`, `nombre`,
+  `categoria`, `precio` con IVA, `imagen` opcional).
+- La canasta se guarda en el navegador y se envía a WhatsApp con un código
+  `PE-XXXX` y el `[#id]` de cada producto. El bot recalcula los precios con el
+  CRM: el total del mensaje es solo de referencia.
