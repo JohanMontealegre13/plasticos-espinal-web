@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tienda en línea · Plásticos Espinal</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta name="theme-color" content="#0e1a47">
+  <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=1">
+  <script src="/tienda/tienda.js?v=1" defer></script>
+</head>
+<body>
+<div class="proto"><div class="envolver"><span>Versión de prueba · solo con contraseña · precios de muestra</span><a class="url" href="/tienda/salir">Salir</a></div></div>
+<div class="franja"><div class="envolver">
+  <span>🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
+  <span>Gratis desde <b>$60.000</b> en productos</span>
+  <span>Pague con <b>Bre-B</b> o efectivo</span>
+</div></div>
+
+<header class="cab"><div class="envolver">
+  <a class="logo" href="/tienda/"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"><span><b>TIENDA</b>en línea</span></a>
+  <label class="buscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" placeholder="¿Qué necesita hoy? vasos, bolsas, contenedores…" aria-label="Buscar productos"><button type="button" id="btnq">Buscar</button></label>
+  <button class="btn-canasta" type="button" data-abrir><svg class="ico" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="txt">Canasta</span><span class="n" id="n" hidden>0</span></button>
+</div></header>
+
+<main class="envolver">
+  <nav class="cats" id="cats" aria-label="Categorías"></nav>
+
+  <section class="portada">
+    <div class="banner">
+      <span class="chip">Nuevo · pida en línea</span>
+      <h1>Todo para su negocio, en su puerta en 1 hora</h1>
+      <p>Desechables, empaques y aseo de las marcas que ya conoce. Arme la canasta y la recibe hoy.</p>
+      <button class="acc" type="button" id="verTodo">Ver productos</button>
+    </div>
+    <div class="combo">
+      <span class="et">Combo de la semana</span>
+      <img src="/img/productos/contenedores.webp" alt="">
+      <h3>Combo Almuerzos: 25 contenedores + 100 tenedores + 300 servilletas</h3>
+      <div class="pr"><b>$25.200</b><span class="unidad">los 3 productos</span></div>
+      <button type="button" data-combo="141,131,191">Agregar el combo</button>
+    </div>
+  </section>
+
+  <section class="benef" aria-label="Por qué comprar aquí">
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span><b>Llega en 1 hora</b>En horario de tienda</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></svg><span><b>Pago con Bre-B</b>O efectivo al recibir</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span><b>Precio de bodega</b>Del paquete a la caja</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><b>Le confirmamos por WhatsApp</b>Al 318 355 5246</span></div>
+  </section>
+
+  <section class="sec" id="vitrina">
+    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a></div>
+    <p class="estado" id="estado" role="status">Cargando productos…</p>
+    <ul class="grilla" id="grilla"></ul>
+  </section>
+
+  <section class="sec">
+    <div class="sec-cab"><h2>Compre por tipo de negocio</h2></div>
+    <div class="negocios">
+      <button class="neg" type="button" data-cat="contenedores"><img src="/img/productos/contenedores.webp" alt=""><span><b>Restaurantes</b><small>Contenedores, cubiertos, bolsas</small></span></button>
+      <button class="neg" type="button" data-cat="empaques"><img src="/img/productos/empaques.webp" alt=""><span><b>Comidas rápidas</b><small>Cajas, bolsas kraft, salseros</small></span></button>
+      <button class="neg" type="button" data-cat="platos"><img src="/img/productos/fiesta.webp" alt=""><span><b>Fiestas y eventos</b><small>Platos, vasos, pitillos</small></span></button>
+      <button class="neg" type="button" data-cat="aseo"><img src="/img/productos/servilletas.webp" alt=""><span><b>Hogar y aseo</b><small>Servilletas, guantes, papel</small></span></button>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-cab"><h2>Así de fácil</h2></div>
+    <div class="pasos">
+      <div class="paso"><b>Arme su canasta</b><p>Busque o elija por categoría. Ve el precio de una vez.</p></div>
+      <div class="paso"><b>Envíela por WhatsApp</b><p>Le confirmamos el total y la dirección en minutos.</p></div>
+      <div class="paso"><b>Pague y reciba</b><p>Con el QR Bre-B o en efectivo. Llega en menos de 1 hora.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie"><div class="envolver">
+  <div><img src="/tienda/img/logo-negativo-noche.svg" alt="Plásticos Espinal" width="210" height="80"><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
+  <div><h4>Tienda</h4><a href="#cats">Categorías</a><a href="#vitrina">Lo más pedido</a></div>
+  <div><h4>Plásticos Espinal</h4><a href="/">Quiénes somos</a><span>Calle 7 #5-35, Centro, El Espinal</span></div>
+  <div><h4>Ayuda</h4><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a></div>
+</div></footer>
+
+<button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
+
+<div class="velo" id="velo" hidden></div>
+<aside class="panel" id="panel" hidden aria-label="Su canasta">
+  <header><h2>Su canasta</h2><button class="cerrar" type="button" id="cerrar" aria-label="Cerrar">✕</button></header>
+  <p class="vacio" id="vacio">Todavía no ha agregado productos.</p>
+  <ul class="items" id="items"></ul>
+  <div class="resumen">
+    <div class="meta" id="meta"></div>
+    <div class="fila"><span>Productos</span><b id="sub">$0</b></div>
+    <div class="fila"><span>Domicilio</span><b id="dom">$0</b></div>
+    <div class="fila total"><span>Total</span><span id="tot">$0</span></div>
+    <a class="enviar" id="enviar" href="#" target="_blank" rel="noopener" aria-disabled="true">Enviar pedido por WhatsApp</a>
+    <p class="nota">Le confirmamos el total por WhatsApp antes de despachar.</p>
+    <button class="vaciar" type="button" id="vaciar" hidden>Vaciar canasta</button>
+  </div>
+</aside>
+</body>
+</html>

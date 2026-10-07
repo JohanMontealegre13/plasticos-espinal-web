@@ -25,7 +25,5 @@
   Cache-Control: public, max-age=604800
 /img/*
   Cache-Control: public, max-age=2592000
-/datos/*
-  Cache-Control: public, max-age=300
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
