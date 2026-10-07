@@ -30,7 +30,7 @@
   /* ---------- Formato ---------- */
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
   function pesos(n) { return '$' + formato.format(Math.round(n)); }
-  function normal(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function normal(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 
   function el(tag, clase, texto) {
     var n = document.createElement(tag);
