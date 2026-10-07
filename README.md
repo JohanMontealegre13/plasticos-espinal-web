@@ -62,9 +62,7 @@ Luego abre <http://localhost:5500/>.
    muestra testimonios: solo invita a dejar reseña en Google. Cuando haya
    reseñas reales (con permiso) o ficha de Google Business Profile, pueden
    sumarse ahí.
-2. **`og-image.jpg`** — la imagen para compartir en redes sigue siendo la de
-   un diseño anterior; conviene rehacerla con la cápsula actual.
-3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
+2. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
 
@@ -75,7 +73,7 @@ Luego abre <http://localhost:5500/>.
 | `index.html` | La página completa (portada, marcas, catálogo, sectores, línea ecológica, nosotros, por qué nos eligen, preguntas, contacto) |
 | `css/estilos.css` | Todos los estilos (sistema «hermana del CRM, más sobria»; colores del `:root` del CRM) |
 | `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp); el sitio funciona sin JavaScript |
-| `img/` | Logo optimizado (2 tamaños), favicons, fotos de producto, `ondas.svg` (relleno de la cápsula) y `og-image.jpg` |
+| `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, fotos de producto, `ondas.svg` (relleno de la cápsula) y `og-image.jpg` |
 | `favicon.ico`, `site.webmanifest` | Iconos del navegador y de "agregar a pantalla de inicio" |
 | `robots.txt`, `sitemap.xml` | Para Google |
 | `_headers` | Cabeceras de seguridad y caché que aplica Cloudflare Pages |
