@@ -10,8 +10,10 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=2">
-  <script src="/tienda/tienda.js?v=2" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=3">
+  <script src="/tienda/tienda.js?v=3" defer></script>
+  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=1">
+  <script src="/tienda/mi-cuenta/menu.js?v=1" defer></script>
 </head>
 <body>
 <div class="proto"><div class="envolver"><span>Versión de prueba · solo con contraseña · precios de muestra</span><a class="url" href="/tienda/salir">Salir</a></div></div>
@@ -24,7 +26,7 @@
 <header class="cab"><div class="envolver">
   <a class="logo" href="/tienda/"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"><span><b>TIENDA</b>en línea</span></a>
   <label class="buscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" placeholder="¿Qué necesita hoy? vasos, bolsas, contenedores…" aria-label="Buscar productos"><button type="button" id="btnq">Buscar</button></label>
-  <a class="btn-cuenta" href="https://portal.plasticosespinal.com/cuenta/"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span class="txt">Mi cuenta</span></a>
+  <a class="btn-cuenta" href="/tienda/mi-cuenta/"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span class="txt">Mi cuenta</span></a>
   <button class="btn-canasta" type="button" data-abrir><svg class="ico" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="txt">Canasta</span><span class="n" id="n" hidden>0</span></button>
 </div></header>
 
@@ -84,7 +86,7 @@
   <div><img src="/tienda/img/logo-negativo-noche.svg" alt="Plásticos Espinal" width="210" height="80"><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
   <div><h4>Tienda</h4><a href="#cats">Categorías</a><a href="#vitrina">Lo más pedido</a></div>
   <div><h4>Plásticos Espinal</h4><a href="/">Quiénes somos</a><span>Calle 7 #5-35, Centro, El Espinal</span></div>
-  <div><h4>Ayuda</h4><a href="https://portal.plasticosespinal.com/cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="/tienda/privacidad/">Política de datos</a></div>
+  <div><h4>Ayuda</h4><a href="/tienda/mi-cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="/tienda/privacidad/">Política de datos</a></div>
 </div></footer>
 
 <button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
@@ -121,7 +123,7 @@
       <label for="d-muni">Municipio<select id="d-muni" name="municipio" required><option value="El Espinal">El Espinal, Tolima</option></select><small>Por ahora solo hacemos domicilios dentro de El Espinal.</small></label>
       <label for="d-barrio">Barrio<input id="d-barrio" name="barrio" list="barrios" required maxlength="80" autocomplete="off" placeholder="Escriba y elija su barrio"></label>
       <datalist id="barrios"></datalist>
-      <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="street-address" required maxlength="160" placeholder="Calle 7 # 5-35, casa esquinera"></label>
+      <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="address-line1" required maxlength="160" placeholder="Calle 7 # 5-35, casa esquinera"></label>
       <label for="d-extra">Indicaciones (opcional)<textarea id="d-extra" name="extra" rows="2" maxlength="300" placeholder="Portón verde, timbre dañado, llamar al llegar…"></textarea></label>
     </fieldset>
     <label class="check" for="d-acepto"><input id="d-acepto" name="acepto" type="checkbox" required> <span>Autorizo a Plásticos Espinal a usar mis datos para entregar mis pedidos y manejar mi cuenta, según la <a href="/tienda/privacidad/" target="_blank" rel="noopener">política de datos</a>.</span></label>

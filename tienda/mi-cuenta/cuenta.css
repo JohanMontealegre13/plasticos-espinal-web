@@ -1,0 +1,52 @@
+/* Portal del cliente (/tienda/mi-cuenta) y panel «Mi cuenta» de la cabecera.
+   Usa los tokens y la cabecera de tienda.css. */
+
+/* panel pequeño de la cabecera */
+.mi-cuenta{position:relative;justify-self:end}
+.menu-cuenta{position:absolute;right:0;top:calc(100% + 8px);z-index:40;width:min(290px,calc(100vw - 32px));background:#fff;border:1px solid var(--linea);border-radius:var(--r);box-shadow:0 14px 34px rgba(14,26,71,.16);padding:8px;display:grid;gap:2px}
+.menu-cuenta .hola{padding:8px 10px 10px;border-bottom:1px solid var(--linea);margin-bottom:4px;display:grid;font-size:13px;color:var(--texto2)}
+.menu-cuenta .hola b{font-family:var(--display);font-weight:400;font-size:19px;color:var(--texto)}
+.menu-cuenta .opcion{display:grid;padding:10px;border-radius:10px;text-decoration:none;color:var(--texto)}
+.menu-cuenta .opcion:hover,.menu-cuenta .opcion:focus-visible{background:var(--suave)}
+.menu-cuenta .opcion small{color:var(--texto2);font-size:13px}
+.menu-cuenta .salir{margin-top:4px;padding:10px;border:0;border-top:1px solid var(--linea);background:none;text-align:left;color:var(--rojo);font-weight:700;border-radius:0 0 10px 10px}
+
+/* páginas del portal */
+.portal{max-width:720px;padding-block:26px 40px;display:grid;gap:18px}
+.portal h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,32px);line-height:1.15}
+.portal .sub{color:var(--texto2)}
+.portal .migas{font-size:14px}
+.portal .migas a{color:var(--azul);font-weight:700;text-decoration:none}
+.tarjeta{background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:20px}
+.cargando{color:var(--texto2)}
+.form{display:grid;gap:14px}
+.form label{display:grid;gap:5px;font-weight:700;font-size:14px}
+.form small{font-weight:400;color:var(--texto2);font-size:13px}
+.form input,.form textarea{font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--linea);border-radius:12px;background:#fff;color:var(--texto);width:100%}
+.form input:focus,.form textarea:focus{outline:none;border-color:var(--azul)}
+.form input[readonly]{background:var(--suave);color:var(--texto2)}
+.form .codigo{font-size:28px;letter-spacing:8px;text-align:center;font-variant-numeric:tabular-nums}
+.boton{display:inline-flex;justify-content:center;align-items:center;min-height:50px;padding:0 22px;border:0;border-radius:99px;background:var(--azul);color:#fff;font-weight:800;text-decoration:none}
+.boton.sec{background:var(--suave);color:var(--noche)}
+.boton[disabled]{opacity:.6}
+.aviso{background:var(--verde2);color:var(--verde);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600}
+.lista{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.compra{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;border:1px solid var(--linea);border-radius:var(--r);padding:14px 16px;text-decoration:none;color:inherit}
+.compra:hover{border-color:var(--azul)}
+.compra b{font-size:18px;font-variant-numeric:tabular-nums}
+.compra .det{font-size:14px;color:var(--texto2)}
+.chip{display:inline-block;font-size:12px;font-weight:800;padding:2px 10px;border-radius:99px;background:var(--suave);margin-right:6px}
+.chip.dom{background:#fff3c4;color:#6b4d00}
+.chip.pend{background:#fdecea;color:#8f1a10}
+.vacio{background:var(--suave);border-radius:var(--r);padding:22px;text-align:center;display:grid;gap:10px;justify-items:center}
+.tabla{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tabla td,.tabla th{padding:10px 4px;border-bottom:1px solid var(--linea);text-align:left;vertical-align:top}
+.tabla th{font-size:13px;color:var(--texto2)}
+.tabla .n{text-align:right;white-space:nowrap}
+.tabla .total td{font-weight:800;font-size:18px;border-bottom:0}
+.datos-fijos{display:grid;gap:8px;margin:0}
+.datos-fijos div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+.datos-fijos dt{color:var(--texto2);font-size:14px}
+.datos-fijos dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.ayuda{font-size:14px;color:var(--texto2)}
+.ayuda a{color:var(--azul);font-weight:700}

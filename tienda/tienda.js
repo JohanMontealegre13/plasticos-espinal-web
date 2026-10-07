@@ -127,7 +127,9 @@
     var lin = ['Hola, quiero hacer este pedido 🛒 ' + codigo, ''];
     Object.keys(canasta).forEach(function (id) { lin.push(canasta[id] + ' × ' + por[id].nombre + ' [#' + id + ']'); });
     lin.push('', 'Productos: ' + pesos(c.s), 'Domicilio: ' + (c.d ? pesos(c.d) : 'gratis'), 'Total: ' + pesos(c.t));
-    /* Datos de entrega y de la cuenta: el CRM crea al cliente con ellos al registrar el pedido */
+    /* Datos de entrega y de la cuenta: el CRM crea al cliente con ellos al registrar el pedido.
+       Todo va en una sola línea: un salto de línea en las indicaciones podría colar otra «Correo: …» */
+    d = Object.keys(d).reduce(function (o, k) { o[k] = String(d[k]).replace(/\s*[\r\n]+\s*/g, ' ').trim(); return o; }, {});
     lin.push('', '— Datos de entrega y de mi cuenta —',
       'Nombre: ' + d.nombre,
       d.tipo + ': ' + d.documento,
