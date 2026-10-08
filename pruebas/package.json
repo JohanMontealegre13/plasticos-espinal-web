@@ -1,0 +1,29 @@
+{
+  "name": "plasticos-espinal-web",
+  "private": true,
+  "description": "Pruebas y controles del sitio. Vive en pruebas/ a propósito: si hubiera un package.json en la raíz, Cloudflare Pages instalaría dependencias y podría publicar node_modules.",
+  "type": "module",
+  "scripts": {
+    "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
+    "lint:html": "cd .. && html-validate -c pruebas/.htmlvalidate.json \"*.html\" \"tienda/**/*.html\"",
+    "lint:css": "cd .. && stylelint --config pruebas/.stylelintrc.json \"css/*.css\" \"tienda/**/*.css\"",
+    "lint:js": "cd .. && eslint -c pruebas/eslint.config.js .",
+    "typecheck": "tsc -p jsconfig.json",
+    "test:unit": "node --test \"unit/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "mutaciones": "node mutaciones.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.19.1",
+    "eslint": "10.1.0",
+    "globals": "17.1.0",
+    "html-validate": "11.10.0",
+    "stylelint": "17.6.0",
+    "stylelint-config-recommended": "18.0.0",
+    "typescript": "5.9.3"
+  }
+}

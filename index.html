@@ -6,6 +6,9 @@
   <!-- Seguridad: respaldo por si el hosting no envía cabeceras (las reales van en _headers) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
+  <!-- Abre siempre desde arriba aunque la dirección traiga #ancla (fix e7352f9). Si cambia este script, cambia su huella sha256 en la CSP de aquí, de _headers y de .htaccess: pruebas/unit/sitio.test.mjs lo vigila. -->
+  <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual';if(location.hash)history.replaceState(null,'',location.pathname+location.search);</script>
+
   <title>Plásticos Espinal — Distribuidora de desechables en el Tolima</title>
   <meta name="description" content="Desechables y plásticos al por mayor y al detal en El Espinal, Tolima: vasos, platos, contenedores, cubiertos y línea biodegradable. Pida por WhatsApp.">
 
@@ -37,8 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=10">
-  <script src="js/principal.js?v=10" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=11">
+  <script src="js/principal.js?v=11" defer></script>
 
   <script type="application/ld+json">
   {
@@ -72,7 +75,7 @@
     "mainEntity": [
       {"@type": "Question", "name": "¿Venden al detal o solo al por mayor?", "acceptedAnswer": {"@type": "Answer", "text": "Las dos. Puede comprar desde un paquete para su casa hasta cajas completas para su negocio, siempre con precio de distribuidora."}},
       {"@type": "Question", "name": "¿Cómo hago un pedido?", "acceptedAnswer": {"@type": "Answer", "text": "Escríbanos por WhatsApp con lo que necesita y le confirmamos precio y disponibilidad. También puede visitarnos en la Calle 7 #5-35, Barrio Centro."}},
-      {"@type": "Question", "name": "¿Hacen entregas a domicilio?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, gratis para pedidos desde $50.000 en el casco urbano de El Espinal y en Chicoral. Despachamos en el horario de la tienda. Fuera de esa zona no hacemos domicilios."}},
+      {"@type": "Question", "name": "¿Hacen entregas a domicilio?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, gratis para pedidos desde $60.000 en el casco urbano de El Espinal. Despachamos en el horario de la tienda. Fuera de esa zona no hacemos domicilios."}},
       {"@type": "Question", "name": "¿Qué opciones biodegradables manejan?", "acceptedAnswer": {"@type": "Answer", "text": "La línea Darnel BIO® y Darnel Naturals: platos, contenedores y vasos de pulpa de papel y materiales compostables de fuentes renovables."}},
       {"@type": "Question", "name": "¿Tienen precios especiales para negocios?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Restaurantes, panaderías, tiendas y demás negocios que compran con frecuencia reciben precio mayorista. Pida su lista de precios por WhatsApp."}}
     ]
@@ -463,7 +466,7 @@
           </details>
           <details class="faq">
             <summary>¿Hacen entregas a domicilio?<span class="chev" aria-hidden="true"><svg class="icono"><use href="#i-chevron"/></svg></span></summary>
-            <p>Sí, gratis para pedidos desde $50.000 en el casco urbano de El Espinal y en Chicoral. Despachamos en el horario de la tienda. Fuera de esa zona no hacemos domicilios.</p>
+            <p>Sí, gratis para pedidos desde $60.000 en el casco urbano de El Espinal. Despachamos en el horario de la tienda. Fuera de esa zona no hacemos domicilios.</p>
           </details>
           <details class="faq">
             <summary>¿Qué opciones biodegradables manejan?<span class="chev" aria-hidden="true"><svg class="icono"><use href="#i-chevron"/></svg></span></summary>
@@ -479,7 +482,7 @@
             Pregunte por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
           </a>
 
-          <p class="letra-chica" id="terminos-domicilio"><b>Domicilio gratis, términos y condiciones:</b> aplica para pedidos desde $50.000 dentro del casco urbano de El Espinal y en el corregimiento de Chicoral. Los despachos salen en el horario de la tienda. Fuera de esa zona no hacemos domicilios.</p>
+          <p class="letra-chica" id="terminos-domicilio"><b>Domicilio gratis, términos y condiciones:</b> aplica para pedidos desde $60.000 dentro del casco urbano de El Espinal. Los despachos salen en el horario de la tienda. Fuera de esa zona no hacemos domicilios.</p>
         </div>
       </div>
     </section>
