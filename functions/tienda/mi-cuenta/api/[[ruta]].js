@@ -21,6 +21,7 @@ const RUTA_GALLETA = '/tienda';
 const NO_RESPONDE = 'No pudimos traer sus datos. Intente más tarde o escríbanos por WhatsApp al 318 355 5246.';
 
 /* ruta del navegador -> [método, ruta en el CRM] */
+/** @type {[RegExp, string][]} */
 const RUTAS = [
   [/^entrar$/, 'POST'],
   [/^codigo$/, 'POST'],

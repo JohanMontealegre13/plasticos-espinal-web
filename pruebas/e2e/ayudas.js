@@ -16,7 +16,8 @@ export function vigilar(page) {
   });
   page.on('response', (r) => {
     const u = new URL(r.url());
-    if (u.hostname === '127.0.0.1' && r.status() >= 400 && r.request().resourceType() !== 'document') {
+    /* Las respuestas de la API (401 sin sesión, 400 código malo) son parte del contrato y se prueban aparte */
+    if (u.hostname === '127.0.0.1' && r.status() >= 400 && r.request().resourceType() !== 'document' && !u.pathname.includes('/api/')) {
       problemas.push(`${r.status()} ${u.pathname}`);
     }
   });

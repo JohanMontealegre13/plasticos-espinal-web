@@ -49,6 +49,12 @@ const MUTACIONES = [
   { parte: 'Candado', nombre: 'sin pausa contra fuerza bruta', archivo: 'functions/tienda/_middleware.js', buscar: 'setTimeout(listo, 800)', poner: 'setTimeout(listo, 0)', pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'tienda sin noindex', archivo: 'tienda/index.html', buscar: '<meta name="robots" content="noindex, nofollow">', poner: '', pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'enlace a la tienda desde el inicio', archivo: 'index.html', buscar: '<a href="#contacto">', poner: '<a href="/tienda/">Tienda</a><a href="#contacto">', pruebas: ['unit'] },
+  /* Portal del cliente (intermediario de Cloudflare) */
+  { parte: 'Portal', nombre: 'el token de sesión viaja en el cuerpo', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: "return json({ ok: true, nombre: datos.nombre || '' }, 200, [", poner: "return json({ ok: true, nombre: datos.nombre || '', token: datos.token }, 200, [", pruebas: ['unit'] },
+  { parte: 'Portal', nombre: 'acepta POST de otro sitio', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: 'if (origen && origen !== new URL(request.url).origin)', poner: 'if (false)', pruebas: ['unit'] },
+  { parte: 'Portal', nombre: 'deja pasar cualquier ruta al CRM', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: 'if (!permitida) return', poner: 'if (false) return', pruebas: ['unit'] },
+  { parte: 'Portal', nombre: 'sigue redirecciones del CRM', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: "redirect: 'manual'", poner: "redirect: 'follow'", pruebas: ['unit'] },
+  { parte: 'Portal', nombre: 'el JS del navegador llama directo al CRM', archivo: 'tienda/mi-cuenta/cuenta.js', buscar: "var API = '/tienda/mi-cuenta/api/';", poner: "var API = 'https://portal.plasticosespinal.com/cuenta/api/';", pruebas: ['unit', 'e2e'] },
   /* Seguridad y caché */
   { parte: 'CSP', nombre: 'script embebido cambiado sin nueva huella', archivo: 'index.html', buscar: "classList.add('js');", poner: "classList.add('js') ;", pruebas: ['unit', 'e2e'] },
   { parte: 'CSP', nombre: 'se pierde el script que abre arriba', archivo: 'index.html', buscar: / {2}<script>document\.documentElement[^\n]*<\/script>\n/, poner: '', pruebas: ['unit', 'e2e'] },
