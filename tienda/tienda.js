@@ -7,6 +7,15 @@
   'use strict';
 
   var CLAVE = 'pe-canasta-v1';
+  var CLAVE_DATOS = 'pe-cliente-v1';   /* datos de entrega, solo en este celular */
+  /* Barrios de El Espinal para sugerir (lista parcial: el cliente puede escribir otro) */
+  var BARRIOS = ['Arkabal', 'Balkanes', 'Belén', 'Betania', 'Betania Campestre', 'Bosques de Roa',
+    'Caballero y Góngora', 'Cafasur', 'El Centro', 'Entre Ríos', 'Fátima', 'Isaías Olivar',
+    'La Cascada', 'La Esperanza', 'Libertador', 'Nacional', 'Primero de Mayo', 'Rondón',
+    'San Rafael', 'Santa Margarita María', 'Talura', 'Villa Catalina', 'Villa Ceiba',
+    'Villa Laura', 'Villa Lorena', 'Villa Paz'];
+  var CAMPOS = { nombre: 'd-nombre', tipo: 'd-tipo', documento: 'd-doc', celular: 'd-cel',
+    correo: 'd-correo', barrio: 'd-barrio', direccion: 'd-dir', extra: 'd-extra' };   /* dato -> campo */
   var cat = null;                 /* catálogo */
   var por = {};                   /* id -> producto */
   var cats = {};                  /* id -> categoría */
@@ -23,6 +32,8 @@
   /* ---------- Guardado en el navegador (si falla, la canasta vive solo en memoria) ---------- */
   function leer() { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { return {}; } }
   function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(canasta)); } catch (e) { /* sin almacenamiento */ } }
+  function leerDatos() { try { return JSON.parse(localStorage.getItem(CLAVE_DATOS)) || {}; } catch (e) { return {}; } }
+  function guardarDatos(d) { try { localStorage.setItem(CLAVE_DATOS, JSON.stringify(d)); } catch (e) { /* sin almacenamiento */ } }
 
   function foto(p) { return p.imagen || (cats[p.categoria] || {}).imagen || '/img/productos/bodega.webp'; }
 
@@ -111,12 +122,71 @@
     for (var i = 0; i < 4; i++) s += letras[azar[i] % letras.length];
     return 'PE-' + s;
   }
-  function enlaceWhatsApp(c) {
+  function enlaceWhatsApp(c, d) {
     if (!codigo) codigo = codigoPedido();
     var lin = ['Hola, quiero hacer este pedido 🛒 ' + codigo, ''];
     Object.keys(canasta).forEach(function (id) { lin.push(canasta[id] + ' × ' + por[id].nombre + ' [#' + id + ']'); });
     lin.push('', 'Productos: ' + pesos(c.s), 'Domicilio: ' + (c.d ? pesos(c.d) : 'gratis'), 'Total: ' + pesos(c.t));
+    /* Datos de entrega y de la cuenta: el CRM crea al cliente con ellos al registrar el pedido.
+       Todo va en una sola línea: un salto de línea en las indicaciones podría colar otra «Correo: …» */
+    d = Object.keys(d).reduce(function (o, k) { o[k] = String(d[k]).replace(/\s*[\r\n]+\s*/g, ' ').trim(); return o; }, {});
+    lin.push('', '— Datos de entrega y de mi cuenta —',
+      'Nombre: ' + d.nombre,
+      d.tipo + ': ' + d.documento,
+      'Celular: ' + d.celular,
+      'Correo: ' + d.correo,
+      'Municipio: El Espinal (Tolima)',
+      'Barrio: ' + d.barrio,
+      'Dirección: ' + d.direccion);
+    if (d.extra) lin.push('Indicaciones: ' + d.extra);
+    lin.push('Autorizo el uso de mis datos para el pedido y mi cuenta.');
     return 'https://wa.me/' + cat.whatsapp + '?text=' + encodeURIComponent(lin.join('\n'));
+  }
+
+  /* ---------- Paso 2: datos de entrega ---------- */
+  function soloDigitos(t) { return String(t || '').replace(/\D/g, ''); }
+  function celular10(t) { var n = soloDigitos(t); if (n.length === 12 && n.indexOf('57') === 0) n = n.slice(2); return n; }
+  function leerFormulario() {
+    var d = {};
+    Object.keys(CAMPOS).forEach(function (k) { d[k] = ($(CAMPOS[k]).value || '').trim(); });
+    return d;
+  }
+  function validar(d) {
+    var malos = [];
+    function mal(id, texto) { malos.push([id, texto]); }
+    if (d.nombre.length < 3) mal('d-nombre', 'Escriba el nombre de quien recibe.');
+    var doc = soloDigitos(d.documento.split('-')[0]);
+    if (doc.length < 5 || doc.length > 15) mal('d-doc', 'El número de documento no parece completo.');
+    var cel = celular10(d.celular);
+    if (!/^3\d{9}$/.test(cel)) mal('d-cel', 'El celular debe tener 10 dígitos y empezar por 3.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.correo)) mal('d-correo', 'Revise el correo.');
+    if (d.barrio.length < 3) mal('d-barrio', 'Elija o escriba su barrio.');
+    if (d.direccion.length < 5) mal('d-dir', 'Escriba la dirección con el detalle.');
+    if (!$('d-acepto').checked) mal('d-acepto', 'Falta autorizar el uso de sus datos.');
+    ['d-nombre', 'd-doc', 'd-cel', 'd-correo', 'd-barrio', 'd-dir', 'd-acepto'].forEach(function (id) { $(id).removeAttribute('aria-invalid'); });
+    malos.forEach(function (m) { $(m[0]).setAttribute('aria-invalid', 'true'); });
+    var e = $('errores');
+    e.textContent = malos.map(function (m) { return m[1]; }).join(' ');
+    e.hidden = !malos.length;
+    if (malos.length) $(malos[0][0]).focus();
+    if (!malos.length) d.celular = cel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    return !malos.length;
+  }
+  function pasoDatos() {
+    var d = leerDatos();
+    $('d-nombre').value = d.nombre || ''; $('d-tipo').value = d.tipo || 'CC';
+    $('d-doc').value = d.documento || ''; $('d-cel').value = d.celular || '';
+    $('d-correo').value = d.correo || ''; $('d-barrio').value = d.barrio || '';
+    $('d-dir').value = d.direccion || ''; $('d-extra').value = d.extra || '';
+    $('d-acepto').checked = !!d.acepto;
+    $('errores').hidden = true;
+    $('items').hidden = true; $('vacio').hidden = true; document.querySelector('.resumen').hidden = true;
+    $('datos').hidden = false;
+    $('d-nombre').focus();
+  }
+  function pasoCanasta() {
+    $('datos').hidden = true; $('items').hidden = false; document.querySelector('.resumen').hidden = false;
+    pintarCanasta();
   }
 
   function pintarCanasta() {
@@ -146,14 +216,14 @@
     var pr = el('progress'); pr.max = 1; pr.value = Math.min(c.s / gratis, 1);
     m.appendChild(pr);
     m.hidden = vacia;
-    var enviar = $('enviar');
-    enviar.href = vacia ? 'https://wa.me/' + cat.whatsapp : enlaceWhatsApp(c);
-    enviar.setAttribute('aria-disabled', String(vacia));
+    $('seguir').disabled = vacia;
+    $('tot2').textContent = pesos(c.t);
+    if (vacia && !$('datos').hidden) pasoCanasta();
   }
 
   /* ---------- Panel ---------- */
   function abrir() { $('panel').hidden = false; $('velo').hidden = false; $('cerrar').focus(); }
-  function cerrar() { $('panel').hidden = true; $('velo').hidden = true; }
+  function cerrar() { $('panel').hidden = true; $('velo').hidden = true; pasoCanasta(); }
   function verTodo() { filtro = { cat: '', q: '', todo: true }; $('q').value = ''; pintar(); }
 
   function eventos() {
@@ -176,8 +246,20 @@
     $('velo').addEventListener('click', cerrar);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
     $('vaciar').addEventListener('click', function () { canasta = {}; guardar(); pintar(); pintarCanasta(); cerrar(); });
-    /* Cada envío lleva un código nuevo: si el cliente vuelve y cambia algo, es otro pedido */
-    $('enviar').addEventListener('click', function () { setTimeout(function () { codigo = null; pintarCanasta(); }, 0); });
+    $('seguir').addEventListener('click', pasoDatos);
+    $('volver').addEventListener('click', pasoCanasta);
+    $('datos').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var d = leerFormulario();
+      if (!cuentas().n || !validar(d)) return;
+      d.acepto = true;
+      guardarDatos(d);
+      var enlace = enlaceWhatsApp(cuentas(), d);
+      /* Cada envío lleva un código nuevo: si el cliente vuelve y cambia algo, es otro pedido */
+      codigo = null;
+      var w = window.open(enlace, '_blank');
+      if (w) w.opener = null; else window.location.href = enlace;
+    });
   }
 
   /* ---------- Carga ---------- */
@@ -190,6 +272,7 @@
       /* Lo que ya no está en el catálogo sale de la canasta guardada */
       Object.keys(canasta).forEach(function (id) { if (!por[id] || !(canasta[id] > 0)) delete canasta[id]; });
       guardar();
+      BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
       pintarCategorias();
       eventos();
       pintar();

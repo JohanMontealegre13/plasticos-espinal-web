@@ -136,7 +136,18 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   `functions/tienda/_middleware.js` (Cloudflare Pages Functions): pide la
   contraseña de prueba, deja una galleta de 30 días y marca todo `noindex`.
   La contraseña no está en el código, solo su huella (cómo cambiarla: ver el
-  comentario del archivo). Al abrirla al público se borra `functions/tienda/`.
+  comentario del archivo). Al abrirla al público se borra SOLO
+  `functions/tienda/_middleware.js` (no la carpeta: ahí vive el portal del cliente).
+- **Portal del cliente** (`tienda/mi-cuenta/`): «Mi cuenta» en la cabecera
+  despliega un panel pequeño (Mis pedidos, Mis datos, Salir). El cliente entra
+  con cédula/NIT + celular y un código de 6 números que le llega al correo; ve
+  sus compras de tienda y mostrador, descarga el recibo PDF y edita nombre,
+  barrio, dirección e indicaciones (celular y correo NO: son la llave).
+  Los datos vienen del CRM a través de `functions/tienda/mi-cuenta/api/[[ruta]].js`,
+  el ÚNICO que habla con el CRM: le pone la clave `PORTAL_CLAVE` (secreto de
+  Cloudflare Pages, el mismo valor del `.env` del CRM) y guarda la sesión del
+  cliente en una galleta HttpOnly. Sin ese secreto el portal dice que no pudo
+  traer los datos. El navegador nunca ve la dirección del CRM.
 - Diseño «tienda primero»: búsqueda y canasta arriba, categorías en fotos,
   combo, lo más pedido y compra por tipo de negocio; Plásticos Espinal queda en
   el logo y el pie.
