@@ -245,6 +245,12 @@ test('el umbral de domicilio gratis es el mismo en el inicio y en la tienda ($60
   }
 });
 
+test('los domicilios solo se prometen en El Espinal (Johan 2026-10-08: a Chicoral no)', () => {
+  for (const p of paginas()) {
+    assert.doesNotMatch(leer(p), /chicoral/i, `${p} promete domicilio fuera de El Espinal`);
+  }
+});
+
 test('el repositorio no publica secretos ni contraseñas en claro', () => {
   const sospechosos = [];
   /** @param {string} dir */
