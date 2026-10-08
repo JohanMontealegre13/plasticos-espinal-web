@@ -234,11 +234,15 @@ test('Regresión (3869274): no reaparece la promesa de envío gratis «sobre $50
   for (const p of paginas()) assert.doesNotMatch(leer(p), /env[ií]os? gratis en pedidos sobre/i, p);
 });
 
-test('el umbral de domicilio gratis es el mismo en el inicio y en la tienda', { todo: 'decisión de Johan: el inicio dice $50.000 y Chicoral; la tienda $60.000 y solo El Espinal' }, () => {
+test('el umbral de domicilio gratis es el mismo en el inicio y en la tienda ($60.000, Johan 2026-10-08)', () => {
   const tienda = JSON.parse(leer('tienda/catalogo.json')).domicilio.gratis_desde;
   const inicio = leer('index.html');
   const valor = '$' + tienda.toLocaleString('es-CO');
   assert.ok(inicio.includes(valor), `el inicio no dice ${valor}`);
+  /* Ningún otro monto de «gratis desde» en el inicio (ni en el JSON-LD para Google) */
+  for (const m of inicio.matchAll(/gratis[^.<]*?desde \$([\d.]+)|desde \$([\d.]+)[^.<]*?(?:casco urbano|Chicoral)/g)) {
+    assert.equal('$' + (m[1] || m[2]), valor, `el inicio promete domicilio gratis desde $${m[1] || m[2]}`);
+  }
 });
 
 test('el repositorio no publica secretos ni contraseñas en claro', () => {
