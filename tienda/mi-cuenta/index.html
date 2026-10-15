@@ -10,9 +10,9 @@
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/tienda/tienda.css?v=3">
-  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=1">
+  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=3">
   <script src="/tienda/mi-cuenta/menu.js?v=1" defer></script>
-  <script src="/tienda/mi-cuenta/cuenta.js?v=1" defer></script>
+  <script src="/tienda/mi-cuenta/cuenta.js?v=2" defer></script>
 </head>
 <body data-pagina="entrar">
 <header class="cab"><div class="envolver">
@@ -22,22 +22,82 @@
   <a class="btn-canasta" href="/tienda/"><svg class="ico" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="txt">Tienda</span></a>
 </div></header>
 <main class="envolver portal">
-  <h1>Entre a su cuenta</h1>
-  <p class="sub">Vea sus compras de la tienda y del mostrador, y descargue sus recibos.</p>
-  <form class="tarjeta form" id="f-entrar" novalidate>
-    <label for="documento">Cédula o NIT<input id="documento" inputmode="numeric" autocomplete="off" required maxlength="20" placeholder="1105678901"></label>
-    <label for="celular">Celular<input id="celular" type="tel" inputmode="tel" autocomplete="tel" required placeholder="318 355 5246"><small>El mismo que nos dio en su pedido.</small></label>
-    <p class="errores" id="e-entrar" role="alert" hidden></p>
-    <button class="boton" type="submit">Pedir código</button>
-  </form>
-  <form class="tarjeta form" id="f-codigo" novalidate hidden>
-    <p>Si sus datos coinciden con una cuenta, le llegó un <b>código de 6 números</b> al correo que nos dio. Vence en 10 minutos.</p>
-    <label for="codigo">Código<input id="codigo" class="codigo" inputmode="numeric" autocomplete="one-time-code" required maxlength="6" placeholder="······"></label>
-    <p class="errores" id="e-codigo" role="alert" hidden></p>
-    <button class="boton" type="submit">Entrar</button>
-    <button class="boton sec" type="button" id="otro">Cambiar datos o pedir otro código</button>
-  </form>
-  <p class="ayuda">¿Aún no tiene cuenta? Se crea sola con su primer pedido en la <a href="/tienda/">tienda en línea</a>. ¿No le llega el código? Escríbanos por <a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp</a>.</p>
+  <a class="cerrar" href="/tienda/" aria-label="Cerrar y volver a la tienda" title="Volver a la tienda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+  <!-- Entrar -->
+  <section id="v-entrar">
+    <h1>Entre a su cuenta</h1>
+    <p class="sub">Vea sus compras de la tienda y del mostrador, y descargue sus recibos.</p>
+    <form class="tarjeta form" id="f-entrar" novalidate>
+      <label for="usuario">Cédula o celular<input id="usuario" inputmode="numeric" autocomplete="username" required maxlength="20" placeholder="1105678901 o 318 355 5246"></label>
+      <label for="clave">Contraseña<input id="clave" type="password" autocomplete="current-password" required maxlength="72"></label>
+      <p class="errores" id="e-entrar" role="alert" hidden></p>
+      <button class="boton" type="submit">Entrar</button>
+      <a class="enlace" href="#olvide">Olvidé mi contraseña</a>
+    </form>
+    <div class="tarjeta invita">
+      <b>¿Primera vez?</b>
+      <p class="ayuda">Cree su cuenta con su nombre, cédula y celular. Si ya nos ha comprado, verá sus compras anteriores.</p>
+      <a class="boton sec" href="#crear">Crear mi cuenta</a>
+    </div>
+  </section>
+
+  <!-- Crear cuenta -->
+  <section id="v-crear" hidden>
+    <p class="migas"><a href="#">← Entrar</a></p>
+    <h1>Cree su cuenta</h1>
+    <p class="sub">Paso 1 de 3. Después confirmamos su WhatsApp y usted pone su contraseña.</p>
+    <form class="tarjeta form" id="f-crear" novalidate>
+      <label for="nombre">Nombre completo<input id="nombre" autocomplete="name" required maxlength="120" placeholder="Ana Pérez"></label>
+      <label for="documento">Cédula o NIT<input id="documento" inputmode="numeric" autocomplete="off" required maxlength="20" placeholder="1105678901"></label>
+      <label for="celular">Celular con WhatsApp<input id="celular" type="tel" inputmode="tel" autocomplete="tel" required placeholder="318 355 5246"><small>Con este número entra y le avisamos de sus pedidos.</small></label>
+      <p class="errores" id="e-crear" role="alert" hidden></p>
+      <button class="boton" type="submit">Seguir</button>
+    </form>
+  </section>
+
+  <!-- Olvidé mi contraseña -->
+  <section id="v-olvide" hidden>
+    <p class="migas"><a href="#">← Entrar</a></p>
+    <h1>Cambie su contraseña</h1>
+    <p class="sub">Confirmamos que es usted por el WhatsApp de su cuenta.</p>
+    <form class="tarjeta form" id="f-olvide" novalidate>
+      <label for="usuario2">Cédula o celular<input id="usuario2" inputmode="numeric" autocomplete="username" required maxlength="20"></label>
+      <p class="errores" id="e-olvide" role="alert" hidden></p>
+      <button class="boton" type="submit">Seguir</button>
+    </form>
+  </section>
+
+  <!-- Confirmar el WhatsApp -->
+  <section id="v-verificar" hidden>
+    <h1>Confirme su WhatsApp</h1>
+    <div class="tarjeta form" id="escribe" hidden>
+      <p>Mándenos este código por WhatsApp <b>desde su celular</b>. Así sabemos que el número es suyo.</p>
+      <p class="codigo-grande" id="mi-codigo"></p>
+      <a class="boton wa" id="abrir-wa" href="https://wa.me/573183555246" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      <p class="esperando" id="esperando" aria-live="polite">Esperando su mensaje…</p>
+    </div>
+    <form class="tarjeta form" id="f-codigo" novalidate hidden>
+      <p>Le mandamos un <b>código de 6 números</b> a su WhatsApp. Vence en 10 minutos.</p>
+      <label for="codigo">Código<input id="codigo" class="codigo" inputmode="numeric" autocomplete="one-time-code" required maxlength="6" placeholder="······"></label>
+      <button class="boton" type="submit">Confirmar</button>
+    </form>
+    <p class="errores" id="e-verificar" role="alert" hidden></p>
+    <p class="ayuda"><a href="#">Empezar de nuevo</a></p>
+  </section>
+
+  <!-- Poner la contraseña -->
+  <section id="v-clave" hidden>
+    <h1>Ponga su contraseña</h1>
+    <p class="sub">WhatsApp confirmado. Último paso.</p>
+    <form class="tarjeta form" id="f-clave" novalidate>
+      <label for="nueva">Contraseña<input id="nueva" type="password" autocomplete="new-password" required minlength="8" maxlength="72"><small>Mínimo 8 caracteres.</small></label>
+      <label for="repetir">Repítala<input id="repetir" type="password" autocomplete="new-password" required maxlength="72"></label>
+      <p class="errores" id="e-clave" role="alert" hidden></p>
+      <button class="boton" type="submit">Guardar y entrar</button>
+    </form>
+  </section>
+
+  <p class="ayuda">¿Problemas para entrar? Escríbanos por <a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp</a>.</p>
 </main>
 <footer class="pie"><div class="envolver">
   <div><img src="/tienda/img/logo-negativo-noche.svg" alt="Plásticos Espinal" width="210" height="80"><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
