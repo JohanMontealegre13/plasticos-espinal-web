@@ -39,44 +39,124 @@
 
   function enviando(boton, si) { boton.disabled = si; }
 
-  /* ---------- entrar ---------- */
-  function entrar() {
-    var f1 = $('f-entrar'), f2 = $('f-codigo'), e1 = $('e-entrar'), e2 = $('e-codigo');
-    pedir('yo').then(function () { location.href = BASE + 'pedidos/'; }, function () {});
-    f1.addEventListener('submit', function (ev) {
+  /* ---------- entrar, crear cuenta y olvidé mi contraseña ----------
+     Una sola página con cinco vistas. El #hash elige la de arranque
+     (#crear, #olvide). Pasos intermedios: el intermediario los guarda en
+     una galleta HttpOnly; aquí solo se ve si hay que esperar o seguir. */
+  var VISTAS = ['entrar', 'crear', 'olvide', 'verificar', 'clave'];
+  var sondeo = null;
+
+  function ver(nombre) {
+    VISTAS.forEach(function (v) { $('v-' + v).hidden = v !== nombre; });
+    if (sondeo) { clearTimeout(sondeo); sondeo = null; }
+    window.scrollTo(0, 0);
+    var primero = $('v-' + nombre).querySelector('input');
+    if (primero && !primero.closest('[hidden]')) primero.focus();
+  }
+
+  function desdeHash() {
+    var h = location.hash.replace('#', '');
+    ver(h === 'crear' || h === 'olvide' ? h : 'entrar');
+  }
+
+  function formulario(id, errorId, armar, enviar) {
+    var f = $(id), e = $(errorId);
+    f.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      var datos = armar();
+      if (typeof datos === 'string') return error(e, datos);
+      error(e, '');
+      var b = f.querySelector('button[type=submit]');
+      enviando(b, true);
+      enviar(datos).catch(function (err) { error(e, err.message); })
+        .finally(function () { enviando(b, false); });
+    });
+  }
+
+  /* El celular queda probado: él nos escribe, o escribe el código que le llegó. */
+  function verificar(r) {
+    error($('e-verificar'), '');
+    ver('verificar');
+    var escribe = r.modo === 'cliente_escribe';
+    $('escribe').hidden = !escribe;
+    $('f-codigo').hidden = escribe;
+    if (!escribe) { $('codigo').value = ''; $('codigo').focus(); return; }
+    $('mi-codigo').textContent = r.codigo.replace(/(\d{3})(\d{3})/, '$1 $2');
+    $('abrir-wa').href = 'https://wa.me/' + encodeURIComponent(r.whatsapp) + '?text=' + encodeURIComponent(r.mensaje);
+    var vence = Date.now() + (r.minutos || 10) * 60000;
+    (function preguntar() {
+      pedir('verificar', {}).then(function (j) {
+        if (j.listo) return ver('clave');
+        if (Date.now() > vence) return error($('e-verificar'), 'El código venció. Empiece de nuevo.');
+        sondeo = setTimeout(preguntar, document.hidden ? 6000 : 3000);
+      }, function (err) { error($('e-verificar'), err.message); });
+    })();
+  }
+
+  function entrar() {
+    pedir('yo').then(function () { location.href = BASE + 'pedidos/'; }, function () {});
+    window.addEventListener('hashchange', desdeHash);
+    desdeHash();
+
+    formulario('f-entrar', 'e-entrar', function () {
+      var u = $('usuario').value.replace(/\D/g, '');
+      if (u.length < 5) return 'Escriba su cédula o su celular.';
+      if (!$('clave').value) return 'Escriba su contraseña.';
+      return { usuario: u, clave: $('clave').value };
+    }, function (d) {
+      return pedir('entrar', d).then(function () { location.href = BASE + 'pedidos/'; });
+    });
+
+    formulario('f-crear', 'e-crear', function () {
+      var n = $('nombre').value.replace(/\s+/g, ' ').trim();
       var doc = $('documento').value.replace(/\D/g, '');
       var cel = $('celular').value.replace(/\D/g, '').slice(-10);
-      if (doc.length < 5) return error(e1, 'Escriba su número de documento.');
-      if (cel.length !== 10) return error(e1, 'Escriba su celular de 10 dígitos.');
-      error(e1, '');
-      var b = f1.querySelector('button');
-      enviando(b, true);
-      pedir('entrar', { documento: doc, celular: cel }).then(function () {
-        f1.hidden = true; f2.hidden = false; $('codigo').focus();
-      }, function (err) { error(e1, err.message); }).finally(function () { enviando(b, false); });
+      if (n.length < 3) return 'Escriba su nombre completo.';
+      if (doc.length < 5) return 'Escriba su número de documento.';
+      if (cel.length !== 10 || cel[0] !== '3') return 'Escriba su celular de 10 dígitos.';
+      return { nombre: n, documento: doc, celular: cel };
+    }, function (d) { return pedir('registro', d).then(verificar); });
+
+    formulario('f-olvide', 'e-olvide', function () {
+      var u = $('usuario2').value.replace(/\D/g, '');
+      return u.length < 5 ? 'Escriba su cédula o su celular.' : { usuario: u };
+    }, function (d) { return pedir('olvide', d).then(verificar); });
+
+    formulario('f-codigo', 'e-verificar', function () {
+      var c = $('codigo').value.replace(/\D/g, '');
+      return c.length !== 6 ? 'El código tiene 6 números.' : { codigo: c };
+    }, function (d) {
+      return pedir('verificar', d).then(function (j) { if (j.listo) ver('clave'); });
     });
-    f2.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var codigo = $('codigo').value.replace(/\D/g, '');
-      if (codigo.length !== 6) return error(e2, 'El código tiene 6 números.');
-      error(e2, '');
-      var b = f2.querySelector('button[type=submit]');
-      enviando(b, true);
-      pedir('codigo', { codigo: codigo }).then(function () {
-        location.href = BASE + 'pedidos/';
-      }, function (err) { error(e2, err.message); }).finally(function () { enviando(b, false); });
+
+    formulario('f-clave', 'e-clave', function () {
+      var c = $('nueva').value;
+      if (c.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
+      if (c !== $('repetir').value) return 'Las dos contraseñas no son iguales.';
+      return { clave: c };
+    }, function (d) {
+      return pedir('clave', d).then(function () { location.href = BASE + 'pedidos/'; });
     });
-    $('otro').addEventListener('click', function () {
-      f2.hidden = true; f1.hidden = false; $('codigo').value = ''; error(e2, '');
-    });
+  }
+
+  /* Cuenta creada con una cédula que ya teníamos con otro celular. */
+  function enRevision(caja) {
+    caja.textContent = '';
+    var v = el('div', 'vacio');
+    v.appendChild(el('b', '', 'Estamos confirmando su cuenta.'));
+    v.appendChild(el('p', 'ayuda', 'Esa cédula ya estaba con otro celular. Alguien de la tienda le escribe para confirmar que es usted; luego verá aquí sus compras.'));
+    caja.appendChild(v);
   }
 
   /* ---------- Mis pedidos ---------- */
   function pedidos() {
     var caja = $('lista');
-    pedir('yo').then(function (yo) { $('hola').textContent = 'Hola, ' + ((yo.nombre || '').split(' ')[0] || 'cliente'); });
-    pedir('pedidos').then(function (j) {
+    pedir('yo').then(function (yo) {
+      $('hola').textContent = 'Hola, ' + ((yo.nombre || '').split(' ')[0] || 'cliente');
+      if (yo.estado === 'por_confirmar') return enRevision(caja);
+      return pedir('pedidos').then(pintar);
+    }).catch(function (err) { caja.textContent = err.message; });
+    function pintar(j) {
       caja.textContent = '';
       if (!j.pedidos.length) {
         var v = el('div', 'vacio');
@@ -101,7 +181,7 @@
         var li = el('li'); li.appendChild(a); ul.appendChild(li);
       });
       caja.appendChild(ul);
-    }, function (err) { caja.textContent = err.message; });
+    }
   }
 
   /* ---------- una compra ---------- */
@@ -155,6 +235,7 @@
   function datos() {
     var f = $('f-datos'), e = $('e-datos'), ok = $('ok-datos');
     function llenar(yo) {
+      if (yo.estado === 'por_confirmar') { $('cargando').hidden = true; return enRevision(f.parentNode.insertBefore(el('div'), f)); }
       EDITABLES.forEach(function (c) { $(c).value = yo[c] || ''; });
       $('v-doc').textContent = (yo.tipo_documento + ' ' + yo.documento).trim();
       $('v-cel').textContent = yo.celular || '—';

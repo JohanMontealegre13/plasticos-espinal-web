@@ -9,6 +9,9 @@
      del cliente, para que el CRM cuente los intentos por persona.
    - La sesión del cliente (token firmado por el CRM) vive en una galleta
      HttpOnly de este sitio: el JavaScript de la página no la puede leer.
+     Los pasos de crear cuenta y de cambiar la contraseña (registro u
+     olvide -> verificar -> clave) también: cada uno deja su paso firmado en
+     la galleta pe_cuenta_p y el siguiente lo toma de ahí.
    - Solo deja pasar las rutas del portal; cualquier otra da 404.
 
    Variables de Cloudflare Pages:
@@ -23,7 +26,10 @@ const NO_RESPONDE = 'No pudimos traer sus datos. Intente más tarde o escríbano
 /* ruta del navegador -> [método, ruta en el CRM] */
 const RUTAS = [
   [/^entrar$/, 'POST'],
-  [/^codigo$/, 'POST'],
+  [/^registro$/, 'POST'],
+  [/^olvide$/, 'POST'],
+  [/^verificar$/, 'POST'],
+  [/^clave$/, 'POST'],
   [/^salir$/, 'POST'],
   [/^yo$/, 'GET'],
   [/^pedidos$/, 'GET'],
@@ -95,7 +101,8 @@ export async function onRequest({ request, env, params }) {
   let cuerpo;
   if (request.method === 'POST') {
     const datos = await leerJson(request);
-    if (ruta === 'codigo') datos.pendiente = leerGalleta(request, PENDIENTE);
+    if (ruta === 'verificar') datos.pendiente = leerGalleta(request, PENDIENTE);
+    if (ruta === 'clave') datos.verificado = leerGalleta(request, PENDIENTE);
     cuerpo = JSON.stringify(datos);
     cabeceras['Content-Type'] = 'application/json';
   }
@@ -133,16 +140,21 @@ export async function onRequest({ request, env, params }) {
   if (respuesta.status === 401) {
     return json(datos, 401, [galleta(GALLETA, '', 0)]);
   }
-  if (ruta === 'entrar' && respuesta.ok) {
-    /* El paso intermedio queda en galleta: la página no lo ve */
-    return json({ ok: true }, 200, [galleta(PENDIENTE, datos.pendiente || '', 15 * 60)]);
+  const sesion = (d) => [
+    galleta(GALLETA, d.token || '', (Number(d.dias) || 30) * 86400),
+    galleta(PENDIENTE, '', 0),
+  ];
+  if ((ruta === 'entrar' || ruta === 'clave') && respuesta.ok) {
+    return json({ ok: true, nombre: datos.nombre || '', estado: datos.estado || '' }, 200, sesion(datos));
   }
-  if (ruta === 'codigo' && respuesta.ok) {
-    const dias = Number(datos.dias) || 30;
-    return json({ ok: true, nombre: datos.nombre || '' }, 200, [
-      galleta(GALLETA, datos.token || '', dias * 86400),
-      galleta(PENDIENTE, '', 0),
-    ]);
+  if ((ruta === 'registro' || ruta === 'olvide') && respuesta.ok) {
+    /* El paso queda en galleta; la página solo ve cómo confirmar el WhatsApp */
+    const { pendiente, ...resto } = datos;
+    return json(resto, 200, [galleta(PENDIENTE, pendiente || '', 15 * 60)]);
+  }
+  if (ruta === 'verificar' && respuesta.ok) {
+    if (!datos.listo) return json({ ok: true, listo: false });
+    return json({ ok: true, listo: true }, 200, [galleta(PENDIENTE, datos.verificado || '', 15 * 60)]);
   }
   return json(datos, respuesta.status);
 }
