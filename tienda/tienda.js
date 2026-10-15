@@ -12,7 +12,7 @@
   var CLAVE_DATOS = 'pe-cliente-v1';   /* datos de entrega, solo en este celular */
   var CLAVE_PEDIDO = 'pe-pedido-v1';   /* pedido en curso: código + secreto */
   var API = '/tienda/mi-cuenta/api/tienda/pedido';
-  var CADA = 10000;                    /* cada cuánto pregunta en qué va el pedido */
+  var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   /* Barrios de El Espinal para sugerir (lista parcial: el cliente puede escribir otro) */
   var BARRIOS = ['Arkabal', 'Balkanes', 'Belén', 'Betania', 'Betania Campestre', 'Bosques de Roa',
     'Caballero y Góngora', 'Cafasur', 'El Centro', 'Entre Ríos', 'Fátima', 'Isaías Olivar',
