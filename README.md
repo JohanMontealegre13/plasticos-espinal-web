@@ -150,7 +150,8 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   el ÚNICO que habla con el CRM: le pone la clave `PORTAL_CLAVE` (secreto de
   Cloudflare Pages, el mismo valor del `.env` del CRM) y guarda la sesión del
   cliente en una galleta HttpOnly. Sin ese secreto el portal dice que no pudo
-  traer los datos. El navegador nunca ve la dirección del CRM.
+  traer los datos (el secreto va en Production y solo se carga en la siguiente
+  publicación). El navegador nunca ve la dirección del CRM.
 - Diseño «tienda primero»: búsqueda y canasta arriba, categorías en fotos,
   combo, lo más pedido y compra por tipo de negocio; Plásticos Espinal queda en
   el logo y el pie.
