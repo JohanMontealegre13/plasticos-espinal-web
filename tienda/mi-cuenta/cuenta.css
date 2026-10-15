@@ -63,7 +63,7 @@
 
 
 /* cerrar: vuelve a la tienda desde entrar, crear cuenta o el código */
-.cerrar{position:absolute;top:18px;right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--suave);color:var(--noche);z-index:2}
-.cerrar:hover,.cerrar:focus-visible{background:var(--linea)}
-.cerrar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.portal > .cerrar{position:absolute;top:18px;right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--suave);color:var(--noche);z-index:2}
+.portal > .cerrar:hover,.portal > .cerrar:focus-visible{background:var(--linea)}
+.portal > .cerrar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 .portal > section > h1:first-child,.portal > section > .migas:first-child{padding-right:56px}
