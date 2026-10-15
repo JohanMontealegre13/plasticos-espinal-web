@@ -12,7 +12,7 @@
 .menu-cuenta .salir{margin-top:4px;padding:10px;border:0;border-top:1px solid var(--linea);background:none;text-align:left;color:var(--rojo);font-weight:700;border-radius:0 0 10px 10px}
 
 /* páginas del portal */
-.portal{max-width:720px;padding-block:26px 40px;display:grid;gap:18px}
+.portal{max-width:720px;padding-block:26px 40px;display:grid;gap:18px;position:relative}
 .portal h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,32px);line-height:1.15}
 .portal .sub{color:var(--texto2)}
 .portal .migas{font-size:14px}
@@ -61,3 +61,9 @@
 @keyframes latido{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.esperando::before{animation:none}}
 
+
+/* cerrar: vuelve a la tienda desde entrar, crear cuenta o el código */
+.cerrar{position:absolute;top:18px;right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--suave);color:var(--noche);z-index:2}
+.cerrar:hover,.cerrar:focus-visible{background:var(--linea)}
+.cerrar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.portal > section > h1:first-child,.portal > section > .migas:first-child{padding-right:56px}
