@@ -13,6 +13,9 @@
      olvide -> verificar -> clave) también: cada uno deja su paso firmado en
      la galleta pe_cuenta_p y el siguiente lo toma de ahí.
    - Solo deja pasar las rutas del portal; cualquier otra da 404.
+   - También lleva el pedido de la tienda (tienda/pedido…): el CRM lo recibe
+     «Por confirmar»; la página guarda el código y el secreto del pedido y
+     manda el secreto en X-Pedido-Secreto para ver en qué va.
 
    Variables de Cloudflare Pages:
      PORTAL_CLAVE  (secreto, obligatorio)
@@ -36,6 +39,12 @@ const RUTAS = [
   [/^pedidos\/\d{1,9}$/, 'GET'],
   [/^pedidos\/\d{1,9}\/recibo\.pdf$/, 'GET'],
   [/^datos$/, 'POST'],
+  /* Catálogo real del CRM: precio y si hay o no (nunca cuántas) */
+  [/^tienda\/catalogo$/, 'GET'],
+  /* Pedido de la tienda: crear, elegir pago y ver en qué va (con su secreto) */
+  [/^tienda\/pedido$/, 'POST'],
+  [/^tienda\/pedido\/PE-[A-Z2-9]{5}$/, 'GET'],
+  [/^tienda\/pedido\/PE-[A-Z2-9]{5}\/pago$/, 'POST'],
 ];
 
 function leerGalleta(request, nombre) {
@@ -97,6 +106,9 @@ export async function onRequest({ request, env, params }) {
   };
   const token = leerGalleta(request, GALLETA);
   if (token) cabeceras['X-Cuenta-Token'] = token;
+  /* El secreto del pedido lo guarda la página que lo creó; solo pasa a esas rutas */
+  const secreto = request.headers.get('X-Pedido-Secreto') || '';
+  if (ruta.startsWith('tienda/') && /^[A-Za-z0-9_-]{16,64}$/.test(secreto)) cabeceras['X-Pedido-Secreto'] = secreto;
 
   let cuerpo;
   if (request.method === 'POST') {
