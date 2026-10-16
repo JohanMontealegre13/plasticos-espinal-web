@@ -430,7 +430,8 @@
   Promise.all([json('/tienda/catalogo.json'), json(CATALOGO)])
     .then(function (r) {
       var sitio = r[0], crm = r[1];
-      if (!crm.ok || !crm.productos || !crm.productos.length) throw new Error('vacío');
+      if (!crm.ok) throw new Error('crm');
+      if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
         domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp,
         categorias: crm.categorias.map(function (c) {
@@ -460,8 +461,10 @@
       pintarAviso();
       vigilar();
     })
-    .catch(function () {
+    .catch(function (e) {
       document.querySelectorAll('.combo').forEach(function (c) { c.hidden = true; });
-      $('estado').textContent = 'No pudimos cargar los productos. Escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.';
+      $('estado').textContent = e && e.vacio
+        ? 'Estamos subiendo los productos a la tienda. Mientras tanto, escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.'
+        : 'No pudimos cargar los productos. Escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.';
     });
 })();

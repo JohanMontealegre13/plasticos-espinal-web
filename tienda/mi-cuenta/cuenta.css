@@ -67,3 +67,19 @@
 .portal > .cerrar:hover,.portal > .cerrar:focus-visible{background:var(--linea)}
 .portal > .cerrar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 .portal > section > h1:first-child,.portal > section > .migas:first-child{padding-right:56px}
+
+/* Mis pedidos, Mis datos y el detalle: ventana encima de la tienda */
+html.con-ventana{overflow:hidden}
+.ventana-cuenta{position:fixed;inset:0;z-index:80;display:grid;place-items:end center}
+.vc-velo{position:absolute;inset:0;background:rgba(14,26,71,.45)}
+.vc-hoja{position:relative;width:min(760px,100%);height:min(88vh,100%);height:min(88dvh,100%);background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(14,26,71,.25);overflow:hidden;display:grid}
+.vc-marco{width:100%;height:100%;border:0;display:block}
+.vc-cerrar{position:absolute;top:12px;right:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px 0 12px;border:0;border-radius:99px;background:var(--noche);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 4px 12px rgba(14,26,71,.25);cursor:pointer}
+.vc-cerrar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round}
+.vc-cerrar:hover,.vc-cerrar:focus-visible{background:var(--azul);outline:3px solid #fff;outline-offset:-5px}
+@media (min-width:760px){.ventana-cuenta{place-items:center}.vc-hoja{border-radius:22px;height:min(86vh,820px)}}
+/* dentro de la ventana: sin cabecera ni pie, solo el contenido */
+html.en-ventana .cab,html.en-ventana .pie{display:none}
+html.en-ventana body{background:#fff}
+html.en-ventana .portal{padding-top:18px}
+html.en-ventana .portal h1,html.en-ventana .portal .sub{padding-right:120px}
