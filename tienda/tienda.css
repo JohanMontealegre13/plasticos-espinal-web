@@ -112,9 +112,12 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .mas:hover{background:var(--verde);color:#fff}
 .mas.agotado,.mas.agotado:hover{border-color:#cfd6e4;color:#8a94a8;background:#f4f6fa;cursor:not-allowed}
 .prod .sello.agotado{background:#5b6478}
-.cant{margin-top:8px;display:grid;grid-template-columns:40px 1fr 40px;height:40px;border-radius:99px;background:var(--verde);color:#fff;overflow:hidden}
-.cant button{border:0;background:transparent;color:#fff;font-size:20px;font-weight:700}
-.cant output{display:grid;place-items:center;font-weight:800}
+.cant{margin-top:8px;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;height:44px;border-radius:99px;background:var(--verde);color:#fff;overflow:hidden}
+.cant button{border:0;background:transparent;color:#fff;font-size:24px;font-weight:700;line-height:1}
+.cant button:active{background:rgba(0,0,0,.15)}
+/* 16px o más: así el iPhone no acerca la pantalla al escribir */
+.cant input{width:100%;min-width:0;border:0;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:17px;font-weight:800;text-align:center;padding:0;border-radius:0;-webkit-appearance:none;appearance:none}
+.cant input:focus{outline:none;background:#fff;color:var(--verde)}
 
 /* negocios */
 .negocios{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
@@ -145,7 +148,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* barra de canasta en celular */
 .barra{display:none}
 @media (max-width:760px){
-  .barra:not([hidden]){position:fixed;left:12px;right:12px;bottom:12px;z-index:30;display:flex;justify-content:space-between;align-items:center;height:56px;padding:0 18px;border:0;border-radius:99px;background:var(--verde);color:#fff;font-weight:700;box-shadow:0 8px 24px rgba(14,26,71,.25)}
+  .barra:not([hidden]){position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;display:flex;justify-content:space-between;align-items:center;height:56px;padding:0 18px;border:0;border-radius:99px;background:var(--verde);color:#fff;font-weight:700;box-shadow:0 8px 24px rgba(14,26,71,.25)}
 }
 
 /* panel de canasta */
@@ -159,7 +162,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .items li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--linea)}
 .items img{width:48px;height:48px;border-radius:10px;object-fit:cover}
 .items .nm{font-size:14px;font-weight:600;line-height:1.3}
-.items .cant{margin:4px 0 0;width:112px;height:32px;grid-template-columns:32px 1fr 32px}
+.items .cant{margin:6px 0 0;width:148px;height:44px;grid-template-columns:44px minmax(0,1fr) 44px}
 .items .v{font-weight:800}
 .vacio{padding:30px 20px;color:var(--texto2)}
 .resumen{padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--linea);display:grid;gap:6px;box-shadow:0 -6px 16px rgba(14,26,71,.06)}
@@ -207,8 +210,13 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .texto-legal ul{margin:0;padding-left:20px;display:grid;gap:4px}
 
 /* aviso del pedido en curso (arriba de la barra en celular, fijo en computador) */
-.aviso-pedido{position:fixed;left:12px;right:12px;bottom:76px;z-index:31;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:8px 18px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--noche);font-weight:700;box-shadow:0 8px 24px rgba(14,26,71,.18);text-align:left}
+.aviso-pedido{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:31;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:8px 18px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--noche);font-weight:700;box-shadow:0 8px 24px rgba(14,26,71,.18);text-align:left}
+@media (max-width:760px){body.con-barra .aviso-pedido{bottom:calc(76px + env(safe-area-inset-bottom))}}
 @media (min-width:761px){.aviso-pedido{left:auto;right:24px;bottom:24px;max-width:420px}}
+/* Sin doble toque que acerque la pantalla; el pellizco para ampliar sigue */
+html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+/* El pie llega hasta abajo del todo y deja espacio a la barra y al aviso */
+@media (max-width:760px){.pie{padding-bottom:calc(150px + env(safe-area-inset-bottom))}}
 
 /* medio de pago */
 .pago,.final{flex:1;overflow-y:auto;padding:16px;display:grid;gap:14px;align-content:start}
