@@ -56,10 +56,20 @@
     var d = s === 0 || s >= cat.domicilio.gratis_desde ? 0 : cat.domicilio.tarifa;
     return { n: n, s: s, d: d, t: s + d };
   }
-  function cambiar(id, d) {
-    var n = (canasta[id] || 0) + d;
+  function cambiar(id, d) { poner(id, (canasta[id] || 0) + d); }
+  function poner(id, n) {
+    n = Math.floor(Number(n) || 0);
     if (n <= 0) delete canasta[id]; else canasta[id] = Math.min(n, 999);
-    guardar(); pintar(); pintarCanasta();
+    guardar(); refrescar(id); pintarCanasta();
+  }
+  /* Solo cambia el botón de ESE producto: la vitrina no se vuelve a pintar
+     entera (las fotos no parpadean ni la página salta) */
+  function refrescar(id) {
+    document.querySelectorAll('#grilla [data-ctrl="' + id + '"]').forEach(function (v) {
+      var nuevo = control(por[id]);
+      nuevo.dataset.ctrl = id;
+      v.replaceWith(nuevo);
+    });
   }
 
   /* ---------- Selector − n + ---------- */
@@ -78,11 +88,18 @@
       w.appendChild(b);
       return w;
     }
-    var c = el('div', 'cant'), m = el('button', null, '−'), o = el('output', null, String(n)), s = el('button', null, '+');
+    var c = el('div', 'cant'), m = el('button', null, '−'), o = el('input'), s = el('button', null, '+');
     m.type = s.type = 'button';
     m.setAttribute('aria-label', 'Quitar uno de ' + p.nombre);
     s.setAttribute('aria-label', 'Agregar uno más de ' + p.nombre);
-    o.setAttribute('aria-live', 'polite');
+    /* La cantidad también se escribe con el teclado de números */
+    o.type = 'text'; o.inputMode = 'numeric'; o.pattern = '[0-9]*'; o.maxLength = 3;
+    o.autocomplete = 'off'; o.value = String(n);
+    o.setAttribute('aria-label', 'Cantidad de ' + p.nombre);
+    o.addEventListener('focus', function () { o.select(); });
+    o.addEventListener('input', function () { o.value = o.value.replace(/\D/g, '').slice(0, 3); });
+    o.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); o.blur(); } });
+    o.addEventListener('change', function () { poner(p.id, o.value); });
     m.addEventListener('click', function () { cambiar(p.id, -1); });
     s.addEventListener('click', function () { cambiar(p.id, 1); });
     c.append(m, o, s);
@@ -125,7 +142,9 @@
       if (!p.disponible) f.appendChild(el('span', 'sello agotado', 'Agotado'));
       else if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
       var c = el('div', 'cuerpo');
-      c.append(el('h3', null, p.nombre), el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), control(p));
+      var ctrl = control(p);
+      ctrl.dataset.ctrl = p.id;
+      c.append(el('h3', null, p.nombre), el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), ctrl);
       a.append(f, c);
       li.appendChild(a);
       g.appendChild(li);
@@ -340,6 +359,7 @@
     var vacia = c.n === 0;
     $('n').hidden = vacia; $('n').textContent = c.n;
     $('barra').hidden = vacia;
+    document.body.classList.toggle('con-barra', !vacia);
     $('barraN').textContent = c.n + (c.n === 1 ? ' producto' : ' productos');
     $('barraT').textContent = pesos(c.t);
     $('dom').textContent = vacia ? '$0' : (c.d ? pesos(c.d) : 'Gratis');
