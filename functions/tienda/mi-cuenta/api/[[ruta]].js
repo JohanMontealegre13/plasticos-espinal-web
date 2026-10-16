@@ -39,6 +39,8 @@ const RUTAS = [
   [/^pedidos\/\d{1,9}$/, 'GET'],
   [/^pedidos\/\d{1,9}\/recibo\.pdf$/, 'GET'],
   [/^datos$/, 'POST'],
+  /* Catálogo real del CRM: precio y si hay o no (nunca cuántas) */
+  [/^tienda\/catalogo$/, 'GET'],
   /* Pedido de la tienda: crear, elegir pago y ver en qué va (con su secreto) */
   [/^tienda\/pedido$/, 'POST'],
   [/^tienda\/pedido\/PE-[A-Z2-9]{5}$/, 'GET'],

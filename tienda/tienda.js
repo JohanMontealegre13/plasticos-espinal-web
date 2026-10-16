@@ -1,5 +1,6 @@
 /* Plásticos Espinal · tienda en línea (versión de prueba, detrás de contraseña).
-   Lee /tienda/catalogo.json (en la fase 2 lo publica el CRM) y arma la canasta.
+   Los productos salen del CRM (precio y si hay o no; nunca cuántas quedan).
+   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp y fotos.
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
@@ -12,6 +13,7 @@
   var CLAVE_DATOS = 'pe-cliente-v1';   /* datos de entrega, solo en este celular */
   var CLAVE_PEDIDO = 'pe-pedido-v1';   /* pedido en curso: código + secreto */
   var API = '/tienda/mi-cuenta/api/tienda/pedido';
+  var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   /* Barrios de El Espinal para sugerir (lista parcial: el cliente puede escribir otro) */
   var BARRIOS = ['Arkabal', 'Balkanes', 'Belén', 'Betania', 'Betania Campestre', 'Bosques de Roa',
@@ -66,6 +68,11 @@
     if (!n) {
       var b = el('button', 'mas', '+ Agregar');
       b.type = 'button';
+      if (!p.disponible) {
+        b.textContent = 'Agotado'; b.disabled = true; b.className = 'mas agotado';
+        w.appendChild(b);
+        return w;
+      }
       b.setAttribute('aria-label', 'Agregar ' + p.nombre + ' a la canasta');
       b.addEventListener('click', function () { cambiar(p.id, 1); });
       w.appendChild(b);
@@ -91,7 +98,7 @@
       b.type = 'button';
       b.setAttribute('aria-pressed', 'false');
       b.dataset.cat = c.id;
-      var i = el('img'); i.src = c.imagen; i.alt = '';
+      var i = el('img'); i.src = c.imagen || '/img/productos/bodega.webp'; i.alt = '';
       b.append(i, el('span', null, c.nombre));
       $('cats').appendChild(b);
     });
@@ -115,7 +122,8 @@
       var li = el('li'), a = el('article', 'prod'), f = el('div', 'foto'), i = el('img');
       i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
       f.appendChild(i);
-      if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
+      if (!p.disponible) f.appendChild(el('span', 'sello agotado', 'Agotado'));
+      else if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
       var c = el('div', 'cuerpo');
       c.append(el('h3', null, p.nombre), el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), control(p));
       a.append(f, c);
@@ -202,13 +210,13 @@
   function enviarPedido(d) {
     var c = cuentas();
     var lineas = Object.keys(canasta).map(function (id) {
-      return { id: id, nombre: por[id].nombre, cantidad: canasta[id], precio: por[id].precio };
+      return { id: Number(id), cantidad: canasta[id] };   /* precio y nombre los pone el CRM */
     });
     ocupado($('enviar'), true, 'Enviando su pedido…');
     llamar('', 'POST', {
       nombre: d.nombre, tipo: d.tipo, documento: d.documento, celular: d.celular,
       barrio: d.barrio, direccion: d.direccion, indicaciones: d.extra,
-      domicilio: c.d, lineas: lineas
+      lineas: lineas
     }).then(function (r) {
       pedido = r;
       guardarPedido(pedido);
@@ -358,7 +366,7 @@
       if (b) { filtro = { cat: b.dataset.cat, q: '', todo: true }; $('q').value = ''; pintar(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); }
       var combo = e.target.closest('[data-combo]');
       if (combo) {
-        combo.dataset.combo.split(',').forEach(function (id) { if (por[id]) canasta[id] = (canasta[id] || 0) + 1; });
+        combo.dataset.combo.split(',').forEach(function (id) { if (por[id] && por[id].disponible) canasta[id] = (canasta[id] || 0) + 1; });
         guardar(); pintar(); pintarCanasta(); vista('canasta'); abrir();
       }
       if (e.target.closest('[data-abrir]')) { vista('canasta'); abrir(); }
@@ -406,15 +414,43 @@
   }
 
   /* ---------- Carga ---------- */
-  fetch('/tienda/catalogo.json', { cache: 'no-cache' })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (datos) {
-      cat = datos;
-      datos.categorias.forEach(function (c) { cats[c.id] = c; });
-      datos.productos.forEach(function (p) { por[p.id] = p; });
-      /* Lo que ya no está en el catálogo sale de la canasta guardada */
-      Object.keys(canasta).forEach(function (id) { if (!por[id] || !(canasta[id] > 0)) delete canasta[id]; });
+  /* Foto de la categoría: la del sitio cuyo nombre se parece (Platos, Vasos…) */
+  function fotoCategoria(nombre, fotos) {
+    var n = norm(nombre), hallada = '';
+    fotos.forEach(function (f) {
+      var clave = norm(f.nombre).split(' ')[0];
+      if (!hallada && clave && n.indexOf(clave.replace(/s$/, '')) >= 0) hallada = f.imagen;
+    });
+    return hallada;
+  }
+  function json(url) {
+    return fetch(url, { cache: 'no-cache', headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  Promise.all([json('/tienda/catalogo.json'), json(CATALOGO)])
+    .then(function (r) {
+      var sitio = r[0], crm = r[1];
+      if (!crm.ok || !crm.productos || !crm.productos.length) throw new Error('vacío');
+      cat = {
+        domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp,
+        categorias: crm.categorias.map(function (c) {
+          return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, sitio.categorias || []) };
+        }),
+        productos: crm.productos
+      };
+      /* Si nada sale como «Más pedido», la portada muestra todo */
+      if (!cat.productos.some(function (p) { return p.destacado; })) filtro.todo = true;
+      cat.categorias.forEach(function (c) { cats[c.id] = c; });
+      cat.productos.forEach(function (p) { por[p.id] = p; });
+      /* Lo que ya no está o se agotó sale de la canasta guardada */
+      Object.keys(canasta).forEach(function (id) { if (!por[id] || !por[id].disponible || !(canasta[id] > 0)) delete canasta[id]; });
       guardar();
+      /* El combo solo se ofrece si todos sus productos están y hay */
+      document.querySelectorAll('[data-combo]').forEach(function (b) {
+        var ok = b.dataset.combo.split(',').every(function (id) { return por[id] && por[id].disponible; });
+        var caja = b.closest('.combo');
+        if (!ok && caja) caja.hidden = true;
+      });
       BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
       pintarCategorias();
       eventos();
@@ -425,6 +461,7 @@
       vigilar();
     })
     .catch(function () {
+      document.querySelectorAll('.combo').forEach(function (c) { c.hidden = true; });
       $('estado').textContent = 'No pudimos cargar los productos. Escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.';
     });
 })();

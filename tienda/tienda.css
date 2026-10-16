@@ -110,6 +110,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .prod .unidad{font-size:12px;color:var(--texto2)}
 .mas{margin-top:8px;height:40px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px}
 .mas:hover{background:var(--verde);color:#fff}
+.mas.agotado,.mas.agotado:hover{border-color:#cfd6e4;color:#8a94a8;background:#f4f6fa;cursor:not-allowed}
+.prod .sello.agotado{background:#5b6478}
 .cant{margin-top:8px;display:grid;grid-template-columns:40px 1fr 40px;height:40px;border-radius:99px;background:var(--verde);color:#fff;overflow:hidden}
 .cant button{border:0;background:transparent;color:#fff;font-size:20px;font-weight:700}
 .cant output{display:grid;place-items:center;font-weight:800}
