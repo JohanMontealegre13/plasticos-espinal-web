@@ -29,7 +29,7 @@
   var canasta = leer();           /* { id: cantidad } */
   var filtro = { cat: '', q: '', todo: false };
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
-  var reloj = null;
+  var reloj = null, relojQr = null;
 
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
@@ -159,8 +159,10 @@
     $('vaciar').hidden = cual !== 'canasta' || !cuentas().n;
     $('datos').hidden = cual !== 'datos';
     $('pago').hidden = cual !== 'pago';
+    $('pqr').hidden = cual !== 'qr';
     $('final').hidden = cual !== 'final';
-    $('panelTitulo').textContent = { canasta: 'Su canasta', datos: 'Datos de entrega', pago: 'Medio de pago', final: 'Su pedido' }[cual];
+    if (cual !== 'qr') clearTimeout(relojQr);
+    $('panelTitulo').textContent = { canasta: 'Su canasta', datos: 'Datos de entrega', pago: 'Medio de pago', qr: 'Pague con QR', final: 'Su pedido' }[cual];
     $('panel').dataset.vista = cual;
     $('panel').scrollTop = 0;
   }
@@ -251,17 +253,37 @@
   function pasoPago() {
     $('pCodigo').textContent = pedido.codigo;
     $('pTotal').textContent = pesos(pedido.total);
-    $('qrTotal').textContent = pesos(pedido.total);
     $('errPago').hidden = true;
-    elegirMedio(pedido.medio || '');
+    marcarMedio('');
     pintarBilletes();
     vista('pago');
   }
-  function elegirMedio(m) {
+  function marcarMedio(m) {
     document.querySelectorAll('.medio').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.medio === m)); });
-    $('bQr').hidden = m !== 'qr';
     $('bEfe').hidden = m !== 'efectivo';
-    if (m === 'qr') pintarQr();
+  }
+  function elegirMedio(m) {
+    marcarMedio(m);
+    if (m === 'qr') pasoQr();
+  }
+  /* Pantalla del QR: entra con animación, el código aparece despacio
+     y el botón «PAGO CONFIRMADO» sale a los 5 segundos */
+  var ESPERA_BOTON = 5000;
+  function pasoQr() {
+    $('qrTotal').textContent = pesos(pedido.total);
+    $('qCodigo').textContent = pedido.codigo;
+    $('errQr').hidden = true;
+    pintarQr();
+    $('yaPague').hidden = true;
+    $('qrEspera').hidden = false;
+    vista('qr');
+    var p = $('pqr');
+    p.classList.remove('entra'); void p.offsetWidth; p.classList.add('entra');
+    clearTimeout(relojQr);
+    relojQr = setTimeout(function () {
+      $('qrEspera').hidden = true;
+      $('yaPague').hidden = false;
+    }, ESPERA_BOTON);
   }
   function pintarQr() {
     var pago = (cat && cat.pago) || {};
@@ -286,14 +308,15 @@
     });
     $('pagaCon').value = '';
   }
-  function pagar(datos, boton) {
-    $('errPago').hidden = true;
+  function pagar(datos, boton, err) {
+    err = $(err || 'errPago');
+    err.hidden = true;
     ocupado(boton, true);
     llamar('/' + pedido.codigo + '/pago', 'POST', datos).then(function (r) {
       Object.assign(pedido, r); guardarPedido(pedido);
       pasoFinal();
     }).catch(function (e) {
-      $('errPago').textContent = e.message; $('errPago').hidden = false;
+      err.textContent = e.message; err.hidden = false;
       if (e.estado === 404) { guardarPedido(null); }
     }).then(function () { ocupado(boton, false); });
   }
@@ -417,7 +440,8 @@
       guardarDatos(d);
       enviarPedido(d);
     });
-    $('yaPague').addEventListener('click', function () { pagar({ medio: 'qr', pagado: true }, this); });
+    $('yaPague').addEventListener('click', function () { pagar({ medio: 'qr', pagado: true }, this, 'errQr'); });
+    $('volverPago').addEventListener('click', function () { marcarMedio(''); vista('pago'); });
     $('pagaCon').addEventListener('input', function () {
       document.querySelectorAll('.billete').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
     });

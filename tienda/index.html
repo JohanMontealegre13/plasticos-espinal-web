@@ -10,8 +10,8 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=6">
-  <script src="/tienda/tienda.js?v=8" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=7">
+  <script src="/tienda/tienda.js?v=9" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -28,7 +28,9 @@
   <label class="buscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" placeholder="¿Qué necesita hoy? vasos, bolsas, contenedores…" aria-label="Buscar productos"><button type="button" id="btnq">Buscar</button></label>
   <a class="btn-cuenta" href="/tienda/mi-cuenta/"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span class="txt">Mi cuenta</span></a>
   <button class="btn-canasta" type="button" data-abrir><svg class="ico" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="txt">Canasta</span><span class="n" id="n" hidden>0</span></button>
-</div></header>
+</div>
+<button class="aviso-pedido" type="button" id="avisoPedido" hidden><span class="envolver"><span class="pulso" aria-hidden="true"></span><span id="avisoTexto"></span><span class="ver">Ver<span class="largo"> su pedido</span> ›</span></span></button>
+</header>
 
 <main class="envolver">
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
@@ -89,12 +91,11 @@
   <div><h4>Ayuda</h4><a href="/tienda/mi-cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="/tienda/privacidad/">Política de datos</a></div>
 </div></footer>
 
-<button class="aviso-pedido" type="button" id="avisoPedido" hidden><span id="avisoTexto"></span><span>Ver ›</span></button>
 <button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
 
 <div class="velo" id="velo" hidden></div>
 <aside class="panel" id="panel" hidden aria-label="Su canasta">
-  <header><h2 id="panelTitulo">Su canasta</h2><button class="vaciar" type="button" id="vaciar" hidden>Vaciar</button><button class="cerrar" type="button" id="cerrar" aria-label="Cerrar">✕</button></header>
+  <header><h2 id="panelTitulo">Su canasta</h2><button class="vaciar" type="button" id="vaciar" hidden>Vaciar</button><button class="cerrar" type="button" id="cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="txt">Cerrar</span></button></header>
 
   <!-- 1. Canasta: casi toda la pantalla para los productos -->
   <p class="vacio" id="vacio">Todavía no ha agregado productos.</p>
@@ -139,12 +140,6 @@
       <button type="button" class="medio" data-medio="qr" role="radio" aria-checked="false"><b>QR Bre-B</b><span>Pague ya desde la app de su banco</span></button>
       <button type="button" class="medio" data-medio="efectivo" role="radio" aria-checked="false"><b>Efectivo</b><span>Paga al recibir el pedido</span></button>
     </div>
-    <div class="bloque" id="bQr" hidden>
-      <div class="qr" id="qrCaja"><img id="qrImg" alt="Código QR Bre-B de Plásticos Espinal" width="240" height="240"><p id="qrFalta" hidden>El código QR estará aquí muy pronto. Mientras tanto, elija efectivo.</p></div>
-      <p class="llave" id="qrLlave" hidden></p>
-      <p class="ayuda">Abra la app de su banco, escanee el código y transfiera <b id="qrTotal"></b>. Cuando termine, toque el botón.</p>
-      <button class="enviar" type="button" id="yaPague">PAGO CONFIRMADO</button>
-    </div>
     <div class="bloque" id="bEfe" hidden>
       <p class="pregunta">¿Con cuánto va a pagar? <small>Para llevarle el cambio.</small></p>
       <div class="billetes" id="billetes"></div>
@@ -152,6 +147,22 @@
       <button class="enviar" type="button" id="listoEfe">Confirmar pedido</button>
     </div>
     <p class="errores" id="errPago" role="alert" hidden></p>
+  </section>
+
+  <!-- 3b. Pantalla del QR: el código aparece despacio y el botón sale después -->
+  <section class="pqr" id="pqr" hidden>
+    <button class="volver" type="button" id="volverPago">‹ Cambiar medio de pago</button>
+    <div class="pqr-monto"><span>Transfiera</span><b id="qrTotal"></b><small>Pedido <b id="qCodigo"></b></small></div>
+    <div class="qr" id="qrCaja"><img id="qrImg" alt="Código QR Bre-B de Plásticos Espinal" width="240" height="240"><span class="barrido" aria-hidden="true"></span><p id="qrFalta" hidden>El código QR estará aquí muy pronto. Mientras tanto, elija efectivo.</p></div>
+    <p class="llave" id="qrLlave" hidden></p>
+    <ol class="pqr-pasos">
+      <li>Abra la app de su banco</li>
+      <li>Escanee este código</li>
+      <li>Transfiera el total y vuelva aquí</li>
+    </ol>
+    <div class="espera" id="qrEspera"><span>Preparando el botón para avisarnos…</span><i></i></div>
+    <button class="enviar" type="button" id="yaPague" hidden>PAGO CONFIRMADO</button>
+    <p class="errores" id="errQr" role="alert" hidden></p>
   </section>
 
   <!-- 4. Pedido por confirmar: se actualiza solo con lo que pase en la tienda -->
