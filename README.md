@@ -155,6 +155,10 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - Diseño «tienda primero»: búsqueda y canasta arriba, categorías en fotos,
   combo, lo más pedido y compra por tipo de negocio; Plásticos Espinal queda en
   el logo y el pie.
+- Foto de cada producto: la que tiene en el CRM. El catálogo trae su `foto`
+  (nombre del archivo) y la imagen pasa por el intermediario
+  (`/tienda/mi-cuenta/api/tienda/foto/<archivo>`), así que sale en la tienda
+  sola en cuanto se sube al CRM. Sin foto, la de su categoría.
 - Lee `tienda/catalogo.json`. Hoy trae **productos de muestra**; en la fase 2 lo
   publica el CRM cada noche con las 80 referencias marcadas «Se vende en línea».
 - Forma del archivo: `domicilio` (`tarifa`, `gratis_desde`), `whatsapp`,

@@ -36,10 +36,15 @@ function leerGalleta(request) {
   return '';
 }
 
-function privada(respuesta) {
+/* Fotos de producto que manda el CRM: su nombre cambia con cada foto, así que
+   el navegador las puede guardar (solo él: siguen detrás del candado). */
+const FOTOS = '/tienda/mi-cuenta/api/tienda/foto/';
+
+function privada(respuesta, ruta) {
   const r = new Response(respuesta.body, respuesta);
   r.headers.set('X-Robots-Tag', 'noindex, nofollow');
-  r.headers.set('Cache-Control', 'private, no-store');
+  const guardable = ruta.startsWith(FOTOS) && respuesta.status === 200;
+  r.headers.set('Cache-Control', guardable ? 'private, max-age=2592000, immutable' : 'private, no-store');
   return r;
 }
 
@@ -124,7 +129,7 @@ export async function onRequest({ request, next }) {
 
   const galleta = leerGalleta(request);
   if (galleta && iguales(await sha256(galleta), HUELLA_GALLETA)) {
-    return privada(await next());
+    return privada(await next(), url.pathname);
   }
   return pantallaClave(false, 401);
 }
