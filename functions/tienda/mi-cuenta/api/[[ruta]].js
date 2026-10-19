@@ -16,6 +16,8 @@
    - También lleva el pedido de la tienda (tienda/pedido…): el CRM lo recibe
      «Por confirmar»; la página guarda el código y el secreto del pedido y
      manda el secreto en X-Pedido-Secreto para ver en qué va.
+   - Y la foto de cada producto de la tienda (tienda/foto/<archivo>): el CRM
+     solo entrega la de lo que se vende allá; aquí pasa tal cual, como imagen.
 
    Variables de Cloudflare Pages:
      PORTAL_CLAVE  (secreto, obligatorio)
@@ -41,6 +43,8 @@ const RUTAS = [
   [/^datos$/, 'POST'],
   /* Catálogo real del CRM: precio y si hay o no (nunca cuántas) */
   [/^tienda\/catalogo$/, 'GET'],
+  /* Foto del producto: el nombre lo pone el CRM y cambia con cada foto */
+  [/^tienda\/foto\/[0-9a-f]{32}\.(?:png|jpe?g|gif|webp)$/, 'GET'],
   /* Pedido de la tienda: crear, elegir pago y ver en qué va (con su secreto) */
   [/^tienda\/pedido$/, 'POST'],
   [/^tienda\/pedido\/PE-[A-Z2-9]{5}$/, 'GET'],
@@ -102,7 +106,7 @@ export async function onRequest({ request, env, params }) {
   const cabeceras = {
     'X-Portal-Clave': env.PORTAL_CLAVE,
     'X-Cliente-IP': request.headers.get('CF-Connecting-IP') || '',
-    Accept: 'application/json, application/pdf',
+    Accept: 'application/json, application/pdf, image/*',
   };
   const token = leerGalleta(request, GALLETA);
   if (token) cabeceras['X-Cuenta-Token'] = token;
@@ -126,6 +130,22 @@ export async function onRequest({ request, env, params }) {
     });
   } catch (e) {
     return json({ ok: false, error: NO_RESPONDE }, 502);
+  }
+
+  /* La foto pasa tal cual; si el CRM no la da, no existe */
+  if (ruta.startsWith('tienda/foto/')) {
+    const tipo = respuesta.headers.get('Content-Type') || '';
+    if (!respuesta.ok || !tipo.startsWith('image/')) return json({ ok: false, error: 'No existe.' }, 404);
+    return new Response(respuesta.body, {
+      status: 200,
+      headers: {
+        'Content-Type': tipo,
+        /* Privada mientras la tienda tenga candado; el nombre nunca se repite */
+        'Cache-Control': 'private, max-age=2592000, immutable',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    });
   }
 
   /* El recibo pasa tal cual (PDF) */
