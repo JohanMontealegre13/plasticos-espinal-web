@@ -165,7 +165,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 @media (max-width:860px){.pie .envolver{grid-template-columns:minmax(0,1fr)}}
 .pie img{height:42px;width:auto;margin-bottom:10px}
 .pie h4{margin:0 0 8px;color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
-.pie a{color:#fff;text-decoration:none;display:block;padding:2px 0}
+.pie a{color:#fff;text-decoration:none;display:flex;align-items:center;min-height:44px;padding:2px 0}
+/* quién vende (Ley 1480, art. 50): una línea al pie de todo el ancho; se pinta desde tienda/catalogo.json y sin datos queda escondida */
+.pie .vendedor{grid-column:1/-1;padding-top:16px;border-top:1px solid rgba(201,210,242,.25);font-size:14px;overflow-wrap:anywhere}
+/* las páginas de texto no tienen la barra de la canasta: el pie no necesita el hueco de abajo */
+.texto-legal ~ .pie .envolver{padding-bottom:34px}
 
 /* barra de canasta en celular */
 .barra{display:none}
@@ -228,11 +232,18 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .datos .check input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--verde)}
 .errores{background:#fdecea;color:#8f1a10;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600}
 .cierre{display:grid;gap:8px;position:sticky;bottom:-20px;background:#fff;padding:10px 0 4px;border-top:1px solid var(--linea)}
+.cierre .acepta-terminos{font-size:13px;color:var(--texto2);text-align:center}
+.cierre .acepta-terminos a{color:var(--azul);font-weight:700}
 
 /* página de política de datos */
 .texto-legal{max-width:720px;padding-block:28px 64px;display:grid;gap:14px}
 .texto-legal h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,32px)}
 .texto-legal ul{margin:0;padding-left:20px;display:grid;gap:4px}
+/* términos: quién vende y las vías para reclamar son listas de datos, no de viñetas; cada renglón se toca con el dedo */
+.texto-legal .vende,.texto-legal .vias{list-style:none;padding-left:0;overflow-wrap:anywhere}
+.texto-legal .vende-nombre{font-weight:800}
+.texto-legal .vias li{display:flex;align-items:center;min-height:44px}
+.texto-legal .volver-tienda{display:inline-flex;align-items:center;min-height:44px}
 
 /* aviso del pedido en curso: cinta azul pegada bajo la cabecera.
    Arriba y no abajo: en el iPhone nada blanco toca el borde de abajo
