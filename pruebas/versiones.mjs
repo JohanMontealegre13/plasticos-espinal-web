@@ -6,7 +6,8 @@ import { execFileSync } from 'node:child_process';
 import { RAIZ, paginas, leer } from './lib.mjs';
 
 const base = process.argv[2] || process.env.BASE_REF || 'origin/main';
-const git = (/** @type {string[]} */ ...args) => execFileSync('git', args, { cwd: RAIZ, encoding: 'utf8' });
+/* stderr a ningún lado: «git show» de un archivo nuevo (que no está en la base) escribe «fatal: …» aunque eso es lo esperado */
+const git = (/** @type {string[]} */ ...args) => execFileSync('git', args, { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 
 /** @param {string} ruta */
 function enBase(ruta) {
