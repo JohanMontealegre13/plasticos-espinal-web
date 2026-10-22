@@ -1,0 +1,103 @@
+{
+  "ok": true,
+  "domicilio": {
+    "tarifa": 4000,
+    "gratis_desde": 60000
+  },
+  "categorias": [
+    {
+      "id": "c1",
+      "nombre": "Contenedores"
+    },
+    {
+      "id": "c2",
+      "nombre": "Vasos y platos"
+    },
+    {
+      "id": "c3",
+      "nombre": "Aseo"
+    }
+  ],
+  "productos": [
+    {
+      "id": 141,
+      "nombre": "Contenedor icopor J1 x25 und",
+      "categoria": "c1",
+      "precio": 9800,
+      "disponible": true,
+      "destacado": true,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 131,
+      "nombre": "Tenedor plástico x100 und",
+      "categoria": "c1",
+      "precio": 6200,
+      "disponible": true,
+      "destacado": true,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 191,
+      "nombre": "Servilleta 25x25 x300 und",
+      "categoria": "c3",
+      "precio": 9200,
+      "disponible": true,
+      "destacado": false,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 210,
+      "nombre": "Vaso 7 oz blanco Wau x50 und",
+      "categoria": "c2",
+      "precio": 5400,
+      "disponible": true,
+      "destacado": true,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 305,
+      "nombre": "Bolsa kraft #6 x100 und",
+      "categoria": "c1",
+      "precio": 18900,
+      "disponible": true,
+      "destacado": false,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 398,
+      "nombre": "Plato 23 cm hondo Darnel x20 und",
+      "categoria": "c2",
+      "precio": 7300,
+      "disponible": false,
+      "destacado": false,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 228,
+      "nombre": "Pitillo flexible x100 und",
+      "categoria": "c2",
+      "precio": 3100,
+      "disponible": true,
+      "destacado": false,
+      "foto": "",
+      "fotos": []
+    },
+    {
+      "id": 520,
+      "nombre": "Detergente en polvo 1 kg",
+      "categoria": "c3",
+      "precio": 12500,
+      "disponible": true,
+      "destacado": false,
+      "foto": "",
+      "fotos": []
+    }
+  ]
+}
