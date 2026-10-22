@@ -2,7 +2,7 @@
    datos de tienda/catalogo.json, la página de términos tiene sus nueve secciones y el formulario de entrega
    avisa que pedir es aceptarlos. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, sitioDe, vigilar } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const ANA = { nombre: 'Ana Prueba', documento: 'NIT 900.000.000-1', direccion: 'Calle 7 #5-35', telefono: '318 355 5246', correo: 'hola@ejemplo.co' };
@@ -12,18 +12,15 @@ const A_MEDIAS = { nombre: '', documento: '', direccion: 'Carrera 9 #1-2, Barrio
 /** El texto de respaldo que trae la página de términos (el mismo de la política de datos) */
 const RESPALDO_DIRECCION = 'Calle 7 #5-35, Centro, El Espinal, Tolima';
 
-/** Cambia el `vendedor` de tienda/catalogo.json por el de la prueba (o lo quita con `null`). */
-async function vendedorDe(/** @type {import('@playwright/test').Page} */ page, /** @type {object | null} */ vendedor) {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const j = JSON.parse(await (await r.fetch()).text());
-    if (vendedor === null) delete j.vendedor; else j.vendedor = vendedor;
-    await r.fulfill({ json: j });
-  });
-}
+/** Pone en tienda/catalogo.json el `vendedor` de la prueba (o lo quita con `null`): para abrirTienda({ sitio }) o sitioDe. */
+const conVendedor = (/** @type {object | null} */ vendedor) => (/** @type {any} */ sitio) => {
+  if (vendedor === null) delete sitio.vendedor; else sitio.vendedor = vendedor;
+};
+/** Para las páginas que no son la tienda (términos, política de datos). */
+const vendedorDe = (/** @type {import('@playwright/test').Page} */ page, /** @type {object | null} */ vendedor) => sitioDe(page, conVendedor(vendedor));
 
 test('el pie dice quién vende con los datos de catalogo.json', async ({ page }) => {
-  await vendedorDe(page, ANA);
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: conVendedor(ANA) });
   await expect(page.locator('.pie [data-vendedor-linea]')).toHaveText(LINEA_ANA);
   await page.locator('.pie').getByRole('link', { name: 'Términos, cambios y retracto' }).click();
   await expect(page.locator('[data-vendedor="nombre"]')).toHaveText('Ana Prueba');
@@ -31,8 +28,7 @@ test('el pie dice quién vende con los datos de catalogo.json', async ({ page })
 
 test('sin el nombre del vendedor el pie no muestra una línea a medias', async ({ page }) => {
   const v = vigilar(page);
-  await vendedorDe(page, A_MEDIAS);        /* sin nombre no hay «Vende: …», aunque haya dirección y teléfono */
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: conVendedor(A_MEDIAS) });   /* sin nombre no hay «Vende: …», aunque haya dirección y teléfono */
   await expect(page.locator('.pie [data-vendedor-linea]')).toBeHidden();
   await expect(page.locator('.pie [data-vendedor-linea]')).toHaveText('');
   await expect(page.locator('.pie').getByRole('link', { name: 'Términos, cambios y retracto' })).toBeVisible();
@@ -179,8 +175,7 @@ test('los términos caben en la pantalla (sin barra de lado) y todo lo que se to
 });
 
 test('la línea larga de quién vende cabe en el pie del celular', async ({ page }) => {
-  await vendedorDe(page, { ...ANA, nombre: 'Comercializadora de Plásticos y Desechables Espinal S.A.S.', direccion: 'Calle 7 #5-35, Centro, El Espinal, Tolima', correo: 'reclamos.servicio.al.cliente.tienda.en.linea@plasticosespinal.com' });
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: conVendedor({ ...ANA, nombre: 'Comercializadora de Plásticos y Desechables Espinal S.A.S.', direccion: 'Calle 7 #5-35, Centro, El Espinal, Tolima', correo: 'reclamos.servicio.al.cliente.tienda.en.linea@plasticosespinal.com' }) });
   await expect(page.locator('.pie [data-vendedor-linea]')).toBeVisible();
   const ancho = await page.evaluate(() => ({ total: document.documentElement.scrollWidth, visible: document.documentElement.clientWidth }));
   expect(ancho.total).toBeLessThanOrEqual(ancho.visible);

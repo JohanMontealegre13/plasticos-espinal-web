@@ -1,5 +1,6 @@
 /* Buscador de la tienda: entiende plurales, sinónimos y errores de dedo; ordena la vitrina;
-   y si no hay nada, ofrece pedirlo por WhatsApp con lo que la persona escribió. */
+   y si no hay nada, ofrece pedirlo por WhatsApp con lo que la persona escribió.
+   Los sinónimos y el WhatsApp son los congelados de SITIO_FIJO (ayudas.js), no los de tienda/catalogo.json. */
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { abrirTienda, vigilar } from './ayudas.js';
@@ -45,11 +46,7 @@ test('el enlace de WhatsApp lleva lo escrito tal cual, sin espacios sobrantes, y
 });
 
 test('el número del enlace sale de catalogo.json y no del código', async ({ page }) => {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const sitio = await (await r.fetch()).json();
-    await r.fulfill({ json: { ...sitio, whatsapp: '573001112233' } });
-  });
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: (sitio) => { sitio.whatsapp = '573001112233'; } });
   await page.locator('#q').fill('manguera');
   await expect(page.locator('#pedirloWa')).toHaveAttribute('href', 'https://wa.me/573001112233?text=' + encodeURIComponent('Hola, busco: manguera'));
 });

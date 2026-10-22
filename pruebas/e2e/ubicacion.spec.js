@@ -322,35 +322,20 @@ test('sin GPS en el navegador no sale el botón y el pedido sigue igual', async 
 });
 
 test('si "entrega" falta en catalogo.json no sale el botón', async ({ page }) => {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const sitio = await (await r.fetch()).json();
-    delete sitio.entrega;
-    await r.fulfill({ json: sitio });
-  });
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: (sitio) => { delete sitio.entrega; } });
   await hastaLosDatos(page);
   await expect(page.locator('#ubicar')).toBeHidden();
 });
 
 test('si "entrega" viene dañada no sale el botón', async ({ page }) => {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const sitio = await (await r.fetch()).json();
-    sitio.entrega = { tienda: { lat: 'aquí', lng: null }, radio_km: 'cerca' };
-    await r.fulfill({ json: sitio });
-  });
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: (sitio) => { sitio.entrega = { tienda: { lat: 'aquí', lng: null }, radio_km: 'cerca' }; } });
   await hastaLosDatos(page);
   await expect(page.locator('#ubicar')).toBeHidden();
 });
 
 test('el radio sale de catalogo.json: con un radio de 1 km, un punto a 1,5 km queda fuera', async ({ page }) => {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const sitio = await (await r.fetch()).json();
-    sitio.entrega.radio_km = 1;
-    await r.fulfill({ json: sitio });
-  });
   await gpsFalso(page, [{ lat: 4.1525081 + 0.0135, lng: -74.8828245 }]);   /* ~1,5 km al norte de la tienda */
-  await abrirTienda(page);
+  await abrirTienda(page, { sitio: (sitio) => { sitio.entrega.radio_km = 1; } });
   await hastaLosDatos(page);
   await page.locator('#ubicar').click();
   await expect(page.locator('#ubicado')).toHaveText(FUERA);

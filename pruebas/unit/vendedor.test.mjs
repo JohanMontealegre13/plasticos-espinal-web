@@ -116,10 +116,7 @@ test('un documento sin querySelectorAll tampoco rompe', () => {
 });
 
 /* ---------- datos y páginas ---------- */
-test('catalogo.json trae los cinco campos del vendedor como texto', () => {
-  const v = JSON.parse(leer('tienda/catalogo.json')).vendedor;
-  for (const k of ['nombre', 'documento', 'direccion', 'telefono', 'correo']) assert.equal(typeof v[k], 'string', k);
-});
+/* Que tienda/catalogo.json traiga los cinco campos del vendedor como texto lo revisa catalogo.test.mjs */
 test('los términos nombran el retracto de 5 días hábiles y no nombran Chicoral', () => {
   const t = leer('tienda/terminos/index.html');
   assert.match(t, /retracto/i); assert.match(t, /5 días hábiles/); assert.doesNotMatch(t, /Chicoral/i);

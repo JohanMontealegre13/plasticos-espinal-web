@@ -1,4 +1,5 @@
-/* Hora de llegada: la franja de arriba y la canasta dicen cuándo llega según el horario. */
+/* Hora de llegada: la franja de arriba y la canasta dicen cuándo llega según el horario
+   (el congelado de SITIO_FIJO, no el de tienda/catalogo.json: ver ayudas.js). */
 import { test, expect } from '@playwright/test';
 import { abrirTienda, vigilar } from './ayudas.js';
 
@@ -27,12 +28,7 @@ test('la franja sigue la hora de Colombia aunque el equipo esté en otra zona', 
 });
 
 test('si el horario falta queda el texto de siempre', async ({ page }) => {
-  await page.route('**/tienda/catalogo.json', async (r) => {
-    const sitio = await (await r.fetch()).json();
-    delete sitio.horario;
-    await r.fulfill({ json: sitio });
-  });
-  await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00' });
+  await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00', sitio: (sitio) => { delete sitio.horario; } });
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Domicilio en El Espinal en menos de 1 hora');
   await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await page.locator('.btn-canasta').click();

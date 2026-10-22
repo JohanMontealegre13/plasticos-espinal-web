@@ -1,10 +1,12 @@
-/* Hora de llegada de un pedido hecho ahora, según el horario de tienda/catalogo.json. */
+/* Hora de llegada de un pedido hecho ahora, según el horario de tienda/catalogo.json.
+   Las pruebas usan una copia congelada del horario (fixtures/horario.json): Johan puede cambiar el de
+   verdad sin que se pongan rojas. Que el de verdad esté bien escrito lo revisa catalogo.test.mjs. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cargarPE, leer } from '../lib.mjs';
 
 const { llegada } = cargarPE(['tienda/llegada.js']);
-const H = JSON.parse(leer('tienda/catalogo.json')).horario;
+const H = JSON.parse(leer('pruebas/unit/fixtures/horario.json'));
 const en = (/** @type {string} */ iso) => llegada(new Date(iso), H);
 
 test('jueves 10:00 llega hoy a las 11:00', () => {
