@@ -10,15 +10,16 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=9">
-  <script src="/tienda/tienda.js?v=11" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=10">
+  <script src="/tienda/llegada.js?v=1" defer></script>
+  <script src="/tienda/tienda.js?v=12" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
 <body>
 <div class="proto"><div class="envolver"><span>Versión de prueba · solo con contraseña · precios de muestra</span><a class="url" href="/tienda/salir">Salir</a></div></div>
 <div class="franja"><div class="envolver">
-  <span>🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
+  <span id="franjaLlegada">🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
   <span>Gratis desde <b>$60.000</b> en productos</span>
   <span>Pague con <b>Bre-B</b> o efectivo</span>
 </div></div>
@@ -101,6 +102,7 @@
   <p class="vacio" id="vacio">Todavía no ha agregado productos.</p>
   <ul class="items" id="items"></ul>
   <div class="resumen" id="resumen">
+    <p class="llegada" id="llegada" hidden></p>
     <div class="fila"><span>Domicilio <small id="falta"></small></span><b id="dom">$0</b></div>
     <div class="fila total"><span>Total</span><span id="tot">$0</span></div>
     <button class="enviar" id="seguir" type="button" disabled>Pedir ya</button>

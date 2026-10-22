@@ -1,1 +1,98 @@
-{"generado":"2026-10-07T10:00:00-05:00","whatsapp":"573183555246","pago":{"qr":"/tienda/img/qr-breb-prueba.png","llave":"PRUEBA (no pague aquí)"},"categorias":[{"id":"platos","nombre":"Platos","imagen":"/img/productos/platos.webp"},{"id":"vasos","nombre":"Vasos","imagen":"/img/productos/vasos.webp"},{"id":"bolsas","nombre":"Bolsas","imagen":"/img/productos/bolsas.webp"},{"id":"cubiertos","nombre":"Cubiertos","imagen":"/img/productos/cubiertos.webp"},{"id":"contenedores","nombre":"Contenedores","imagen":"/img/productos/contenedores.webp"},{"id":"tapas","nombre":"Tapas y domos","imagen":"/img/productos/tapas.webp"},{"id":"empaques","nombre":"Empaques","imagen":"/img/productos/empaques.webp"},{"id":"pitillos","nombre":"Pitillos","imagen":"/img/productos/pitillos.webp"},{"id":"bandejas","nombre":"Bandejas","imagen":"/img/productos/bandejas.webp"},{"id":"aseo","nombre":"Servilletas y aseo","imagen":"/img/productos/servilletas.webp"}],"nota":"Los productos, precios, disponibilidad y domicilio salen del CRM. Aquí solo va lo de la página: WhatsApp, pago y fotos por categoría."}
+{
+  "generado": "2026-10-07T10:00:00-05:00",
+  "whatsapp": "573183555246",
+  "pago": {
+    "qr": "/tienda/img/qr-breb-prueba.png",
+    "llave": "PRUEBA (no pague aquí)"
+  },
+  "categorias": [
+    {
+      "id": "platos",
+      "nombre": "Platos",
+      "imagen": "/img/productos/platos.webp"
+    },
+    {
+      "id": "vasos",
+      "nombre": "Vasos",
+      "imagen": "/img/productos/vasos.webp"
+    },
+    {
+      "id": "bolsas",
+      "nombre": "Bolsas",
+      "imagen": "/img/productos/bolsas.webp"
+    },
+    {
+      "id": "cubiertos",
+      "nombre": "Cubiertos",
+      "imagen": "/img/productos/cubiertos.webp"
+    },
+    {
+      "id": "contenedores",
+      "nombre": "Contenedores",
+      "imagen": "/img/productos/contenedores.webp"
+    },
+    {
+      "id": "tapas",
+      "nombre": "Tapas y domos",
+      "imagen": "/img/productos/tapas.webp"
+    },
+    {
+      "id": "empaques",
+      "nombre": "Empaques",
+      "imagen": "/img/productos/empaques.webp"
+    },
+    {
+      "id": "pitillos",
+      "nombre": "Pitillos",
+      "imagen": "/img/productos/pitillos.webp"
+    },
+    {
+      "id": "bandejas",
+      "nombre": "Bandejas",
+      "imagen": "/img/productos/bandejas.webp"
+    },
+    {
+      "id": "aseo",
+      "nombre": "Servilletas y aseo",
+      "imagen": "/img/productos/servilletas.webp"
+    }
+  ],
+  "nota": "Los productos, precios, disponibilidad y domicilio salen del CRM. Aquí solo va lo de la página: WhatsApp, pago y fotos por categoría.",
+  "horario": {
+    "alistar_min": 60,
+    "dias": {
+      "domingo": [["08:00", "13:00"]],
+      "lunes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "martes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "miercoles": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "jueves": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "viernes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "sabado": [["08:00", "12:30"], ["14:00", "18:30"]]
+    },
+    "festivo": "domingo",
+    "festivos": [
+      "2026-11-02",
+      "2026-11-16",
+      "2026-12-08",
+      "2026-12-25",
+      "2027-01-01",
+      "2027-01-11",
+      "2027-03-22",
+      "2027-03-25",
+      "2027-03-26",
+      "2027-05-01",
+      "2027-05-10",
+      "2027-05-31",
+      "2027-06-07",
+      "2027-07-05",
+      "2027-07-20",
+      "2027-08-07",
+      "2027-08-16",
+      "2027-10-18",
+      "2027-11-01",
+      "2027-11-15",
+      "2027-12-08",
+      "2027-12-25"
+    ]
+  }
+}

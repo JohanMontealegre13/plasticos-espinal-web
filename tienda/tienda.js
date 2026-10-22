@@ -1,6 +1,6 @@
 /* Plásticos Espinal · tienda en línea (versión de prueba, detrás de contraseña).
    Los productos salen del CRM (precio y si hay o no; nunca cuántas quedan).
-   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp y fotos.
+   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos y horario.
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
@@ -30,6 +30,7 @@
   var filtro = { cat: '', q: '', todo: false };
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
+  var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
 
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
@@ -75,6 +76,25 @@
       Array.prototype.forEach.call(puntos.children, function (b, k) { b.setAttribute('aria-current', String(k === n)); });
     }, { passive: true });
     f.append(tira, puntos);
+  }
+
+  /* ---------- Hora de llegada (PE.llegada, según el horario de tienda/catalogo.json) ---------- */
+  /* La franja de arriba y la canasta dicen cuándo llega un pedido hecho ahora. Sin horario
+     (o si llegada.js no cargó, o no abre en 14 días) queda el texto que trae el HTML. */
+  function pintarLlegada() {
+    var franja = $('franjaLlegada'), nota = $('llegada');
+    var r = cat && cat.horario && window.PE && window.PE.llegada ? window.PE.llegada(new Date(), cat.horario) : null;
+    if (!franjaBase) franjaBase = Array.prototype.map.call(franja.childNodes, function (n) { return n.cloneNode(true); });
+    if (r) {
+      if (franja.textContent !== '🛵 ' + r.texto) franja.textContent = '🛵 ' + r.texto;
+      conHora = true;
+    } else if (conHora) {
+      franja.textContent = '';
+      franjaBase.forEach(function (n) { franja.appendChild(n.cloneNode(true)); });
+      conHora = false;
+    }
+    if (nota.textContent !== (r ? r.texto : '')) nota.textContent = r ? r.texto : '';
+    nota.hidden = !r;
   }
 
   /* ---------- Cuentas ---------- */
@@ -424,6 +444,7 @@
     $('tot2').textContent = pesos(c.t);
     if (vistaActual() === 'canasta') { $('vacio').hidden = !vacia; $('vaciar').hidden = vacia; }
     if (vacia && vistaActual() === 'datos') vista('canasta');
+    pintarLlegada();
   }
 
   /* ---------- Panel ---------- */
@@ -509,7 +530,7 @@
       if (!crm.ok) throw new Error('crm');
       if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
-        domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp,
+        domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp, horario: sitio.horario,
         categorias: crm.categorias.map(function (c) {
           return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, sitio.categorias || []) };
         }),
@@ -532,10 +553,11 @@
       pintarCategorias();
       eventos();
       pintar();
-      pintarCanasta();
+      pintarCanasta();   /* también pinta la hora de llegada */
       vista('canasta');
       pintarAviso();
       vigilar();
+      setInterval(pintarLlegada, 60000);   /* la hora de llegada corre sola mientras la página está abierta */
     })
     .catch(function (e) {
       document.querySelectorAll('.combo').forEach(function (c) { c.hidden = true; });
