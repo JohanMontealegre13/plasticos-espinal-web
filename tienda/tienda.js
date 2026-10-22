@@ -1,6 +1,7 @@
 /* Plásticos Espinal · tienda en línea (versión de prueba, detrás de contraseña).
    Los productos salen del CRM (precio y si hay o no; nunca cuántas quedan).
-   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos, horario y sinónimos.
+   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos, horario, sinónimos, entrega y
+   quién vende. Todo eso es opcional: si falta, viene mal escrito o no carga, la tienda sigue sin ello.
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
@@ -50,6 +51,14 @@
   function pesos(n) { return '$' + formato.format(Math.round(n)); }
   function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
+  /* Lo que es un extra (hora de llegada, favoritos, ubicación, la ficha de la dirección…) no tumba la tienda:
+     si lanza, se anota en la consola y se sigue con lo demás. Devuelve lo que devuelva fn, o undefined. */
+  function intentar(fn) {
+    try { return fn(); } catch (e) {
+      try { if (window.console && console.warn) console.warn('Tienda: se sigue sin esto:', e); } catch (e2) { /* sin consola */ }
+      return undefined;
+    }
+  }
 
   /* ---------- Guardado en el navegador (si falla, la canasta vive solo en memoria) ---------- */
   function leer() { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { return {}; } }
@@ -96,7 +105,8 @@
      (o si llegada.js no cargó, o no abre en 14 días) queda el texto que trae el HTML. */
   function pintarLlegada() {
     var franja = $('franjaLlegada'), nota = $('llegada');
-    var r = cat && cat.horario && window.PE && window.PE.llegada ? window.PE.llegada(new Date(), cat.horario) : null;
+    var r = cat && cat.horario && window.PE && window.PE.llegada
+      ? intentar(function () { return window.PE.llegada(new Date(), cat.horario); }) || null : null;
     if (!franjaBase) franjaBase = Array.prototype.map.call(franja.childNodes, function (n) { return n.cloneNode(true); });
     if (r) {
       if (franja.textContent !== '🛵 ' + r.texto) franja.textContent = '🛵 ' + r.texto;
@@ -418,10 +428,10 @@
     try { a = window.localStorage; } catch (e) { /* bloqueado: se recuerda solo mientras la página esté abierta */ }
     return { favoritos: PE.guardado(a, CLAVE_FAVORITOS, []), vistos: PE.guardado(a, CLAVE_VISTOS, []), ultimo: PE.guardado(a, CLAVE_ULTIMO, []) };
   }
-  /* Los ids de una lista guardada: solo números enteros, sin repetir */
+  /* Los ids de una lista guardada: solo números enteros, sin repetir (si no se puede leer, ninguno) */
   function idsDe(g) {
-    var visto = {};
-    return g.leer().filter(function (x) {
+    var visto = {}, lista = intentar(function () { return g.leer(); });
+    return (Array.isArray(lista) ? lista : []).filter(function (x) {
       if (typeof x !== 'number' || !(x > 0) || x % 1 !== 0 || visto[x]) return false;
       visto[x] = true;
       return true;
@@ -650,24 +660,30 @@
   }
 
   function enviarPedido(d) {
-    var c = cuentas();
     var lineas = Object.keys(canasta).map(function (id) {
       return { id: Number(id), cantidad: canasta[id] };   /* precio y nombre los pone el CRM */
     });
+    /* El enlace del mapa va primero (ubicacion.js); sin ese módulo, o si falla, van las indicaciones tal cual */
+    var P = window.PE || {};
+    var indicaciones = P.unirIndicaciones ? intentar(function () { return P.unirIndicaciones(enlaceUbicacion, d.extra, MAX_INDICACIONES); }) : d.extra;
+    if (typeof indicaciones !== 'string') indicaciones = d.extra;
     ocupado($('enviar'), true, 'Enviando su pedido…');
     llamar('', 'POST', {
       nombre: d.nombre, tipo: d.tipo, documento: d.documento, celular: d.celular,
-      barrio: d.barrio, direccion: d.direccion,
-      indicaciones: window.PE && window.PE.unirIndicaciones ? window.PE.unirIndicaciones(enlaceUbicacion, d.extra, MAX_INDICACIONES) : d.extra,
+      barrio: d.barrio, direccion: d.direccion, indicaciones: indicaciones,
       lineas: lineas
     }).then(function (r) {
       pedido = r;
       guardarPedido(pedido);
-      recordarUltimo(lineas);   /* para «Pedir lo de la última vez»; solo si el pedido llegó */
-      soltarUbicacion();
-      /* El pedido ya está en la tienda: la canasta queda vacía para la próxima */
-      canasta = {}; guardar(); pintar(); pintarCanasta();
+      /* El pedido ya está en la tienda: la canasta queda vacía para la próxima y lo PRIMERO es el paso de pago.
+         Lo demás es repintar y recordar: si algo de eso falla, el pago ya está a la vista (si no, el cliente
+         vería la canasta vacía sin pago y pediría otra vez). */
+      canasta = {}; guardar();
       pasoPago();
+      intentar(function () { recordarUltimo(lineas); });   /* para «Pedir lo de la última vez»; solo si el pedido llegó */
+      intentar(soltarUbicacion);
+      intentar(pintar);
+      intentar(pintarCanasta);
     }).catch(function (e) {
       $('errores').textContent = e.message; $('errores').hidden = false;
     }).then(function () { ocupado($('enviar'), false); });
@@ -886,10 +902,12 @@
   }
 
   /* ---------- Carga ---------- */
-  /* Foto de la categoría: la del sitio cuyo nombre se parece (Platos, Vasos…) */
+  /* Foto de la categoría: la del sitio cuyo nombre se parece (Platos, Vasos…). Una entrada de catalogo.json
+     sin nombre o sin imagen se salta. */
   function fotoCategoria(nombre, fotos) {
     var n = norm(nombre), hallada = '';
     fotos.forEach(function (f) {
+      if (!f || typeof f.nombre !== 'string' || typeof f.imagen !== 'string') return;
       var clave = norm(f.nombre).split(' ')[0];
       if (!hallada && clave && n.indexOf(clave.replace(/s$/, '')) >= 0) hallada = f.imagen;
     });
@@ -899,16 +917,17 @@
     return fetch(url, { cache: 'no-cache', headers: { Accept: 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
-  Promise.all([json('/tienda/catalogo.json'), json(CATALOGO)])
+  /* Lo de catalogo.json es opcional: si no carga o el JSON está roto, la tienda sigue con {} */
+  Promise.all([json('/tienda/catalogo.json').catch(function () { return {}; }), json(CATALOGO)])
     .then(function (r) {
-      var sitio = r[0], crm = r[1];
+      var sitio = r[0] && typeof r[0] === 'object' && !Array.isArray(r[0]) ? r[0] : {}, crm = r[1];
       if (!crm.ok) throw new Error('crm');
       if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
         domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp, horario: sitio.horario,
         sinonimos: sitio.sinonimos, entrega: sitio.entrega,
         categorias: crm.categorias.map(function (c) {
-          return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, sitio.categorias || []) };
+          return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, Array.isArray(sitio.categorias) ? sitio.categorias : []) };
         }),
         productos: crm.productos
       };
@@ -926,19 +945,20 @@
         if (!ok && caja) caja.hidden = true;
       });
       BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
-      $('ubicarCaja').hidden = !ubicacionDisponible();
-      guardados = abrirGuardados();
+      /* Lo que es un extra va con intentar: si falla, los productos se ven igual (nunca «No pudimos cargar») */
+      $('ubicarCaja').hidden = !intentar(ubicacionDisponible);
+      guardados = intentar(abrirGuardados) || null;
       pintarCategorias();
       eventos();
       eventosFicha();
       pintar();
-      pintarGuardados();   /* favoritos y vistos, solo lo que sigue en la tienda */
-      pintarUltimaVez();
-      pintarCanasta();   /* también pinta la hora de llegada */
+      intentar(pintarGuardados);   /* favoritos y vistos, solo lo que sigue en la tienda */
+      intentar(pintarUltimaVez);
+      pintarCanasta();   /* también pinta la hora de llegada (que se cuida sola) */
       vista('canasta');
       pintarAviso();
       vigilar();
-      fichaDeLaDireccion();   /* un enlace con #p=ID abre esa ficha */
+      intentar(fichaDeLaDireccion);   /* un enlace con #p=ID abre esa ficha */
       setInterval(pintarLlegada, 60000);   /* la hora de llegada corre sola mientras la página está abierta */
     })
     .catch(function (e) {

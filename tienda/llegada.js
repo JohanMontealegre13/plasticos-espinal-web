@@ -28,9 +28,9 @@
   }
 
   /* Tramos abiertos de un día como [[desde, hasta], …] en minutos, en orden.
-     Lo que no se entiende (un tramo roto, un día que no es lista) se ignora. */
+     Lo que no se entiende (un tramo roto, un día o unos festivos que no son lista) se ignora. */
   function tramosDe(horario, fecha, claveDia) {
-    var festivos = horario.festivos || [];
+    var festivos = Array.isArray(horario.festivos) ? horario.festivos : [];
     var esFestivo = festivos.indexOf(fecha) >= 0;
     /* Festivo sin `festivo` en el horario = cerrado ese día */
     var lista = esFestivo ? (horario.festivo ? horario.dias[horario.festivo] : null) : horario.dias[claveDia];

@@ -80,6 +80,14 @@ test('solo mira 14 días adelante', () => {
   assert.equal(llegada(noche, jueves(['2026-10-29'])).fecha, '2026-11-05');   /* justo 14 días adelante */
   assert.equal(llegada(noche, jueves(['2026-10-29', '2026-11-05'])), null);   /* el siguiente ya queda a 21 */
 });
+test('festivos que no son una lista (error al editar a mano) se ignoran, sin romper', () => {
+  const festivo = new Date('2026-11-02T10:00:00-05:00');   /* lunes festivo */
+  const sinFestivos = llegada(festivo, { ...H, festivos: [] });
+  assert.equal(sinFestivos.texto, 'Llega hoy antes de las 11:00 a. m.');   /* lunes normal */
+  for (const festivos of [{}, { '2026-11-02': true }, 2026, true, null, '2026-11-02, 2026-11-16']) {
+    assert.deepEqual(llegada(festivo, { ...H, festivos }), sinFestivos, JSON.stringify(festivos));
+  }
+});
 test('un horario que falta o está mal escrito devuelve null, sin romper', () => {
   const ahora = new Date('2026-10-22T10:00:00-05:00');
   assert.equal(llegada(ahora, undefined), null);
