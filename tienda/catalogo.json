@@ -105,5 +105,9 @@
     "sorbete": ["pitillo"],
     "cubierto": ["tenedor", "cuchara", "cuchillo"],
     "talego": ["bolsa"]
+  },
+  "entrega": {
+    "tienda": { "lat": 4.1525081, "lng": -74.8828245 },
+    "radio_km": 8
   }
 }

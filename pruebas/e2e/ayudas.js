@@ -53,3 +53,18 @@ export async function abrirTienda(page, op = {}) {
   await page.goto(op.ruta || '/tienda/');
   await expect(page.locator('#grilla li').first()).toBeVisible();
 }
+
+/**
+ * Llena los datos de entrega de la canasta (el formulario ya tiene que estar a la vista):
+ * Ana Prueba, CC 1105678901, celular 3001234567, barrio Belén, «Calle 1 # 2-3» y la autorización marcada.
+ * No toca «Indicaciones», para que cada prueba escriba las suyas.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function llenarDatos(page) {
+  await page.locator('#d-nombre').fill('Ana Prueba');
+  await page.locator('#d-doc').fill('1105678901');
+  await page.locator('#d-cel').fill('3001234567');
+  await page.locator('#d-barrio').fill('Belén');
+  await page.locator('#d-dir').fill('Calle 1 # 2-3');
+  await page.locator('#d-acepto').check();
+}

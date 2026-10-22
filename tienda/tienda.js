@@ -7,8 +7,9 @@
    El pedido en curso (código + secreto) queda en este celular. Cada producto tiene
    su ficha (<dialog>) con dirección propia, #p=ID, para compartir. También en este
    celular: favoritos (el corazón), lo visto hace poco y el último pedido enviado,
-   para pedirlo otra vez en un toque (PE.guardado: tienda/guardados.js). Datos de la
-   base: siempre textContent. */
+   para pedirlo otra vez en un toque (PE.guardado: tienda/guardados.js). En los datos de
+   entrega, «Usar mi ubicación actual» suma el punto del GPS si cae en El Espinal
+   (tienda/ubicacion.js). Datos de la base: siempre textContent. */
 (function () {
   'use strict';
 
@@ -21,6 +22,7 @@
   var API = '/tienda/mi-cuenta/api/tienda/pedido';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
+  var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
   /* Barrios de El Espinal para sugerir (lista parcial: el cliente puede escribir otro) */
   var BARRIOS = ['Arkabal', 'Balkanes', 'Belén', 'Betania', 'Betania Campestre', 'Bosques de Roa',
     'Caballero y Góngora', 'Cafasur', 'El Centro', 'Entre Ríos', 'Fátima', 'Isaías Olivar',
@@ -40,6 +42,8 @@
   var ficha = { id: null, empujada: false, desde: null, alto: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial, quién la abrió y dónde estaba la vitrina al abrirla */
   var guardados = null;           /* { favoritos, vistos, ultimo }; null si guardados.js no cargó (sin corazones ni secciones) */
   var buscando = false;           /* hay algo escrito en el buscador: favoritos y vistos se esconden */
+  var enlaceUbicacion = '';       /* enlace del mapa de ESTE pedido; solo en memoria, nunca en pe-cliente-v1 */
+  var busquedaGps = 0;            /* número de la búsqueda de ubicación en curso; subirlo descarta la respuesta que llegue tarde */
 
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
@@ -579,6 +583,53 @@
     if (d.nombre) $('enviar').focus(); else $('d-nombre').focus();
   }
 
+  /* ---------- Ubicación de entrega (PE.dentroDeEntrega, tienda/ubicacion.js) ---------- */
+  /* «Usar mi ubicación actual» adjunta el punto del GPS a las indicaciones, solo si cae dentro del
+     radio de catalogo.json ("entrega"). Sin GPS en el navegador, sin "entrega" o sin ubicacion.js el
+     botón no sale y todo sigue como siempre. Si el GPS se niega o no responde, se puede pedir igual.
+     Un resultado nuevo (error, fuera del radio) borra el enlace anterior: nunca viaja un punto viejo. */
+  function ubicacionDisponible() {
+    var P = window.PE, g = navigator.geolocation;
+    return !!(P && P.entregaValida && P.dentroDeEntrega && P.enlaceMapa && P.entregaValida(cat && cat.entrega) &&
+      g && typeof g.getCurrentPosition === 'function');
+  }
+  function pintarUbicado(texto, estado) {
+    $('ubicado').textContent = texto;
+    if (estado) $('ubicado').dataset.estado = estado; else delete $('ubicado').dataset.estado;
+  }
+  function tomarUbicacion() {
+    var boton = $('ubicar'), mia = ++busquedaGps, teniaFoco = document.activeElement === boton;
+    enlaceUbicacion = '';
+    boton.disabled = true;
+    pintarUbicado('Buscando su ubicación…', 'buscando');
+    function terminar(texto, estado) {
+      pintarUbicado(texto, estado);
+      boton.disabled = false;
+      if (teniaFoco && (!document.activeElement || document.activeElement === document.body)) boton.focus();
+    }
+    function noPudo() {
+      if (mia === busquedaGps) terminar('No pudimos tomar su ubicación. Escriba la dirección y siga.', 'error');
+    }
+    try {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        if (mia !== busquedaGps) return;   /* el pedido ya salió: esta respuesta llegó tarde */
+        var c = pos && pos.coords, enlace = c ? window.PE.enlaceMapa(c.latitude, c.longitude) : '';
+        if (!enlace) return noPudo();
+        if (!window.PE.dentroDeEntrega(c.latitude, c.longitude, cat.entrega)) {
+          return terminar('Esa ubicación queda fuera de El Espinal. Escriba la dirección donde lo recibe.', 'fuera');
+        }
+        enlaceUbicacion = enlace;
+        terminar('Ubicación lista ✓', 'ok');
+      }, noPudo, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    } catch (e) { noPudo(); }
+  }
+  /* El pedido llegó a la tienda: la ubicación era de ese pedido */
+  function soltarUbicacion() {
+    enlaceUbicacion = ''; busquedaGps++;
+    pintarUbicado('');
+    $('ubicar').disabled = false;
+  }
+
   /* ---------- Hablar con la tienda ---------- */
   function llamar(ruta, metodo, cuerpo) {
     var cab = { Accept: 'application/json' };
@@ -606,12 +657,14 @@
     ocupado($('enviar'), true, 'Enviando su pedido…');
     llamar('', 'POST', {
       nombre: d.nombre, tipo: d.tipo, documento: d.documento, celular: d.celular,
-      barrio: d.barrio, direccion: d.direccion, indicaciones: d.extra,
+      barrio: d.barrio, direccion: d.direccion,
+      indicaciones: window.PE && window.PE.unirIndicaciones ? window.PE.unirIndicaciones(enlaceUbicacion, d.extra, MAX_INDICACIONES) : d.extra,
       lineas: lineas
     }).then(function (r) {
       pedido = r;
       guardarPedido(pedido);
       recordarUltimo(lineas);   /* para «Pedir lo de la última vez»; solo si el pedido llegó */
+      soltarUbicacion();
       /* El pedido ya está en la tienda: la canasta queda vacía para la próxima */
       canasta = {}; guardar(); pintar(); pintarCanasta();
       pasoPago();
@@ -805,6 +858,7 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
     $('vaciar').addEventListener('click', function () { canasta = {}; guardar(); pintar(); pintarCanasta(); cerrar(); });
     $('seguir').addEventListener('click', pasoDatos);
+    $('ubicar').addEventListener('click', tomarUbicacion);
     $('volver').addEventListener('click', function () { vista('canasta'); });
     $('datos').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -852,7 +906,7 @@
       if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
         domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp, horario: sitio.horario,
-        sinonimos: sitio.sinonimos,
+        sinonimos: sitio.sinonimos, entrega: sitio.entrega,
         categorias: crm.categorias.map(function (c) {
           return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, sitio.categorias || []) };
         }),
@@ -872,6 +926,7 @@
         if (!ok && caja) caja.hidden = true;
       });
       BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
+      $('ubicarCaja').hidden = !ubicacionDisponible();
       guardados = abrirGuardados();
       pintarCategorias();
       eventos();

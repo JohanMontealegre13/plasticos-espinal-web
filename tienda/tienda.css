@@ -434,3 +434,15 @@ html.con-ficha{overflow:hidden}
 .ultima-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800}
 .ultima-btn:hover{background:var(--verde);color:#fff}
 #noEstan{margin:10px 16px 0;padding:10px 12px;border:1px solid #ecd08a;border-radius:12px;background:#fff6dd;color:#5a4200;font-size:14px;font-weight:600}
+
+/* ubicación de entrega con el GPS: el botón, su resultado (#ubicado, role=status) y para qué se usa.
+   #ubicado queda en el diseño aunque esté vacío, para que el lector de pantalla lo anuncie al cambiar */
+.ubicar{display:grid;justify-items:start}
+.ubicar-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--azul);font-weight:800;font-size:15px}
+@media (hover:hover){.ubicar-btn:hover:not(:disabled){background:var(--azul);color:#fff}}   /* en el celular el toque dejaría el botón relleno */
+.ubicar-btn:disabled{border-color:var(--linea);background:var(--suave);color:var(--texto2);cursor:progress}
+.ubicar small{margin-top:6px}
+.datos #ubicado{margin-top:0;font-size:14px;font-weight:700}
+.datos #ubicado:not(:empty){margin-top:6px}
+.datos #ubicado[data-estado="ok"]{color:var(--verde)}
+.datos #ubicado[data-estado="fuera"],.datos #ubicado[data-estado="error"]{color:#8f1a10}

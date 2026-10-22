@@ -10,11 +10,12 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=13">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=14">
   <script src="/tienda/llegada.js?v=1" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
   <script src="/tienda/guardados.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=15" defer></script>
+  <script src="/tienda/ubicacion.js?v=1" defer></script>
+  <script src="/tienda/tienda.js?v=16" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -175,6 +176,12 @@
       <label for="d-barrio">Barrio (El Espinal)<input id="d-barrio" name="barrio" list="barrios" required maxlength="80" autocomplete="off" placeholder="Escriba y elija su barrio"></label>
       <datalist id="barrios"></datalist>
       <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="address-line1" required maxlength="160" placeholder="Calle, número y casa o local"></label>
+      <!-- Ubicación con el GPS (solo se muestra si el navegador la da y catalogo.json trae "entrega") -->
+      <div class="ubicar" id="ubicarCaja" hidden>
+        <button class="ubicar-btn" id="ubicar" type="button">📍 Usar mi ubicación actual</button>
+        <small id="ubicado" role="status"></small>
+        <small>Solo la usamos para llevarle el pedido.</small>
+      </div>
       <label for="d-extra">Indicaciones (opcional)<textarea id="d-extra" name="extra" rows="2" maxlength="300" placeholder="Algo que ayude a encontrarlo"></textarea></label>
     </fieldset>
     <label class="check" for="d-acepto"><input id="d-acepto" name="acepto" type="checkbox" required> <span>Autorizo a Plásticos Espinal a usar mis datos para entregar mis pedidos, según la <a href="/tienda/privacidad/" target="_blank" rel="noopener">política de datos</a>.</span></label>
