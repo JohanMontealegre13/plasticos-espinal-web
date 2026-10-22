@@ -5,7 +5,7 @@
 
   /* 1. Año del pie */
   var anio = document.getElementById('anio');
-  if (anio) anio.textContent = new Date().getFullYear();
+  if (anio) anio.textContent = String(new Date().getFullYear());
 
   /* 2. Sombra de la cabecera al desplazarse */
   var cabecera = document.querySelector('.cabecera');

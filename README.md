@@ -48,13 +48,43 @@ Luego abre <http://localhost:5500/>.
 
 ## Publicar un cambio
 
-1. Edita los archivos.
-2. Si tocaste `css/estilos.css` o `js/principal.js`, sube su `?v=N`
-   (hoy `?v=10`): el CSS en `index.html` y `404.html`, el JS en
-   `index.html`. `_headers` los guarda 7 días en caché; sin subir el número,
-   los visitantes siguen viendo la versión vieja.
-3. `git add` + `git commit` + `git push origin main` — Cloudflare Pages
-   despliega solo en ~1 minuto.
+1. Edita los archivos **en una rama**, no en `main`: lo que llega a `main`
+   sale al aire en ~1 minuto (Cloudflare Pages).
+2. Si tocaste un CSS o JS, sube su `?v=N` en todas las páginas que lo piden
+   (`css/estilos.css` en `index.html` y `404.html`; `js/principal.js` en
+   `index.html`; `tienda/tienda.css` y `tienda/tienda.js` en
+   `tienda/index.html`). `_headers` los guarda 7 días en caché; sin subir el
+   número, los visitantes siguen viendo la versión vieja. La revisión
+   automática lo exige.
+3. Si cambias el script embebido de `index.html`, recalcula su huella
+   `sha256` en la CSP de `index.html`, `404.html`, `_headers` y `.htaccess`
+   (la prueba que falla dice cuál es la huella nueva).
+4. Corre la revisión (abajo), abre un PR y fusiona cuando salga en verde.
+
+## Pruebas y revisión automática
+
+Viven en `pruebas/` (no en la raíz a propósito: un `package.json` en la raíz
+haría que Cloudflare instale dependencias y podría publicar `node_modules`).
+
+```bash
+cd pruebas
+npm ci                 # la primera vez
+npm run check          # lint + tipos + pruebas rápidas + navegador
+node versiones.mjs     # ¿subí el ?v= de lo que cambié? (frente a origin/main)
+npm run mutaciones     # rompe a propósito 30 partes críticas en una copia y
+                       # comprueba que alguna prueba lo atrapa
+```
+
+| Qué | Dónde |
+|---|---|
+| Enlaces, CSP, caché, regresiones de contenido | `pruebas/unit/sitio.test.mjs` |
+| Contrato del catálogo que exportará el CRM | `pruebas/unit/catalogo.test.mjs` |
+| Candado de la tienda (contraseña, galleta, noindex) | `pruebas/unit/candado.test.mjs` |
+| Canasta, domicilio, mensaje de WhatsApp, búsqueda | `pruebas/e2e/tienda.spec.js` |
+| Inicio y 404 en Chromium, con las cabeceras reales de `_headers` | `pruebas/e2e/inicio.spec.js` |
+
+GitHub Actions (`.github/workflows/revision.yml`) corre todo en cada PR y en
+cada push a `main`.
 
 ## ✏️ Datos pendientes de mejorar
 
@@ -78,6 +108,8 @@ Luego abre <http://localhost:5500/>.
 | `robots.txt`, `sitemap.xml` | Para Google |
 | `_headers` | Cabeceras de seguridad y caché que aplica Cloudflare Pages |
 | `404.html` | Página de error con la cápsula, «Volver al inicio» y pedido por WhatsApp (rutas desde la raíz) |
+| `pruebas/` | Pruebas automáticas y herramientas de revisión (no hacen parte de la página) |
+| `.github/workflows/` | Revisión automática en GitHub |
 
 ## Secciones de la página
 

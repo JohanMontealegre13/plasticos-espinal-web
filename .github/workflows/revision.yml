@@ -1,0 +1,72 @@
+# Revisión automática antes de publicar.
+# Cloudflare Pages publica main solo; esta revisión corre en cada PR y en cada
+# push a main. Para que NADA llegue a main sin pasarla, en GitHub:
+# Settings > Branches > main > "Require status checks to pass" > marcar «Revisión del sitio».
+name: Revisión del sitio
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revision-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  revision:
+    name: Revisión del sitio
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: pruebas
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # la revisión de caché compara contra la rama base
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pruebas/package-lock.json
+
+      - name: Instalar herramientas de prueba
+        run: npm ci
+
+      - name: Lint (HTML, CSS y JS)
+        run: npm run lint
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Pruebas rápidas (catálogo, candado, enlaces, CSP, regresiones)
+        run: npm run test:unit
+
+      - name: Caché (?v=N) al día frente a la rama base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then BASE="origin/${{ github.base_ref }}";
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] && [ -n "${{ github.event.before }}" ]; then BASE="${{ github.event.before }}";
+          else BASE="HEAD~1"; fi
+          node versiones.mjs "$BASE"
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas en navegador (escritorio y celular)
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Guardar el reporte si algo falló
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-playwright
+          path: pruebas/playwright-report/
+          retention-days: 7
