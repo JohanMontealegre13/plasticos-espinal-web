@@ -821,6 +821,12 @@
   }
 
   /* ---------- Canasta ---------- */
+  /* La franja de arriba dice desde cuánto el domicilio es gratis con el valor que manda el CRM;
+     el del HTML queda solo de respaldo. */
+  function pintarGratisDesde() {
+    var g = cat.domicilio && cat.domicilio.gratis_desde;
+    if (typeof g === 'number' && g > 0) $('gratisDesde').textContent = pesos(g);
+  }
   function pintarCanasta() {
     var c = cuentas(), ul = $('items'), gratis = cat.domicilio.gratis_desde;
     ul.textContent = '';
@@ -966,6 +972,7 @@
       pintar();
       intentar(pintarGuardados);   /* favoritos y vistos, solo lo que sigue en la tienda */
       intentar(pintarUltimaVez);
+      intentar(pintarGratisDesde);
       pintarCanasta();   /* también pinta la hora de llegada (que se cuida sola) */
       vista('canasta');
       pintarAviso();
