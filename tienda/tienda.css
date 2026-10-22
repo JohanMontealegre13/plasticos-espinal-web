@@ -106,6 +106,15 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* Foto propia (del CRM): entera sobre blanco; el sello va a la derecha para no tapar el PE */
 .prod .foto.propia img{object-fit:contain;background:#fff}
 .prod .foto.propia .sello{left:auto;right:8px}
+/* Dos fotos (la principal y la del producto en uso): se pasan con el dedo o con los puntos.
+   Los puntos van arriba al centro: abajo taparían la fila de tamaños de la foto. */
+.prod .foto .tira{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.prod .foto .tira::-webkit-scrollbar{display:none}
+.prod .foto .tira img{flex:0 0 100%;scroll-snap-align:start}
+.prod .foto .puntos{position:absolute;left:0;right:0;top:2px;display:flex;justify-content:center}
+.prod .foto .punto{width:24px;height:24px;border:0;padding:0;background:none;display:grid;place-items:center;cursor:pointer}
+.prod .foto .punto::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(14,26,71,.3);box-shadow:0 0 0 2px #fff}
+.prod .foto .punto[aria-current="true"]::before{background:var(--azul)}
 .prod .sello{position:absolute;left:8px;top:8px;background:var(--rojo);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
 .prod .cuerpo{flex:1;display:flex;flex-direction:column;gap:4px;padding:10px 12px 12px}
 .prod h3{font-size:14.5px;font-weight:600;line-height:1.3}

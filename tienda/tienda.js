@@ -55,6 +55,28 @@
     return (cats[p.categoria] || {}).imagen || '/img/productos/bodega.webp';
   }
 
+  /* Con dos o más fotos del CRM (la principal y la del producto en uso), la
+     tarjeta las pasa con el dedo o con los puntos de abajo. */
+  function carrusel(f, fotos) {
+    var tira = el('div', 'tira'), puntos = el('div', 'puntos');
+    fotos.forEach(function (nombre, n) {
+      var i = el('img');
+      i.src = FOTOS + encodeURIComponent(nombre); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+      tira.appendChild(i);
+      var b = el('button', 'punto');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Ver foto ' + (n + 1) + ' de ' + fotos.length);
+      b.setAttribute('aria-current', String(n === 0));
+      b.addEventListener('click', function () { tira.scrollTo({ left: n * tira.clientWidth, behavior: 'smooth' }); });
+      puntos.appendChild(b);
+    });
+    tira.addEventListener('scroll', function () {
+      var n = Math.round(tira.scrollLeft / Math.max(1, tira.clientWidth));
+      Array.prototype.forEach.call(puntos.children, function (b, k) { b.setAttribute('aria-current', String(k === n)); });
+    }, { passive: true });
+    f.append(tira, puntos);
+  }
+
   /* ---------- Cuentas ---------- */
   function cuentas() {
     var n = 0, s = 0;
@@ -142,9 +164,13 @@
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
     lista.forEach(function (p) {
-      var li = el('li'), a = el('article', 'prod'), f = el('div', p.foto ? 'foto propia' : 'foto'), i = el('img');
-      i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
-      f.appendChild(i);
+      var li = el('li'), a = el('article', 'prod'), f = el('div', p.foto ? 'foto propia' : 'foto');
+      if (p.fotos && p.fotos.length > 1) carrusel(f, p.fotos);
+      else {
+        var i = el('img');
+        i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+        f.appendChild(i);
+      }
       if (!p.disponible) f.appendChild(el('span', 'sello agotado', 'Agotado'));
       else if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
       var c = el('div', 'cuerpo');
