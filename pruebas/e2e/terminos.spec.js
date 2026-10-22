@@ -50,7 +50,7 @@ test('los términos traen las nueve secciones, el retracto de 5 días hábiles y
   await page.goto('/tienda/terminos/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText([
-    '1. Quién vende', '2. Precios', '3. Domicilio', '4. Tiempos', '5. Pagos', '6. Cambios y garantía',
+    '1. Contacto', '2. Precios', '3. Domicilio', '4. Tiempos', '5. Pagos', '6. Cambios y garantía',
     '7. Derecho de retracto', '8. Reversión del pago', '9. Peticiones, quejas y reclamos',
   ]);
   await expect(page.locator('main')).toContainText('5 días hábiles');

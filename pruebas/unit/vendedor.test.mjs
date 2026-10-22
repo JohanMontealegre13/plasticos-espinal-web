@@ -126,7 +126,7 @@ const TERMINOS = leer('tienda/terminos/index.html');
 const TIENDA = leer('tienda/index.html');
 const PRIVACIDAD = leer('tienda/privacidad/index.html');
 const SECCIONES = [
-  'Quién vende', 'Precios', 'Domicilio', 'Tiempos', 'Pagos', 'Cambios y garantía',
+  'Contacto', 'Precios', 'Domicilio', 'Tiempos', 'Pagos', 'Cambios y garantía',
   'Derecho de retracto', 'Reversión del pago', 'Peticiones, quejas y reclamos',
 ];
 test('los términos tienen las nueve secciones, en orden', () => {
