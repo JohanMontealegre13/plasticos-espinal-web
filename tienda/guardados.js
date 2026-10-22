@@ -27,10 +27,12 @@
 
   function guardado(almacen, clave, porDefecto) {
     var enMemoria, hayMemoria = false;
+    var sinGuardar = false;   /* la última escritura no llegó al almacenamiento: lo que hay allá está viejo */
     function recuerdo() { return hayMemoria ? copia(enMemoria) : copia(porDefecto); }
     return {
       leer: function () {
         var crudo;
+        if (sinGuardar) return recuerdo();                                         /* hasta que otra escritura sí guarde */
         try { crudo = almacen.getItem(clave); } catch (e) { return recuerdo(); }   /* sin almacenamiento, o no deja leer */
         if (crudo === null || crudo === undefined) return recuerdo();             /* nada guardado (o no se pudo guardar) */
         try {
@@ -40,7 +42,8 @@
       },
       escribir: function (valor) {
         enMemoria = copia(valor); hayMemoria = true;                                /* siempre queda en memoria */
-        try { almacen.setItem(clave, JSON.stringify(valor)); } catch (e) { /* sin almacenamiento o lleno: vale la memoria */ }
+        try { almacen.setItem(clave, JSON.stringify(valor)); sinGuardar = false; }
+        catch (e) { sinGuardar = true; /* sin almacenamiento o lleno: vale la memoria */ }
       }
     };
   }

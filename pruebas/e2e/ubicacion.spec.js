@@ -9,6 +9,7 @@ const ENLACE = 'https://maps.google.com/?q=4.15000,-74.88500';
 const PROPOSITO = 'Solo la usamos para llevarle el pedido.';
 const NO_PUDIMOS = 'No pudimos tomar su ubicación. Escriba la dirección y siga.';
 const FUERA = 'Esa ubicación queda fuera de El Espinal. Escriba la dirección donde lo recibe.';
+const IMPRECISA = 'Su ubicación salió imprecisa. Escriba la dirección o intente otra vez con el GPS encendido.';
 
 /** Simula el CRM: guarda lo que se le manda en `enviados` y responde que el pedido llegó. */
 async function simularPedido(/** @type {import('@playwright/test').Page} */ page) {
@@ -31,18 +32,19 @@ async function hastaLosDatos(/** @type {import('@playwright/test').Page} */ page
 
 /**
  * Cambia el GPS del navegador por uno de mentira. Cada toque de «Usar mi ubicación» toma la siguiente
- * respuesta (la última se repite): { lat, lng } responde con ese punto, { codigo } con ese error del
+ * respuesta (la última se repite): { lat, lng } responde con ese punto (con `precision`, el radio de error
+ * en metros que da el teléfono; si no, 10 m, como un GPS bueno), { codigo } con ese error del
  * navegador (1 permiso negado, 2 sin señal, 3 no respondió a tiempo) y 'espera' se queda esperando
  * hasta que la prueba llame a window.__gpsResponder(respuesta).
  * @param {import('@playwright/test').Page} page
- * @param {(({ lat: number, lng: number } | { codigo: number } | 'espera'))[]} respuestas
+ * @param {(({ lat: number, lng: number, precision?: number } | { codigo: number } | 'espera'))[]} respuestas
  */
 async function gpsFalso(page, respuestas) {
   await page.addInitScript((lista) => {
     let n = 0, pendiente = null;
     const entregar = (ok, error, r) => {
       if ('codigo' in r) error({ code: r.codigo, message: 'simulado', PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 });
-      else ok({ coords: { latitude: r.lat, longitude: r.lng, accuracy: 10 }, timestamp: Date.now() });
+      else ok({ coords: { latitude: r.lat, longitude: r.lng, accuracy: 'precision' in r ? r.precision : 10 }, timestamp: Date.now() });
     };
     // @ts-ignore
     window.__gpsPedidos = [];
@@ -303,6 +305,56 @@ test('una respuesta del GPS que llega después de enviar el pedido no se cuela e
   await page.locator('#enviar').click();
   await expect(page.locator('#pago')).toBeVisible();
   expect(enviados[1].indicaciones).toBe('');
+});
+
+/* ---------- un punto impreciso (por antena o por internet) no sirve para llegar ---------- */
+
+test('una ubicación imprecisa no se adjunta y pide escribir la dirección, sin cifras', async ({ page }) => {
+  const v = vigilar(page);
+  const enviados = await simularPedido(page);
+  await gpsFalso(page, [{ lat: 4.15, lng: -74.885, precision: 1500 }]);   /* cae dentro del radio, pero ±1,5 km */
+  await abrirTienda(page);
+  await hastaLosDatos(page);
+  await llenarDatos(page);
+  await page.locator('#d-extra').fill('Casa azul');
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText(IMPRECISA);
+  await expect(page.locator('#ubicado')).not.toHaveText(/\d/);          /* sin metros ni números en pantalla */
+  await expect(page.locator('#ubicar')).toBeEnabled();                 /* se puede intentar otra vez */
+  await page.locator('#enviar').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  expect(enviados[0].indicaciones).toBe('Casa azul');
+  v.sinProblemas();
+});
+
+test('una ubicación imprecisa después de una buena borra la buena; con el GPS bien se puede otra vez', async ({ page }) => {
+  const enviados = await simularPedido(page);
+  await gpsFalso(page, [{ lat: 4.15, lng: -74.885 }, { lat: 4.153, lng: -74.88, precision: 3000 }, { lat: 4.153, lng: -74.88, precision: 200 }]);
+  await abrirTienda(page);
+  await hastaLosDatos(page);
+  await llenarDatos(page);
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText('Ubicación lista ✓');
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText(IMPRECISA);
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText('Ubicación lista ✓');   /* hasta 200 m todavía sirve */
+  await page.locator('#enviar').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  expect(enviados[0].indicaciones).toBe('https://maps.google.com/?q=4.15300,-74.88000');
+});
+
+test('imprecisa y además lejos: manda la imprecisión, no se adjunta nada', async ({ page }) => {
+  const enviados = await simularPedido(page);
+  await gpsFalso(page, [{ lat: 4.711, lng: -74.072, precision: 5000 }]);
+  await abrirTienda(page);
+  await hastaLosDatos(page);
+  await llenarDatos(page);
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText(IMPRECISA);
+  await page.locator('#enviar').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  expect(enviados[0].indicaciones).toBe('');
 });
 
 /* ---------- cuando no se puede pedir la ubicación ---------- */

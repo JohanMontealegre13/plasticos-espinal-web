@@ -95,6 +95,25 @@ test('las secciones de favoritos y vistos tienen su título y no repiten el bot�
   await expect(page.locator('#favoritos').getByRole('button', { name: /Agregar|Agotado/ })).toHaveCount(0);
 });
 
+test('el anillo de foco de una tarjeta de favoritos se ve entero (la fila que se desliza no lo recorta)', async ({ page }) => {
+  await sembrar(page, { 'pe-favoritos-v1': [141, 131] });
+  await abrirTienda(page);
+  const tarjeta = page.locator('#favoritos [data-ficha="141"]');
+  await tarjeta.focus();
+  const m = await tarjeta.evaluate((b) => {
+    const l = /** @type {HTMLElement} */ (b.closest('.mini-lista')), cl = l.getBoundingClientRect(), c = b.getBoundingClientRect();
+    const s = getComputedStyle(b), anillo = parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset);
+    /* lo que recorta la fila es su caja de relleno: por dentro del borde */
+    const caja = { top: cl.top + l.clientTop, left: cl.left + l.clientLeft, bottom: cl.top + l.clientTop + l.clientHeight };
+    return { foco: b.matches(':focus-visible'), anillo, arriba: c.top - anillo - caja.top, izquierda: c.left - anillo - caja.left, abajo: caja.bottom - (c.bottom + anillo) };
+  });
+  expect(m.foco, 'la prueba necesita el anillo del teclado').toBe(true);
+  expect(m.anillo).toBeGreaterThan(0);
+  expect(m.arriba).toBeGreaterThanOrEqual(0);
+  expect(m.izquierda).toBeGreaterThanOrEqual(0);
+  expect(m.abajo).toBeGreaterThanOrEqual(0);
+});
+
 test('la página no se ensancha aunque haya muchos favoritos', async ({ page }) => {
   await sembrar(page, { 'pe-favoritos-v1': [141, 131, 191, 210, 228, 305, 398, 520] });
   await abrirTienda(page);
@@ -122,6 +141,27 @@ test('abrir y cerrar la primera ficha no mueve la vitrina, aunque «vistos» apa
   await expect(page.locator('#ficha')).toBeHidden();
   await expect(page.locator('#vistos li')).toHaveCount(1);
   await expect.poll(() => page.locator('#vitrina').evaluate((e) => Math.round(e.getBoundingClientRect().top))).toBe(antes);
+});
+
+test('abrir un favorito y cerrarlo deja «Sus favoritos» donde estaba, aunque «vistos» aparezca debajo', async ({ page }) => {
+  await sembrar(page, { 'pe-favoritos-v1': [141, 131] });
+  await abrirTienda(page);
+  await expect(page.locator('#vistos')).toBeHidden();
+  await page.evaluate(() => window.scrollTo(0, document.getElementById('favoritos').getBoundingClientRect().top + window.scrollY - 60));
+  const arriba = () => page.locator('#favoritos').evaluate((e) => Math.round(e.getBoundingClientRect().top));
+  const antes = await arriba();
+  await page.locator('#favoritos [data-ficha="141"]').click();
+  await expect(page.locator('#ficha')).toBeVisible();
+  await page.locator('#fichaCerrar').click();
+  await expect(page.locator('#ficha')).toBeHidden();
+  await expect(page.locator('#vistos li')).toHaveCount(1);   /* «vistos» apareció entre favoritos y la vitrina */
+  /* el «atrás» ya pasó y el lugar se repone un cuadro después: se esperan dos cuadros antes de medir */
+  await expect(page).not.toHaveURL(/#p=/);
+  await page.evaluate(() => new Promise((listo) => requestAnimationFrame(() => requestAnimationFrame(listo))));
+  expect(await arriba()).toBe(antes);
+  const tarjeta = page.locator('#favoritos [data-ficha="141"]');
+  await expect(tarjeta).toBeFocused();
+  await expect(tarjeta).toBeInViewport();
 });
 
 test('guardar el primer favorito desde la ficha y volver con «atrás» tampoco mueve la vitrina', async ({ page }) => {

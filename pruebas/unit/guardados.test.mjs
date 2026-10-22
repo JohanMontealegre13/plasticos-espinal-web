@@ -104,6 +104,24 @@ test('guardado: si el almacenamiento no guarda (cuota llena), lo escrito se recu
   g.escribir([2]);
   assert.deepEqual(g.leer(), [2]);
 });
+test('guardado: si una escritura falla DESPUÉS de una que sí guardó, vale la memoria (no lo viejo) hasta que otra funcione', () => {
+  let lleno = false;
+  const a = almacenFalso();
+  const m = { getItem: a.getItem, setItem: (/** @type {string} */ k, /** @type {string} */ v) => { if (lleno) throw new Error('QuotaExceededError'); a.setItem(k, v); } };
+  const g = guardado(m, 'pe-favoritos-v1', []);
+  g.escribir([141]);                       /* esta sí quedó en el almacenamiento */
+  lleno = true;
+  g.escribir([]);                          /* quitar el favorito: el almacenamiento se quedó con [141] */
+  assert.equal(a.datos['pe-favoritos-v1'], '[141]');
+  assert.deepEqual(g.leer(), []);          /* manda lo último escrito, no lo viejo */
+  g.escribir([131]);
+  assert.deepEqual(g.leer(), [131]);
+  lleno = false;
+  g.escribir([5]);                         /* volvió a guardar: de nuevo vale el almacenamiento */
+  assert.equal(a.datos['pe-favoritos-v1'], '[5]');
+  a.datos['pe-favoritos-v1'] = '[6]';      /* p. ej. otra pestaña */
+  assert.deepEqual(g.leer(), [6]);
+});
 test('guardado: lo que otra pestaña guardó después se lee de nuevo', () => {
   const a = almacenFalso();
   const uno = guardado(a, 'k', []), dos = guardado(a, 'k', []);

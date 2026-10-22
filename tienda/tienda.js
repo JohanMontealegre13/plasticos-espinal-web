@@ -24,6 +24,8 @@
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
+  var PRECISION_MAX_M = 200;           /* un punto del GPS con más error que esto (en metros) no se adjunta: por antena o por internet
+                                          puede caer a kilómetros y confunde al domiciliario. La cifra no sale en pantalla. */
   /* Barrios de El Espinal para sugerir (lista parcial: el cliente puede escribir otro) */
   var BARRIOS = ['Arkabal', 'Balkanes', 'Belén', 'Betania', 'Betania Campestre', 'Bosques de Roa',
     'Caballero y Góngora', 'Cafasur', 'El Centro', 'Entre Ríos', 'Fátima', 'Isaías Olivar',
@@ -40,7 +42,7 @@
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
   var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
-  var ficha = { id: null, empujada: false, desde: null, alto: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial, quién la abrió y dónde estaba la vitrina al abrirla */
+  var ficha = { id: null, empujada: false, desde: null, lugar: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial, quién la abrió y qué se miraba al abrirla (lugarDe) */
   var guardados = null;           /* { favoritos, vistos, ultimo }; null si guardados.js no cargó (sin corazones ni secciones) */
   var buscando = false;           /* hay algo escrito en el buscador: favoritos y vistos se esconden */
   var enlaceUbicacion = '';       /* enlace del mapa de ESTE pedido; solo en memoria, nunca en pe-cliente-v1 */
@@ -226,7 +228,7 @@
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
     $('limpiar').hidden = !(filtro.cat || r.buscando);
-    $('avisoFicha').hidden = true;
+    $('avisoFicha').textContent = '';
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
     /* Buscó y no hay nada: el pedido se lo llevamos nosotros, con lo que escribió */
@@ -321,14 +323,14 @@
     var p = por[id], d = $('ficha');
     if (!p || typeof d.showModal !== 'function') return;
     var yaAbierta = d.open;
-    $('avisoFicha').hidden = true;
+    $('avisoFicha').textContent = '';
     pintarFicha(p);
     ficha.id = p.id;
     if (!yaAbierta) {
-      ficha.alto = $('vitrina').getBoundingClientRect().top;
       /* El foco vuelve a la tarjeta que la abrió: la chica de favoritos o vistos si vino de ahí; si no, al nombre
          de su tarjeta de la vitrina (también si se tocó la foto o se entró por el enlace) */
       ficha.desde = desde || document.querySelector('#grilla [data-ficha="' + p.id + '"]');
+      ficha.lugar = lugarDe(ficha.desde);
       d.showModal();
       document.documentElement.classList.add('con-ficha');
     } else {
@@ -369,14 +371,21 @@
     if (empujada) { try { history.back(); } catch (e) { limpiarDireccion(); reponerLugar(); } }   /* con history.back() el lugar se repone en su popstate */
     else { limpiarDireccion(); reponerLugar(); }
   }
-  /* Con la ficha abierta, arriba de la vitrina pudo aparecer «vistos» o «favoritos»: al cerrarla, la vitrina
-     queda donde estaba. (Con history.back() el navegador devuelve su propio scroll DESPUÉS del popstate:
-     por eso se repone un cuadro más tarde.) */
+  /* Lo que se miraba al abrir la ficha y dónde estaba: la sección de favoritos o vistos si la abrió una tarjeta
+     de ahí (quedan encima de la vitrina), si no la vitrina; la vitrina va de segunda por si esa sección se fue. */
+  function lugarDe(desde) {
+    var v = $('vitrina'), zona = desde && desde.dataset && desde.dataset.zona ? $(desde.dataset.zona) : null;
+    return [zona, v].filter(Boolean).map(function (n) { return { n: n, top: n.getBoundingClientRect().top }; });
+  }
+  /* Con la ficha abierta, arriba de la vitrina pudo aparecer «vistos» o «favoritos»: al cerrarla, lo que se
+     miraba queda donde estaba (la tarjeta que la abrió sigue a la vista, con el foco). (Con history.back() el
+     navegador devuelve su propio scroll DESPUÉS del popstate: por eso se repone un cuadro más tarde.) */
   function reponerLugar() {
-    var antes = ficha.alto;
-    if (ficha.id !== null || antes === null) return;
-    ficha.alto = null;
-    var dif = $('vitrina').getBoundingClientRect().top - antes;
+    var lugar = ficha.lugar;
+    if (ficha.id !== null || !lugar) return;
+    ficha.lugar = null;
+    var a = lugar.filter(function (x) { return x.n.isConnected && !x.n.hidden; })[0];
+    var dif = a ? a.n.getBoundingClientRect().top - a.top : 0;
     if (dif && window.scrollY > 0) window.scrollBy(0, dif);
   }
 
@@ -390,9 +399,8 @@
       return;
     }
     if (ficha.id !== null) soltarFicha();
-    var aviso = $('avisoFicha');
-    aviso.textContent = 'Ese producto ya no está en la tienda.';
-    aviso.hidden = false;
+    /* #avisoFicha (role=status) está siempre en la página, vacío: así el lector de pantalla anuncia el texto al llegar */
+    $('avisoFicha').textContent = 'Ese producto ya no está en la tienda.';
     limpiarDireccion();
   }
 
@@ -597,7 +605,8 @@
   /* «Usar mi ubicación actual» adjunta el punto del GPS a las indicaciones, solo si cae dentro del
      radio de catalogo.json ("entrega"). Sin GPS en el navegador, sin "entrega" o sin ubicacion.js el
      botón no sale y todo sigue como siempre. Si el GPS se niega o no responde, se puede pedir igual.
-     Un resultado nuevo (error, fuera del radio) borra el enlace anterior: nunca viaja un punto viejo. */
+     Un punto impreciso (coords.accuracy mayor que PRECISION_MAX_M) no se adjunta: se pide escribir la dirección.
+     Un resultado nuevo (error, impreciso, fuera del radio) borra el enlace anterior: nunca viaja un punto viejo. */
   function ubicacionDisponible() {
     var P = window.PE, g = navigator.geolocation;
     return !!(P && P.entregaValida && P.dentroDeEntrega && P.enlaceMapa && P.entregaValida(cat && cat.entrega) &&
@@ -625,6 +634,9 @@
         if (mia !== busquedaGps) return;   /* el pedido ya salió: esta respuesta llegó tarde */
         var c = pos && pos.coords, enlace = c ? window.PE.enlaceMapa(c.latitude, c.longitude) : '';
         if (!enlace) return noPudo();
+        if (typeof c.accuracy === 'number' && c.accuracy > PRECISION_MAX_M) {
+          return terminar('Su ubicación salió imprecisa. Escriba la dirección o intente otra vez con el GPS encendido.', 'error');
+        }
         if (!window.PE.dentroDeEntrega(c.latitude, c.longitude, cat.entrega)) {
           return terminar('Esa ubicación queda fuera de El Espinal. Escriba la dirección donde lo recibe.', 'fuera');
         }

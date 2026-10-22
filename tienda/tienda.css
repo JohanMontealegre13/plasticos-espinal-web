@@ -369,6 +369,7 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
    En el celular sube desde abajo como una hoja; en el computador queda al centro. */
 .ficha{width:min(780px,100%);max-width:100%;max-height:100%;margin:auto;padding:0;border:0;background:transparent;color:var(--texto);overflow:visible}
 .ficha::backdrop{background:rgba(14,26,71,.55)}
+.ficha:not([open]){display:none}   /* un navegador sin <dialog> (Safari antes de 15.4) la pintaría vacía al final de la página */
 html.con-ficha{overflow:hidden}
 .ficha-hoja{position:relative;display:flex;flex-direction:column;max-height:min(90vh,820px);max-height:min(90dvh,820px);overflow:hidden;border-radius:22px;background:#fff;box-shadow:0 20px 60px rgba(14,26,71,.35)}
 .ficha[open] .ficha-hoja{animation:hoja .3s ease-out}
@@ -412,8 +413,10 @@ html.con-ficha{overflow:hidden}
   .ficha-control{max-width:none}
 }
 
-/* aviso cuando un enlace compartido apunta a un producto que ya no está */
+/* aviso cuando un enlace compartido apunta a un producto que ya no está. Es una región viva (role=status) que
+   está siempre en la página: vacía no ocupa lugar, y el lector de pantalla anuncia el texto cuando llega */
 .aviso-ficha{margin:14px 0 0;padding:12px 16px;border:1px solid #ecd08a;border-radius:12px;background:#fff6dd;color:#5a4200;font-weight:600}
+.aviso-ficha:empty{margin:0;padding:0;border:0}
 
 @media (prefers-reduced-motion:reduce){
   .ficha[open] .ficha-hoja{animation:none}
@@ -435,7 +438,9 @@ html.con-ficha{overflow:hidden}
    Reusan la tarjeta de «También le sirve» (.parecido) */
 .guardados{padding-block:12px 0}
 .guardados .sec-cab{margin-bottom:10px}
-.mini-lista{list-style:none;margin:0;padding:2px 2px 8px;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+/* La fila se desliza (overflow) y eso recorta lo que se sale de su caja: el relleno de 6px deja ver entero el anillo de
+   foco (3px + 2px de separación) y el margen negativo deja las tarjetas donde estaban */
+.mini-lista{list-style:none;margin:-4px -4px 0;padding:6px 6px 8px;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
 .mini-lista li{flex:0 0 140px;scroll-snap-align:start}
 .mini-foto{position:relative;display:block}
 .mini-foto .sello{position:absolute;left:6px;top:6px;background:#5b6478;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}

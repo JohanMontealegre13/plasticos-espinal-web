@@ -28,6 +28,37 @@ test('un enlace a un producto que ya no está avisa y deja la tienda normal', as
   await expect(page).not.toHaveURL(/#p=/);
   v.sinProblemas();
 });
+test('el aviso del enlace viejo es una región viva que está desde el comienzo: el lector de pantalla lo anuncia', async ({ page }) => {
+  const v = vigilar(page);
+  await abrirTienda(page);
+  const aviso = page.locator('#avisoFicha');
+  await expect(aviso).toHaveAttribute('role', 'status');
+  expect(await aviso.evaluate((e) => e.hidden), 'vacía pero no escondida: ya está en el árbol de accesibilidad').toBe(false);
+  await expect(aviso).toBeHidden();                                    /* vacía no ocupa lugar en la pantalla */
+  await aviso.evaluate((e) => { e.dataset.prueba = 'el-mismo'; });
+  await page.evaluate(() => { location.hash = '#p=999999'; });         /* un enlace viejo con la tienda ya abierta */
+  await expect(aviso).toHaveText('Ese producto ya no está en la tienda.');
+  await expect(aviso).toBeVisible();
+  await expect(aviso).toHaveAttribute('data-prueba', 'el-mismo');      /* el texto cambió en el mismo nodo */
+  expect(await aviso.evaluate((e) => e.hidden)).toBe(false);
+  await page.locator('#grilla').getByText('Contenedor icopor J1 x25 und').click();   /* abrir otra ficha lo borra */
+  await expect(aviso).toHaveText('');
+  await expect(aviso).toBeHidden();
+  v.sinProblemas();
+});
+test('en un navegador sin <dialog> la ficha cerrada no se pinta al final de la página', async ({ page }) => {
+  await abrirTienda(page);
+  /* Allá <dialog> es una etiqueta desconocida, sin estilo propio: se imita con otra etiqueta que lleve la clase */
+  const sinDialog = await page.evaluate(() => {
+    const x = document.createElement('section');
+    x.className = 'ficha';
+    document.body.appendChild(x);
+    const fuera = getComputedStyle(x).display;
+    x.setAttribute('open', '');
+    return { cerrada: fuera, abierta: getComputedStyle(x).display };
+  });
+  expect(sinDialog).toEqual({ cerrada: 'none', abierta: 'block' });
+});
 test('agregar desde la ficha suma en la canasta', async ({ page }) => {
   await abrirTienda(page, { ruta: '/tienda/#p=141' });
   await page.locator('#ficha').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
