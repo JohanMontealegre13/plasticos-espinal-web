@@ -10,10 +10,11 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=12">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=13">
   <script src="/tienda/llegada.js?v=1" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=14" defer></script>
+  <script src="/tienda/guardados.js?v=1" defer></script>
+  <script src="/tienda/tienda.js?v=15" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -54,11 +55,23 @@
     </div>
   </section>
 
+  <div class="ultima" id="ultima" hidden><button class="ultima-btn" id="ultimaVez" type="button">Pedir lo de la última vez</button></div>
+
   <section class="benef" aria-label="Por qué comprar aquí">
     <div><svg class="ico" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span><b>Llega en 1 hora</b>En horario de tienda</span></div>
     <div><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></svg><span><b>Pago con Bre-B</b>O efectivo al recibir</span></div>
     <div><svg class="ico" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span><b>Precio de bodega</b>Del paquete a la caja</span></div>
     <div><svg class="ico" viewBox="0 0 24 24"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><b>Le confirmamos por WhatsApp</b>Al 318 355 5246</span></div>
+  </section>
+
+  <section class="sec guardados" id="favoritos" aria-labelledby="favoritosTit" hidden>
+    <div class="sec-cab"><h2 id="favoritosTit">Sus favoritos</h2></div>
+    <ul class="mini-lista"></ul>
+  </section>
+
+  <section class="sec guardados" id="vistos" aria-labelledby="vistosTit" hidden>
+    <div class="sec-cab"><h2 id="vistosTit">Lo que vio hace poco</h2></div>
+    <ul class="mini-lista"></ul>
   </section>
 
   <section class="sec" id="vitrina">
@@ -117,7 +130,10 @@
         <p class="ficha-precio" id="fichaPrecio"></p>
         <p class="ficha-disp" id="fichaDisp"></p>
         <div class="ficha-control" id="fichaControl"></div>
-        <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
+        <div class="ficha-acciones">
+          <button class="fav fav-ficha" id="fichaFav" type="button" aria-pressed="false" hidden><span class="fav-txt">Guardar en favoritos</span></button>
+          <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
+        </div>
       </div>
       <section class="ficha-parecidos" id="parecidosCaja" aria-labelledby="parecidosTit" hidden>
         <h3 id="parecidosTit">También le sirve</h3>
@@ -132,6 +148,7 @@
   <header><h2 id="panelTitulo">Su canasta</h2><button class="vaciar" type="button" id="vaciar" hidden>Vaciar</button><button class="cerrar" type="button" id="cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="txt">Cerrar</span></button></header>
 
   <!-- 1. Canasta: casi toda la pantalla para los productos -->
+  <p class="aviso" id="noEstan" hidden></p>
   <p class="vacio" id="vacio">Todavía no ha agregado productos.</p>
   <ul class="items" id="items"></ul>
   <div class="resumen" id="resumen">

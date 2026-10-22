@@ -5,7 +5,9 @@
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
    El pedido en curso (código + secreto) queda en este celular. Cada producto tiene
-   su ficha (<dialog>) con dirección propia, #p=ID, para compartir. Datos de la
+   su ficha (<dialog>) con dirección propia, #p=ID, para compartir. También en este
+   celular: favoritos (el corazón), lo visto hace poco y el último pedido enviado,
+   para pedirlo otra vez en un toque (PE.guardado: tienda/guardados.js). Datos de la
    base: siempre textContent. */
 (function () {
   'use strict';
@@ -13,6 +15,9 @@
   var CLAVE = 'pe-canasta-v1';
   var CLAVE_DATOS = 'pe-cliente-v1';   /* datos de entrega, solo en este celular */
   var CLAVE_PEDIDO = 'pe-pedido-v1';   /* pedido en curso: código + secreto */
+  var CLAVE_FAVORITOS = 'pe-favoritos-v1', MAX_FAVORITOS = 100;   /* ids, el último guardado primero */
+  var CLAVE_VISTOS = 'pe-vistos-v1', MAX_VISTOS = 12;             /* ids de lo que se abrió en ficha, lo último primero */
+  var CLAVE_ULTIMO = 'pe-ultimo-v1';   /* líneas { id, cantidad } del último pedido enviado desde este celular */
   var API = '/tienda/mi-cuenta/api/tienda/pedido';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
@@ -32,7 +37,9 @@
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
   var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
-  var ficha = { id: null, empujada: false, desde: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial y quién la abrió */
+  var ficha = { id: null, empujada: false, desde: null, alto: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial, quién la abrió y dónde estaba la vitrina al abrirla */
+  var guardados = null;           /* { favoritos, vistos, ultimo }; null si guardados.js no cargó (sin corazones ni secciones) */
+  var buscando = false;           /* hay algo escrito en el buscador: favoritos y vistos se esconden */
 
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
@@ -198,8 +205,9 @@
   }
 
   function pintar() {
-    var g = $('grilla'), r = listar(), lista = r.lista;
+    var g = $('grilla'), r = listar(), lista = r.lista, favs = guardados ? idsDe(guardados.favoritos) : [];
     g.textContent = '';
+    buscando = r.buscando; verGuardados();
     var titulo = filtro.cat ? (cats[filtro.cat] || {}).nombre
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
@@ -221,6 +229,7 @@
       }
       if (!p.disponible) f.appendChild(el('span', 'sello agotado', 'Agotado'));
       else if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
+      if (guardados) f.appendChild(corazon(p.id, favs.indexOf(p.id) >= 0));
       var c = el('div', 'cuerpo');
       var ctrl = control(p);
       ctrl.dataset.ctrl = p.id;
@@ -230,7 +239,7 @@
       nombre.type = 'button'; nombre.dataset.ficha = p.id;
       nombre.addEventListener('click', function () { abrirFicha(p.id, true); });
       h3.appendChild(nombre);
-      f.addEventListener('click', function (e) { if (!e.target.closest('.puntos')) abrirFicha(p.id, true); });
+      f.addEventListener('click', function (e) { if (!e.target.closest('.puntos, .fav')) abrirFicha(p.id, true); });
       c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), ctrl);
       a.append(f, c);
       li.appendChild(a);
@@ -272,6 +281,8 @@
     ctrl.dataset.ctrl = p.id;
     $('fichaControl').textContent = '';
     $('fichaControl').appendChild(ctrl);
+    var fav = $('fichaFav');
+    fav.hidden = !guardados; fav.dataset.fav = p.id; pintarCorazon(fav, esFavorito(p.id));
     var ul = $('parecidos'), lista = parecidos(p, 6);
     ul.textContent = '';
     $('parecidosCaja').hidden = !lista.length;
@@ -290,8 +301,9 @@
 
   /* Abre la ficha. Con `empujar` (un toque) suma una entrada al historial: el «atrás» del celular
      la cierra sin salir de la tienda. Sin él (entrar por el enlace, o saltar a un producto parecido)
-     solo cambia la dirección de la entrada en la que ya está. */
-  function abrirFicha(id, empujar) {
+     solo cambia la dirección de la entrada en la que ya está. `desde` es la tarjeta chica de favoritos
+     o vistos que la abrió (a ella vuelve el foco al cerrar). Cada ficha que se abre queda en «vistos». */
+  function abrirFicha(id, empujar, desde) {
     var p = por[id], d = $('ficha');
     if (!p || typeof d.showModal !== 'function') return;
     var yaAbierta = d.open;
@@ -299,8 +311,10 @@
     pintarFicha(p);
     ficha.id = p.id;
     if (!yaAbierta) {
-      /* El foco vuelve al nombre de su tarjeta (también si se tocó la foto o se entró por el enlace) */
-      ficha.desde = document.querySelector('#grilla [data-ficha="' + p.id + '"]');
+      ficha.alto = $('vitrina').getBoundingClientRect().top;
+      /* El foco vuelve a la tarjeta que la abrió: la chica de favoritos o vistos si vino de ahí; si no, al nombre
+         de su tarjeta de la vitrina (también si se tocó la foto o se entró por el enlace) */
+      ficha.desde = desde || document.querySelector('#grilla [data-ficha="' + p.id + '"]');
       d.showModal();
       document.documentElement.classList.add('con-ficha');
     } else {
@@ -314,15 +328,18 @@
         history.replaceState({ ficha: p.id }, '', '#p=' + p.id);
       }
     } catch (e) { /* sin historial: la ficha abre igual */ }
+    recordarVisto(p.id);
   }
 
   /* Cierra el diálogo y devuelve el foco, sin tocar el historial */
   function soltarFicha() {
-    var d = $('ficha'), desde = ficha.desde;
+    var d = $('ficha'), desde = ficha.desde, id = ficha.id;
     ficha.id = null; ficha.desde = null; ficha.empujada = false;
     document.documentElement.classList.remove('con-ficha');
     if (d.open) d.close();
     ['fichaFotos', 'fichaControl', 'parecidos'].forEach(function (i) { $(i).textContent = ''; });
+    /* Favoritos y vistos se vuelven a pintar al abrir una ficha: el foco va a la tarjeta nueva del mismo producto */
+    if (desde && !desde.isConnected && desde.dataset.zona) desde = document.querySelector('#' + desde.dataset.zona + ' [data-ficha="' + id + '"]');
     if (desde && desde.isConnected) { try { desde.focus({ preventScroll: true }); } catch (e) { /* sin foco */ } }
   }
   function limpiarDireccion() {
@@ -335,8 +352,18 @@
     if (ficha.id === null) return;
     var empujada = ficha.empujada;
     soltarFicha();
-    if (empujada) { try { history.back(); } catch (e) { limpiarDireccion(); } }
-    else limpiarDireccion();
+    if (empujada) { try { history.back(); } catch (e) { limpiarDireccion(); reponerLugar(); } }   /* con history.back() el lugar se repone en su popstate */
+    else { limpiarDireccion(); reponerLugar(); }
+  }
+  /* Con la ficha abierta, arriba de la vitrina pudo aparecer «vistos» o «favoritos»: al cerrarla, la vitrina
+     queda donde estaba. (Con history.back() el navegador devuelve su propio scroll DESPUÉS del popstate:
+     por eso se repone un cuadro más tarde.) */
+  function reponerLugar() {
+    var antes = ficha.alto;
+    if (ficha.id !== null || antes === null) return;
+    ficha.alto = null;
+    var dif = $('vitrina').getBoundingClientRect().top - antes;
+    if (dif && window.scrollY > 0) window.scrollBy(0, dif);
   }
 
   /* La dirección manda: #p=ID abre la ficha; un id que ya no existe avisa y deja la tienda normal */
@@ -372,7 +399,125 @@
     d.addEventListener('cancel', function (e) { e.preventDefault(); cerrarFicha(); });   /* Escape y el «atrás» de Android */
     d.addEventListener('close', function () { if (!d.open) cerrarFicha(); });   /* si el navegador la cerró por su cuenta */
     $('compartir').addEventListener('click', function () { if (ficha.id !== null) compartir(por[ficha.id]); });
-    window.addEventListener('popstate', fichaDeLaDireccion);
+    $('fichaFav').insertBefore(iconoCorazon(), $('fichaFav').firstChild);
+    $('fichaFav').addEventListener('click', function () { if (ficha.id !== null) alternarFavorito(ficha.id); });
+    window.addEventListener('popstate', function () { fichaDeLaDireccion(); requestAnimationFrame(reponerLugar); });
+  }
+
+  /* ---------- Favoritos, vistos hace poco y lo de la última vez (se recuerdan en este celular) ---------- */
+  /* Si guardados.js no cargó (o no hay localStorage) la tienda sigue igual: sin corazones ni secciones,
+     o con ellos mientras la página esté abierta. Lo guardado puede estar viejo o dañado: solo vale lo
+     que hoy sigue en la tienda, y nada de esto entra a la canasta sin pasar por PE.paraLaCanasta. */
+  function abrirGuardados() {
+    var PE = window.PE || {}, a = null;
+    if (!PE.guardado || !PE.alFrente || !PE.paraLaCanasta) return null;
+    try { a = window.localStorage; } catch (e) { /* bloqueado: se recuerda solo mientras la página esté abierta */ }
+    return { favoritos: PE.guardado(a, CLAVE_FAVORITOS, []), vistos: PE.guardado(a, CLAVE_VISTOS, []), ultimo: PE.guardado(a, CLAVE_ULTIMO, []) };
+  }
+  /* Los ids de una lista guardada: solo números enteros, sin repetir */
+  function idsDe(g) {
+    var visto = {};
+    return g.leer().filter(function (x) {
+      if (typeof x !== 'number' || !(x > 0) || x % 1 !== 0 || visto[x]) return false;
+      visto[x] = true;
+      return true;
+    });
+  }
+  function esFavorito(id) { return !!guardados && idsDe(guardados.favoritos).indexOf(id) >= 0; }
+
+  var SVG = 'http://www.w3.org/2000/svg';
+  function iconoCorazon() {
+    var s = document.createElementNS(SVG, 'svg'), t = document.createElementNS(SVG, 'path');
+    s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+    t.setAttribute('d', 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z');
+    s.appendChild(t);
+    return s;
+  }
+  /* El corazón dice si ya es favorito (aria-pressed) y lo que hará al tocarlo (su nombre) */
+  function pintarCorazon(b, si) {
+    var texto = si ? 'Quitar de favoritos' : 'Guardar en favoritos', t = b.querySelector('.fav-txt');
+    b.setAttribute('aria-pressed', String(si));
+    b.setAttribute('aria-label', texto);
+    if (t) t.textContent = texto;
+  }
+  function corazon(id, si) {
+    var b = el('button', 'fav');
+    b.type = 'button'; b.dataset.fav = id;
+    b.appendChild(iconoCorazon());
+    pintarCorazon(b, si);
+    b.addEventListener('click', function () { alternarFavorito(id); });
+    return b;
+  }
+  function alternarFavorito(id) {
+    if (!guardados) return;
+    var ids = idsDe(guardados.favoritos), i = ids.indexOf(id);
+    if (i >= 0) ids.splice(i, 1); else ids = window.PE.alFrente(ids, id, MAX_FAVORITOS);
+    guardados.favoritos.escribir(ids);
+    /* la tarjeta de la vitrina y el corazón de la ficha son el mismo favorito */
+    document.querySelectorAll('[data-fav="' + id + '"]').forEach(function (b) { pintarCorazon(b, i < 0); });
+    pintarGuardados();
+  }
+  function recordarVisto(id) {
+    if (!guardados) return;
+    guardados.vistos.escribir(window.PE.alFrente(idsDe(guardados.vistos), id, MAX_VISTOS));
+    pintarGuardados();
+  }
+
+  /* Tarjeta chica de favoritos y vistos: foto, nombre, precio y el sello si se agotó. Tocarla abre su ficha;
+     agregar se hace desde la ficha (así no se repiten los botones de la vitrina). */
+  function mini(p, zona) {
+    var li = el('li'), b = el('button', 'parecido mini'), f = el('span', 'mini-foto'), i = el('img', p.foto ? 'propia' : null);
+    b.type = 'button'; b.dataset.ficha = p.id; b.dataset.zona = zona;
+    i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+    f.appendChild(i);
+    if (!p.disponible) f.appendChild(el('span', 'sello', 'Agotado'));
+    b.append(f, el('span', 'nm', p.nombre), el('span', 'pr', pesos(p.precio)));
+    b.addEventListener('click', function () { abrirFicha(p.id, true, b); });
+    li.appendChild(b);
+    return li;
+  }
+  /* Con algo escrito en el buscador se esconden: los resultados quedan arriba */
+  function verGuardados() {
+    ['favoritos', 'vistos'].forEach(function (z) { $(z).hidden = buscando || !Number($(z).dataset.n); });
+  }
+  function pintarGuardados() {
+    if (!guardados) return;
+    /* Si quien mira ya bajó por la página, la vitrina se queda donde está aunque arriba aparezca o crezca una sección
+       (con la ficha abierta no: eso lo repone reponerLugar al cerrarla) */
+    var v = $('vitrina'), antes = v.getBoundingClientRect().top;
+    [['favoritos', guardados.favoritos], ['vistos', guardados.vistos]].forEach(function (z) {
+      var ul = $(z[0]).querySelector('ul'), hay = idsDe(z[1]).filter(function (id) { return por[id]; });   /* solo lo que sigue en la tienda */
+      ul.textContent = '';
+      hay.forEach(function (id) { ul.appendChild(mini(por[id], z[0])); });
+      $(z[0]).dataset.n = hay.length;
+    });
+    verGuardados();
+    var dif = v.getBoundingClientRect().top - antes;
+    if (dif && window.scrollY > 0 && ficha.id === null) window.scrollBy(0, dif);
+  }
+
+  /* «Pedir lo de la última vez» sale si de ese pedido hoy queda algo que se vende */
+  function lineasUltimo() { return guardados ? guardados.ultimo.leer() : []; }
+  function pintarUltimaVez() {
+    $('ultima').hidden = !guardados || !Object.keys(window.PE.paraLaCanasta(lineasUltimo(), por).canasta).length;
+  }
+  function recordarUltimo(lineas) {
+    /* Es un extra: pase lo que pase aquí, el pedido que ya llegó a la tienda no se frena */
+    try { if (guardados) { guardados.ultimo.escribir(lineas); pintarUltimaVez(); } } catch (e) { /* sin guardar */ }
+  }
+  /* Suma lo disponible a lo que ya hay en la canasta y la abre; lo que no está hoy se avisa arriba de las líneas */
+  function pedirLoDeLaUltimaVez() {
+    if (!guardados) return;
+    var r = window.PE.paraLaCanasta(lineasUltimo(), por), ids = Object.keys(r.canasta);
+    ids.forEach(function (id) { canasta[id] = Math.min((canasta[id] || 0) + r.canasta[id], 999); });
+    guardar(); ids.forEach(refrescar); pintarCanasta();
+    vista('canasta'); abrir();
+    avisarNoEstan(r.fuera.length ? 'No están hoy: ' + r.fuera.join(', ') : '');
+  }
+  function avisarNoEstan(texto) {
+    var no = $('noEstan');
+    no.textContent = texto;
+    no.hidden = !texto || vistaActual() !== 'canasta';
   }
 
   /* ---------- Pantallas del panel ---------- */
@@ -381,6 +526,7 @@
     $('resumen').hidden = cual !== 'canasta';
     $('vacio').hidden = cual !== 'canasta' || cuentas().n > 0;
     $('vaciar').hidden = cual !== 'canasta' || !cuentas().n;
+    $('noEstan').hidden = cual !== 'canasta' || !$('noEstan').textContent;
     $('datos').hidden = cual !== 'datos';
     $('pago').hidden = cual !== 'pago';
     $('pqr').hidden = cual !== 'qr';
@@ -465,6 +611,7 @@
     }).then(function (r) {
       pedido = r;
       guardarPedido(pedido);
+      recordarUltimo(lineas);   /* para «Pedir lo de la última vez»; solo si el pedido llegó */
       /* El pedido ya está en la tienda: la canasta queda vacía para la próxima */
       canasta = {}; guardar(); pintar(); pintarCanasta();
       pasoPago();
@@ -620,7 +767,7 @@
   }
 
   /* ---------- Panel ---------- */
-  function abrir() { $('panel').hidden = false; $('velo').hidden = false; $('cerrar').focus(); }
+  function abrir() { avisarNoEstan(''); $('panel').hidden = false; $('velo').hidden = false; $('cerrar').focus(); }
   function cerrar() {
     /* El pedido en curso no se pierde: queda la cinta de arriba para volver */
     $('panel').hidden = true; $('velo').hidden = true;
@@ -647,6 +794,7 @@
       }
     });
     $('verTodo').addEventListener('click', function () { verTodo(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); });
+    $('ultimaVez').addEventListener('click', pedirLoDeLaUltimaVez);
     $('limpiar').addEventListener('click', function (e) { e.preventDefault(); verTodo(); });
     $('q').addEventListener('input', function () { filtro = { cat: '', q: this.value, todo: true }; pintar(); });
     $('orden').addEventListener('change', pintar);
@@ -724,10 +872,13 @@
         if (!ok && caja) caja.hidden = true;
       });
       BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
+      guardados = abrirGuardados();
       pintarCategorias();
       eventos();
       eventosFicha();
       pintar();
+      pintarGuardados();   /* favoritos y vistos, solo lo que sigue en la tienda */
+      pintarUltimaVez();
       pintarCanasta();   /* también pinta la hora de llegada */
       vista('canasta');
       pintarAviso();

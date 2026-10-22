@@ -406,3 +406,31 @@ html.con-ficha{overflow:hidden}
 @media (prefers-reduced-motion:reduce){
   .ficha[open] .ficha-hoja{animation:none}
 }
+
+/* favoritos: el corazón. En la tarjeta es un círculo sobre la foto (arriba a la derecha; si hay sello
+   en esa esquina, queda debajo); en la ficha es un botón con su texto, junto a «Compartir». */
+.fav{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0;border:0;background:rgba(255,255,255,.94);color:var(--noche);font-weight:800}
+.fav svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fav[aria-pressed="true"] svg{color:var(--rojo);fill:currentColor}
+.prod .foto .fav{position:absolute;top:6px;right:6px;z-index:2;width:44px;height:44px;border-radius:50%;box-shadow:0 1px 6px rgba(14,26,71,.25)}
+.prod .foto.propia .sello{top:56px}
+.ficha-acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.ficha-acciones .compartir{margin-top:0}
+.fav-ficha{min-height:44px;padding:0 18px;border:2px solid var(--linea);border-radius:99px;background:#fff}
+.fav-ficha:hover,.fav-ficha[aria-pressed="true"]{border-color:var(--rojo)}
+
+/* favoritos y vistos hace poco: tarjetas chicas en una fila que se desliza; tocar una abre su ficha.
+   Reusan la tarjeta de «También le sirve» (.parecido) */
+.guardados{padding-block:12px 0}
+.guardados .sec-cab{margin-bottom:10px}
+.mini-lista{list-style:none;margin:0;padding:2px 2px 8px;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.mini-lista li{flex:0 0 140px;scroll-snap-align:start}
+.mini-foto{position:relative;display:block}
+.mini-foto .sello{position:absolute;left:6px;top:6px;background:#5b6478;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
+
+/* «Pedir lo de la última vez» (debajo de la portada) y el aviso de lo que hoy no está (arriba de la canasta).
+   El aviso lleva su id porque mi-cuenta/cuenta.css también tiene un .aviso, verde */
+.ultima{padding-block:6px 2px}
+.ultima-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800}
+.ultima-btn:hover{background:var(--verde);color:#fff}
+#noEstan{margin:10px 16px 0;padding:10px 12px;border:1px solid #ecd08a;border-radius:12px;background:#fff6dd;color:#5a4200;font-size:14px;font-weight:600}
