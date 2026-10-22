@@ -4,7 +4,8 @@
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
-   El pedido en curso (código + secreto) queda en este celular. Datos de la
+   El pedido en curso (código + secreto) queda en este celular. Cada producto tiene
+   su ficha (<dialog>) con dirección propia, #p=ID, para compartir. Datos de la
    base: siempre textContent. */
 (function () {
   'use strict';
@@ -31,6 +32,7 @@
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
   var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
+  var ficha = { id: null, empujada: false, desde: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial y quién la abrió */
 
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
@@ -110,13 +112,20 @@
     if (n <= 0) delete canasta[id]; else canasta[id] = Math.min(n, 999);
     guardar(); refrescar(id); pintarCanasta();
   }
-  /* Solo cambia el botón de ESE producto: la vitrina no se vuelve a pintar
-     entera (las fotos no parpadean ni la página salta) */
+  /* Solo cambia el botón de ESE producto (en la vitrina y en su ficha): la vitrina no se
+     vuelve a pintar entera (las fotos no parpadean ni la página salta) */
   function refrescar(id) {
-    document.querySelectorAll('#grilla [data-ctrl="' + id + '"]').forEach(function (v) {
-      var nuevo = control(por[id]);
+    document.querySelectorAll('#grilla [data-ctrl="' + id + '"], #ficha [data-ctrl="' + id + '"]').forEach(function (v) {
+      var nuevo = control(por[id]), enFicha = !!v.closest('#ficha');
+      var tenia = enFicha && v.contains(document.activeElement) ? document.activeElement : null;
       nuevo.dataset.ctrl = id;
       v.replaceWith(nuevo);
+      /* Dentro de la ficha el foco no se pierde al cambiar el botón: sigue en el lado que se tocó */
+      if (tenia && tenia.tagName === 'BUTTON') {
+        var botones = nuevo.querySelectorAll('button');
+        var vuelve = tenia.textContent === '−' ? botones[0] : botones[botones.length - 1];
+        if (vuelve) vuelve.focus();
+      }
     });
   }
 
@@ -195,6 +204,7 @@
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
     $('limpiar').hidden = !(filtro.cat || r.buscando);
+    $('avisoFicha').hidden = true;
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
     /* Buscó y no hay nada: el pedido se lo llevamos nosotros, con lo que escribió */
@@ -214,11 +224,155 @@
       var c = el('div', 'cuerpo');
       var ctrl = control(p);
       ctrl.dataset.ctrl = p.id;
-      c.append(el('h3', null, p.nombre), el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), ctrl);
+      /* El nombre abre la ficha (botón dentro del h3: el texto del h3 sigue siendo solo el nombre);
+         su toque se estira a toda la tarjeta y la foto también la abre */
+      var h3 = el('h3'), nombre = el('button', 'nombre', p.nombre);
+      nombre.type = 'button'; nombre.dataset.ficha = p.id;
+      nombre.addEventListener('click', function () { abrirFicha(p.id, true); });
+      h3.appendChild(nombre);
+      f.addEventListener('click', function (e) { if (!e.target.closest('.puntos')) abrirFicha(p.id, true); });
+      c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), ctrl);
       a.append(f, c);
       li.appendChild(a);
       g.appendChild(li);
     });
+  }
+
+  /* ---------- Ficha del producto (<dialog id="ficha">, con su dirección #p=ID para compartir) ---------- */
+  /* Otros productos de la misma categoría: primero los que hay, luego los más pedidos; máximo `max` */
+  function parecidos(p, max) {
+    if (!p.categoria) return [];
+    var n = function (o, k) { return o[k] ? 1 : 0; };
+    return cat.productos
+      .filter(function (o) { return o.categoria === p.categoria && o.id !== p.id; })
+      .map(function (o, i) { return { o: o, i: i }; })
+      .sort(function (a, b) { return (n(b.o, 'disponible') - n(a.o, 'disponible')) || (n(b.o, 'destacado') - n(a.o, 'destacado')) || (a.i - b.i); })
+      .slice(0, max)
+      .map(function (x) { return x.o; });
+  }
+
+  function pintarFicha(p) {
+    var f = $('fichaFotos');
+    f.textContent = '';
+    f.className = p.foto ? 'foto propia' : 'foto';
+    if (p.fotos && p.fotos.length > 1) carrusel(f, p.fotos);
+    else {
+      var i = el('img');
+      i.src = foto(p); i.alt = ''; i.decoding = 'async';
+      f.appendChild(i);
+    }
+    $('fichaCat').textContent = (cats[p.categoria] || {}).nombre || '';
+    $('fichaNombre').textContent = p.nombre;
+    $('fichaCodigo').textContent = 'Código ' + p.id;
+    $('fichaPrecio').textContent = pesos(p.precio);
+    var disp = $('fichaDisp');
+    disp.textContent = p.disponible ? 'Disponible' : 'Agotado';
+    disp.className = 'ficha-disp ' + (p.disponible ? 'hay' : 'no-hay');
+    var ctrl = control(p);
+    ctrl.dataset.ctrl = p.id;
+    $('fichaControl').textContent = '';
+    $('fichaControl').appendChild(ctrl);
+    var ul = $('parecidos'), lista = parecidos(p, 6);
+    ul.textContent = '';
+    $('parecidosCaja').hidden = !lista.length;
+    lista.forEach(function (o) {
+      var li = el('li'), b = el('button', 'parecido'), im = el('img', o.foto ? 'propia' : null);
+      b.type = 'button';
+      im.src = foto(o); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+      b.append(im, el('span', 'nm', o.nombre), el('span', 'pr', pesos(o.precio)));
+      if (!o.disponible) b.appendChild(el('span', 'ag', 'Agotado'));
+      /* Abre la ficha de ese producto en el mismo lugar: no apila historial */
+      b.addEventListener('click', function () { abrirFicha(o.id, false); });
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+  }
+
+  /* Abre la ficha. Con `empujar` (un toque) suma una entrada al historial: el «atrás» del celular
+     la cierra sin salir de la tienda. Sin él (entrar por el enlace, o saltar a un producto parecido)
+     solo cambia la dirección de la entrada en la que ya está. */
+  function abrirFicha(id, empujar) {
+    var p = por[id], d = $('ficha');
+    if (!p || typeof d.showModal !== 'function') return;
+    var yaAbierta = d.open;
+    $('avisoFicha').hidden = true;
+    pintarFicha(p);
+    ficha.id = p.id;
+    if (!yaAbierta) {
+      /* El foco vuelve al nombre de su tarjeta (también si se tocó la foto o se entró por el enlace) */
+      ficha.desde = document.querySelector('#grilla [data-ficha="' + p.id + '"]');
+      d.showModal();
+      document.documentElement.classList.add('con-ficha');
+    } else {
+      d.querySelector('.ficha-cuerpo').scrollTop = 0;
+      $('fichaNombre').focus({ preventScroll: true });
+    }
+    try {
+      if (empujar && !yaAbierta) { history.pushState({ ficha: p.id }, '', '#p=' + p.id); ficha.empujada = true; }
+      else {
+        if (!yaAbierta) ficha.empujada = false;
+        history.replaceState({ ficha: p.id }, '', '#p=' + p.id);
+      }
+    } catch (e) { /* sin historial: la ficha abre igual */ }
+  }
+
+  /* Cierra el diálogo y devuelve el foco, sin tocar el historial */
+  function soltarFicha() {
+    var d = $('ficha'), desde = ficha.desde;
+    ficha.id = null; ficha.desde = null; ficha.empujada = false;
+    document.documentElement.classList.remove('con-ficha');
+    if (d.open) d.close();
+    ['fichaFotos', 'fichaControl', 'parecidos'].forEach(function (i) { $(i).textContent = ''; });
+    if (desde && desde.isConnected) { try { desde.focus({ preventScroll: true }); } catch (e) { /* sin foco */ } }
+  }
+  function limpiarDireccion() {
+    try { if (/^#p=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* sin historial */ }
+  }
+  /* ✕, Escape, tocar fuera o «atrás». Si un toque la abrió, la entrada que sumó se quita con
+     history.back(); si se entró por el enlace no hay entrada que quitar (back sacaría de la
+     tienda): se cierra y se limpia la dirección. */
+  function cerrarFicha() {
+    if (ficha.id === null) return;
+    var empujada = ficha.empujada;
+    soltarFicha();
+    if (empujada) { try { history.back(); } catch (e) { limpiarDireccion(); } }
+    else limpiarDireccion();
+  }
+
+  /* La dirección manda: #p=ID abre la ficha; un id que ya no existe avisa y deja la tienda normal */
+  function fichaDeLaDireccion() {
+    var m = /^#p=([^&]*)$/.exec(location.hash);
+    if (!m) { if (ficha.id !== null) soltarFicha(); return; }
+    var id = m[1];
+    if (/^\d{1,9}$/.test(id) && Object.prototype.hasOwnProperty.call(por, id)) {
+      if (ficha.id !== Number(id)) abrirFicha(Number(id), false);
+      return;
+    }
+    if (ficha.id !== null) soltarFicha();
+    var aviso = $('avisoFicha');
+    aviso.textContent = 'Ese producto ya no está en la tienda.';
+    aviso.hidden = false;
+    limpiarDireccion();
+  }
+
+  /* Compartir: el menú del teléfono si lo hay; si no, WhatsApp con el nombre y el enlace */
+  function compartir(p) {
+    var url = location.origin + '/tienda/#p=' + p.id;
+    function porWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComponent(p.nombre + ' ' + url), '_blank', 'noopener'); }
+    if (!navigator.share) { porWhatsApp(); return; }
+    navigator.share({ title: p.nombre, text: p.nombre + ' · ' + pesos(p.precio), url: url }).catch(function (e) {
+      if (!e || e.name !== 'AbortError') porWhatsApp();   /* cancelar el menú no es un error */
+    });
+  }
+
+  function eventosFicha() {
+    var d = $('ficha');
+    $('fichaCerrar').addEventListener('click', cerrarFicha);
+    d.addEventListener('click', function (e) { if (e.target === d) cerrarFicha(); });   /* el fondo oscuro */
+    d.addEventListener('cancel', function (e) { e.preventDefault(); cerrarFicha(); });   /* Escape y el «atrás» de Android */
+    d.addEventListener('close', function () { if (!d.open) cerrarFicha(); });   /* si el navegador la cerró por su cuenta */
+    $('compartir').addEventListener('click', function () { if (ficha.id !== null) compartir(por[ficha.id]); });
+    window.addEventListener('popstate', fichaDeLaDireccion);
   }
 
   /* ---------- Pantallas del panel ---------- */
@@ -572,11 +726,13 @@
       BARRIOS.forEach(function (b) { var o = el('option'); o.value = b; $('barrios').appendChild(o); });
       pintarCategorias();
       eventos();
+      eventosFicha();
       pintar();
       pintarCanasta();   /* también pinta la hora de llegada */
       vista('canasta');
       pintarAviso();
       vigilar();
+      fichaDeLaDireccion();   /* un enlace con #p=ID abre esa ficha */
       setInterval(pintarLlegada, 60000);   /* la hora de llegada corre sola mientras la página está abierta */
     })
     .catch(function (e) {

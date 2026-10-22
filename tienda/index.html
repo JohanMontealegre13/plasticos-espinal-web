@@ -10,10 +10,10 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=11">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=12">
   <script src="/tienda/llegada.js?v=1" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=13" defer></script>
+  <script src="/tienda/tienda.js?v=14" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -35,6 +35,7 @@
 </header>
 
 <main class="envolver">
+  <p class="aviso-ficha" id="avisoFicha" role="status" hidden></p>
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
 
   <section class="portada">
@@ -102,6 +103,29 @@
 </div></footer>
 
 <button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
+
+<!-- Ficha de un producto: se abre con un toque y tiene su dirección (#p=ID) para compartir -->
+<dialog class="ficha" id="ficha" aria-labelledby="fichaNombre">
+  <div class="ficha-hoja">
+    <button class="ficha-x" id="fichaCerrar" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="ficha-cuerpo">
+      <div class="foto" id="fichaFotos"></div>
+      <div class="ficha-info">
+        <p class="ficha-cat" id="fichaCat"></p>
+        <h2 id="fichaNombre" tabindex="-1"></h2>
+        <p class="unidad" id="fichaCodigo"></p>
+        <p class="ficha-precio" id="fichaPrecio"></p>
+        <p class="ficha-disp" id="fichaDisp"></p>
+        <div class="ficha-control" id="fichaControl"></div>
+        <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
+      </div>
+      <section class="ficha-parecidos" id="parecidosCaja" aria-labelledby="parecidosTit" hidden>
+        <h3 id="parecidosTit">También le sirve</h3>
+        <ul id="parecidos"></ul>
+      </section>
+    </div>
+  </div>
+</dialog>
 
 <div class="velo" id="velo" hidden></div>
 <aside class="panel" id="panel" hidden aria-label="Su canasta">
