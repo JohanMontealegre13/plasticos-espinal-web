@@ -234,7 +234,7 @@ test('Regresión (3869274): no reaparece la promesa de envío gratis «sobre $50
   for (const p of paginas()) assert.doesNotMatch(leer(p), /env[ií]os? gratis en pedidos sobre/i, p);
 });
 
-test('el umbral de domicilio gratis es el mismo en el inicio y en la tienda ($60.000, Johan 2026-10-08)', () => {
+test('el umbral de domicilio gratis es el mismo en el inicio y en la tienda ($50.000, Johan 2026-10-22)', () => {
   const tienda = JSON.parse(leer('tienda/catalogo.json')).domicilio.gratis_desde;
   const inicio = leer('index.html');
   const valor = '$' + tienda.toLocaleString('es-CO');

@@ -26,7 +26,7 @@ const COMANDOS = {
  */
 const MUTACIONES = [
   /* Canasta y domicilio */
-  { parte: 'Domicilio', nombre: 'gratis desde MÁS de $60.000 (borde)', archivo: 'tienda/tienda.js', buscar: 's >= cat.domicilio.gratis_desde', poner: 's > cat.domicilio.gratis_desde', pruebas: ['e2e'] },
+  { parte: 'Domicilio', nombre: 'gratis desde MÁS de $50.000 (borde)', archivo: 'tienda/tienda.js', buscar: 's >= cat.domicilio.gratis_desde', poner: 's > cat.domicilio.gratis_desde', pruebas: ['e2e'] },
   { parte: 'Domicilio', nombre: 'el umbral suma el domicilio', archivo: 'tienda/tienda.js', buscar: 's >= cat.domicilio.gratis_desde', poner: 's + cat.domicilio.tarifa >= cat.domicilio.gratis_desde', pruebas: ['e2e'] },
   { parte: 'Domicilio', nombre: 'tarifa del catálogo a $5.000', archivo: 'tienda/catalogo.json', buscar: '"tarifa":4000', poner: '"tarifa":5000', pruebas: ['unit'] },
   { parte: 'Domicilio', nombre: 'el total no suma el domicilio', archivo: 'tienda/tienda.js', buscar: 't: s + d', poner: 't: s', pruebas: ['e2e'] },

@@ -38,7 +38,7 @@ export function vigilar(page) {
 export const CATALOGO_PRUEBA = {
   generado: '2026-10-07T10:00:00-05:00',
   muestra: true,
-  domicilio: { tarifa: 4000, gratis_desde: 60000 },
+  domicilio: { tarifa: 4000, gratis_desde: 50000 },
   whatsapp: '573183555246',
   categorias: [
     { id: 'vasos', nombre: 'Vasos', imagen: '/img/productos/vasos.webp' },
@@ -46,9 +46,9 @@ export const CATALOGO_PRUEBA = {
   ],
   productos: [
     { id: 1, nombre: 'Vaso grande', categoria: 'vasos', precio: 30000, destacado: true },
-    { id: 2, nombre: 'Vaso pequeño', categoria: 'vasos', precio: 29999, destacado: true },
+    { id: 2, nombre: 'Vaso pequeño', categoria: 'vasos', precio: 19999, destacado: true },
     { id: 3, nombre: 'Bolsa ecológica', categoria: 'bolsas', precio: 1, destacado: true },
-    { id: 4, nombre: 'Bolsa de 57 mil', categoria: 'bolsas', precio: 57000 },
+    { id: 4, nombre: 'Bolsa de 47 mil', categoria: 'bolsas', precio: 47000 },
     { id: 5, nombre: '<img src=x onerror="window.__xss=1">Bolsa rara', categoria: 'bolsas', precio: 1000 },
   ],
 };

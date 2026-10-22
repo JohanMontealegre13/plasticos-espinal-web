@@ -60,10 +60,10 @@ test('el catálogo publicado cumple el contrato', () => {
   assert.deepEqual(problemasCatalogo(catalogo), []);
 });
 
-test('domicilio: $4.000 por debajo de $60.000 en productos (decisión de Johan)', () => {
+test('domicilio: $4.000 por debajo de $50.000 en productos (decisión de Johan, 22-oct-2026)', () => {
   /* Si esto cambia, que sea a propósito: se actualiza DOMICILIO en lib.mjs y los textos de la tienda */
   assert.deepEqual(catalogo.domicilio, DOMICILIO);
-  assert.match(leer('tienda/index.html'), /Gratis desde <b>\$60\.000<\/b> en productos/);
+  assert.match(leer('tienda/index.html'), /Gratis desde <b>\$50\.000<\/b> en productos/);
 });
 
 test('el contrato rechaza los errores típicos de una exportación', () => {

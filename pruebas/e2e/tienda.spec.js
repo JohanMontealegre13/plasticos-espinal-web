@@ -15,34 +15,34 @@ test.describe('canasta y domicilio', () => {
     v.sinProblemas();
   });
 
-  test('bajo $60.000 en productos se cobra domicilio de $4.000', async ({ page }) => {
+  test('bajo $50.000 en productos se cobra domicilio de $4.000', async ({ page }) => {
     await abrirTienda(page);
     await agregar(page, 'Vaso grande');
-    await agregar(page, 'Vaso pequeño');           /* 59.999 */
+    await agregar(page, 'Vaso pequeño');           /* 49.999 */
     await page.locator('.btn-canasta').click();
-    await expect(page.locator('#sub')).toHaveText('$59.999');
+    await expect(page.locator('#sub')).toHaveText('$49.999');
     await expect(page.locator('#dom')).toHaveText('$4.000');
-    await expect(page.locator('#tot')).toHaveText('$63.999');
+    await expect(page.locator('#tot')).toHaveText('$53.999');
     await expect(page.locator('#meta')).toContainText('Agregue $1 más');
   });
 
-  test('desde $60.000 exactos en productos el domicilio es gratis', async ({ page }) => {
+  test('desde $50.000 exactos en productos el domicilio es gratis', async ({ page }) => {
     await abrirTienda(page);
     await agregar(page, 'Vaso grande');
     await agregar(page, 'Vaso pequeño');
-    await agregar(page, 'Bolsa ecológica');        /* 60.000 */
+    await agregar(page, 'Bolsa ecológica');        /* 50.000 */
     await page.locator('.btn-canasta').click();
-    await expect(page.locator('#sub')).toHaveText('$60.000');
+    await expect(page.locator('#sub')).toHaveText('$50.000');
     await expect(page.locator('#dom')).toHaveText('Gratis');
-    await expect(page.locator('#tot')).toHaveText('$60.000');
+    await expect(page.locator('#tot')).toHaveText('$50.000');
   });
 
   test('Regresión (68a745b): el umbral cuenta solo los productos, no el domicilio', async ({ page }) => {
     await abrirTienda(page);
-    await agregar(page, 'Bolsa de 57 mil');        /* 57.000 + 4.000 = 61.000, igual paga domicilio */
+    await agregar(page, 'Bolsa de 47 mil');        /* 47.000 + 4.000 = 51.000, igual paga domicilio */
     await page.locator('.btn-canasta').click();
     await expect(page.locator('#dom')).toHaveText('$4.000');
-    await expect(page.locator('#tot')).toHaveText('$61.000');
+    await expect(page.locator('#tot')).toHaveText('$51.000');
   });
 
   test('quitar con − hasta cero saca el producto y recalcula', async ({ page }) => {

@@ -10,8 +10,8 @@ export const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** El único WhatsApp del negocio, en formato internacional sin «+». */
 export const WHATSAPP = '573183555246';
 
-/** Reglas del domicilio de la tienda (decisión de Johan, 2026-10-07). */
-export const DOMICILIO = { tarifa: 4000, gratis_desde: 60000 };
+/** Reglas del domicilio de la tienda (Johan: tarifa 2026-10-07; gratis desde $50.000 en todos los domicilios, 2026-10-22). */
+export const DOMICILIO = { tarifa: 4000, gratis_desde: 50000 };
 
 /** @param {string} ruta ruta relativa a la raíz del sitio */
 export function leer(ruta) { return readFileSync(join(RAIZ, ruta), 'utf8'); }
