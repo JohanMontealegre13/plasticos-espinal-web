@@ -141,6 +141,10 @@ test('los términos citan los artículos de la ley y los plazos de la ley', () =
   assert.match(TERMINOS, /15 días hábiles/);
   assert.match(TERMINOS, /perecederos, de uso personal o hechos a la medida/);
 });
+test('el texto fijo de los términos no ofrece un correo (Johan, 22-oct-2026: no hay correo de reclamos)', () => {
+  const fijo = TERMINOS.replace(/<li data-vendedor="correo"[^>]*><\/li>/g, '');   /* el dato, si algún día se llena */
+  assert.doesNotMatch(fijo, /por correo/i);
+});
 test('los términos no fijan cifras que cambian (pesos, horas): eso lo muestra la tienda', () => {
   assert.doesNotMatch(TERMINOS, /\$\s*\d/);
   assert.doesNotMatch(TERMINOS, /\b\d{1,2}:\d{2}\b/);
