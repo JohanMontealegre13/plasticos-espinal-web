@@ -243,7 +243,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .texto-legal .vende,.texto-legal .vias{list-style:none;padding-left:0;overflow-wrap:anywhere}
 .texto-legal .vende-nombre{font-weight:800}
 .texto-legal .vias li{display:flex;align-items:center;min-height:44px}
-.texto-legal .volver-tienda{display:inline-flex;align-items:center;min-height:44px}
+/* el que se toca es el enlace, no el renglón: su caja también mide 44 px */
+.texto-legal .vende a,.texto-legal .vias a,.texto-legal .volver-tienda{display:inline-flex;align-items:center;min-height:44px}
 
 /* aviso del pedido en curso: cinta azul pegada bajo la cabecera.
    Arriba y no abajo: en el iPhone nada blanco toca el borde de abajo

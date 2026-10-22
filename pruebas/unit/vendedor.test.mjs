@@ -120,17 +120,14 @@ test('catalogo.json trae los cinco campos del vendedor como texto', () => {
   const v = JSON.parse(leer('tienda/catalogo.json')).vendedor;
   for (const k of ['nombre', 'documento', 'direccion', 'telefono', 'correo']) assert.equal(typeof v[k], 'string', k);
 });
-test('catalogo.json ya trae la dirección y el teléfono de la tienda', () => {
-  const v = JSON.parse(leer('tienda/catalogo.json')).vendedor;
-  assert.equal(v.direccion, 'Calle 7 #5-35, Centro, El Espinal, Tolima');
-  assert.equal(v.telefono, '318 355 5246');
-});
 test('los términos nombran el retracto de 5 días hábiles y no nombran Chicoral', () => {
   const t = leer('tienda/terminos/index.html');
   assert.match(t, /retracto/i); assert.match(t, /5 días hábiles/); assert.doesNotMatch(t, /Chicoral/i);
 });
 
 const TERMINOS = leer('tienda/terminos/index.html');
+const TIENDA = leer('tienda/index.html');
+const PRIVACIDAD = leer('tienda/privacidad/index.html');
 const SECCIONES = [
   'Quién vende', 'Precios', 'Domicilio', 'Tiempos', 'Pagos', 'Cambios y garantía',
   'Derecho de retracto', 'Reversión del pago', 'Peticiones, quejas y reclamos',
@@ -155,15 +152,41 @@ test('los términos hablan de usted', () => {
   assert.match(TERMINOS, /\busted\b/i);
   assert.doesNotMatch(TERMINOS, /(^|[^\p{L}])(tú|tienes|puedes|tu pedido|tus datos)([^\p{L}]|$)/iu);
 });
+/** Los nodos con data-vendedor="campo" de un HTML, con su etiqueta de apertura y lo que llevan adentro. */
+function nodosDe(html, campo) {
+  return [...html.matchAll(new RegExp(`(<([a-z0-9]+)[^>]*\\bdata-vendedor="${campo}"[^>]*>)([\\s\\S]*?)</\\2>`, 'g'))]
+    .map((m) => ({ apertura: m[1], dentro: m[3] }));
+}
 test('los términos pintan los cinco datos del vendedor, cada uno con su dato y su etiqueta en el mismo nodo', () => {
   for (const campo of ['nombre', 'documento', 'direccion', 'telefono', 'correo']) {
-    const nodos = [...TERMINOS.matchAll(new RegExp(`<[a-z0-9]+[^>]*\\bdata-vendedor="${campo}"[^>]*>`, 'g'))];
-    assert.ok(nodos.length >= 1, `falta data-vendedor="${campo}"`);
-    for (const [n] of nodos) assert.match(n, /\bhidden\b/, `data-vendedor="${campo}" debe empezar escondido`);
+    assert.ok(nodosDe(TERMINOS, campo).length >= 1, `falta data-vendedor="${campo}"`);
   }
   /* El nombre va sin etiqueta: es el primer renglón y su prueba espera solo el nombre */
   assert.doesNotMatch(TERMINOS, /data-vendedor="nombre"[^>]*data-etiqueta/);
   assert.equal([...TERMINOS.matchAll(/data-vendedor="nombre"/g)].length, 1);
+});
+test('lo que hoy no se sabe (nombre, documento, correo) nace escondido y vacío', () => {
+  for (const campo of ['nombre', 'documento', 'correo']) {
+    for (const { apertura, dentro } of nodosDe(TERMINOS, campo)) {
+      assert.match(apertura, /\bhidden\b/, `data-vendedor="${campo}" debe empezar escondido`);
+      assert.equal(dentro.trim(), '', `data-vendedor="${campo}" no lleva texto fijo`);
+    }
+  }
+});
+test('la dirección y el teléfono traen texto de respaldo a la vista: la sección 1 nunca queda vacía sin catalogo.json ni JavaScript', () => {
+  /* Es el mismo texto de la política de datos; vendedor.js lo reemplaza (en el mismo nodo, sin duplicar) con lo de catalogo.json */
+  const direccion = 'Calle 7 #5-35, Centro, El Espinal, Tolima';
+  assert.match(PRIVACIDAD, new RegExp(`${direccion}; WhatsApp 318 355 5246`));
+  for (const campo of ['direccion', 'telefono']) {
+    const nodos = nodosDe(TERMINOS, campo);
+    assert.ok(nodos.length >= 1, `falta data-vendedor="${campo}"`);
+    for (const { apertura, dentro } of nodos) assert.doesNotMatch(apertura, /\bhidden\b/, `data-vendedor="${campo}" debe verse sin JavaScript`);
+  }
+  const primeroDir = nodosDe(TERMINOS, 'direccion')[0].dentro;
+  assert.ok(primeroDir.includes(direccion), 'la dirección de respaldo');
+  assert.ok(nodosDe(TERMINOS, 'direccion').every((n) => n.dentro.includes(direccion)), 'cada lugar con dirección trae su respaldo');
+  const tel = nodosDe(TERMINOS, 'telefono')[0].dentro;
+  assert.match(tel, /<a href="https:\/\/wa\.me\/573183555246" target="_blank" rel="noopener">318 355 5246<\/a>/);
 });
 test('el enlace a la Superintendencia abre en otra pestaña con rel noopener', () => {
   const a = TERMINOS.match(/<a[^>]*href="https:\/\/www\.sic\.gov\.co"[^>]*>/);
@@ -179,14 +202,21 @@ test('los términos se cargan con la misma hoja de estilo, vendedor.js con defer
   assert.doesNotMatch(TERMINOS, /\sonclick=/i);
 });
 
-const TIENDA = leer('tienda/index.html');
-const PRIVACIDAD = leer('tienda/privacidad/index.html');
 for (const [nombre, html] of [['la tienda', TIENDA], ['la política de datos', PRIVACIDAD], ['los términos', TERMINOS]]) {
   test(`el pie de ${nombre} lleva el enlace a los términos y la línea de quién vende (escondida hasta tener datos)`, () => {
     const pie = html.match(/<footer class="pie">[\s\S]*?<\/footer>/);
     assert.ok(pie, 'falta <footer class="pie">');
     assert.match(pie[0], /<a href="\/tienda\/terminos\/">Términos, cambios y retracto<\/a>/);
     assert.match(pie[0], /<p class="vendedor" data-vendedor-linea hidden><\/p>/);
+  });
+}
+for (const pagina of ['index', 'pedidos', 'pedido', 'datos']) {
+  const ruta = pagina === 'index' ? 'tienda/mi-cuenta/index.html' : `tienda/mi-cuenta/${pagina}/index.html`;
+  test(`el pie de Mi cuenta (${pagina}) también lleva el enlace a los términos, sin la línea de quién vende`, () => {
+    const pie = leer(ruta).match(/<footer class="pie">[\s\S]*?<\/footer>/);
+    assert.ok(pie, 'falta <footer class="pie">');
+    assert.match(pie[0], /<a href="\/tienda\/terminos\/">Términos, cambios y retracto<\/a>/);
+    assert.doesNotMatch(pie[0], /data-vendedor/);
   });
 }
 test('«Seguir al pago» lleva al lado la aceptación de los términos (en otra pestaña, para no perder el pedido)', () => {
