@@ -51,11 +51,26 @@ test('las palabras de relleno no cuentan', () => {
   assert.deepEqual(ids(buscar(P, 'vaso de 7 oz', S)), [210]);
   assert.deepEqual(ids(buscar(P, 'bolsa x kraft', S)), [305]);
 });
-test('consulta de puras palabras de relleno devuelve todo', () => {
-  assert.equal(buscar(P, 'de la el', S).length, 8);
+test('solo espacios (o nada) devuelve todo; solo relleno se busca como cualquier palabra', () => {
   assert.equal(buscar(P, '', S).length, 8);
-  assert.deepEqual(palabrasBuscadas('  de la  '), []);
+  assert.equal(buscar(P, ' \t ', S).length, 8);
+  assert.deepEqual(ids(buscar(P, 'con', S)), [141]);          /* de camino a «contenedor»: no se muestra toda la tienda */
+  assert.deepEqual(ids(buscar(P, 'de', S)), [520]);           /* «detergente» empieza por «de» */
+  assert.deepEqual(buscar(P, 'de la', S), []);                /* «de» y «la»: ninguna palabra empieza por «la» */
+  assert.deepEqual(buscar(P, 'para', S), []);
+});
+test('el relleno de un nombre se puede buscar, y el de una búsqueda con más palabras no estorba', () => {
+  const l = [prod(1, 'Bolsa para basura x10'), prod(2, 'Vaso x10')];
+  assert.deepEqual(ids(buscar(l, 'para', {})), [1]);          /* sola, «para» es una palabra más */
+  assert.deepEqual(ids(buscar(l, 'bolsa para basura', {})), [1]);
+  assert.deepEqual(ids(buscar(l, 'bolsa basura', {})), [1]);
+  assert.deepEqual(ids(buscar(l, 'vaso para', {})), [2]);     /* acompañada, «para» se ignora */
+});
+test('palabrasBuscadas: sin relleno si queda algo, con él si es lo único, nada si son espacios', () => {
+  assert.deepEqual(palabrasBuscadas('  de la  '), ['de', 'la']);
   assert.deepEqual(palabrasBuscadas('Vasos DE Papel'), ['vasos', 'papel']);
+  assert.deepEqual(palabrasBuscadas('   '), []);
+  assert.deepEqual(palabrasBuscadas(''), []);
 });
 test('consulta vacía devuelve una copia, en el mismo orden', () => {
   const todo = buscar(P, '', S);
@@ -70,6 +85,15 @@ test('un número solo casa con el código exacto o con una palabra que empiece i
 test('un error de número no casa con otro número', () => {
   const l = [prod(1, 'Caja 12345 und')];
   assert.deepEqual(buscar(l, '12346', S), []);
+});
+test('una medida que no existe no se confunde con la de al lado', () => {
+  assert.deepEqual(buscar(P, '25x35', S), []);                         /* solo hay 25x25 */
+  const l = [prod(1, 'Bolsa 40x60 x100 und'), prod(2, 'Bolsa 40x60 negra x50 und')];
+  assert.deepEqual(buscar(l, '40x70', {}), []);
+  assert.deepEqual(buscar(l, 'bolsa 40x70', {}), []);
+  assert.deepEqual(ids(buscar(l, '40x60', {})), [2, 1]);               /* la que sí existe */
+  assert.deepEqual(ids(buscar(P, '25x2', S)), [191]);                  /* y mientras la escribe, por el comienzo */
+  assert.deepEqual(buscar([prod(1, 'Caja x1000 und')], 'x1001', {}), []);
 });
 test('una letra de menos, de más o dos cambiadas de sitio cuentan como un error', () => {
   assert.deepEqual(ids(buscar(P, 'pitilo', S)), [228]);      /* le falta una «l» */
@@ -100,6 +124,18 @@ test('el orden: código, luego el que empieza por la primera palabra, luego dest
   assert.deepEqual(ids(buscar(l, 'vaso', {})), [40, 20, 10, 30, 5]);
   assert.deepEqual(ids(buscar(l, '5', {})), [5]);
   assert.deepEqual(ids(buscar([prod(7, 'Vaso 7 oz'), prod(8, 'Bolsa 7 kilos', { destacado: true }), prod(7000, 'Caja 7 cm')], '7', {})), [7, 8, 7000]);
+});
+test('entre los que empiezan igual, los que hay van antes que los agotados aunque el agotado sea más pedido', () => {
+  const l = [
+    prod(1, 'Vaso blanco x50', { disponible: false, destacado: true }),
+    prod(2, 'Vaso negro x50'),
+    prod(3, 'Vaso rojo x50', { destacado: true }),
+  ];
+  assert.deepEqual(ids(buscar(l, 'vaso', {})), [3, 2, 1]);
+});
+test('empezar por la primera palabra pesa más que estar agotado', () => {
+  const l = [prod(1, 'Tapa de vaso x10'), prod(2, 'Vaso x10', { disponible: false })];
+  assert.deepEqual(ids(buscar(l, 'vaso', {})), [2, 1]);
 });
 test('el nombre se compara en español (la ñ y las tildes no desordenan)', () => {
   const l = [prod(1, 'Zapato vaso'), prod(2, 'Ñame vaso'), prod(3, 'Ánfora vaso'), prod(4, 'Nube vaso')];

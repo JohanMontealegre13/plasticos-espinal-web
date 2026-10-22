@@ -172,12 +172,17 @@
   /* Qué se ve y en qué orden. Buscando con «Más pedidos» manda lo más parecido a lo escrito
      (PE.buscar: el código exacto va primero); con otro orden, el que escogió la persona. */
   function listar() {
-    var PE = window.PE, consulta = filtro.q.trim(), modo = $('orden').value;   /* PE: tienda/buscar.js */
+    var PE = window.PE || {}, consulta = filtro.q.trim(), modo = $('orden').value;   /* PE: tienda/buscar.js */
     var base = cat.productos.filter(function (p) {
       if (filtro.cat && p.categoria !== filtro.cat) return false;
       return filtro.todo || p.destacado;
     });
-    var buscando = PE.palabrasBuscadas(consulta).length > 0;   /* solo «de», «la»… no es buscar */
+    if (!PE.buscar || !PE.ordenar || !PE.palabrasBuscadas) {
+      /* buscar.js no cargó: la tienda sigue, con la búsqueda simple de antes y sin orden */
+      var q = norm(consulta);
+      return { lista: q ? base.filter(function (p) { return norm(p.nombre).indexOf(q) >= 0; }) : base, consulta: consulta, buscando: !!q };
+    }
+    var buscando = PE.palabrasBuscadas(consulta).length > 0;   /* solo espacios no es buscar */
     if (!buscando) return { lista: PE.ordenar(base, modo), consulta: consulta, buscando: false };
     var lista = PE.buscar(base, consulta, cat.sinonimos);
     return { lista: modo === 'pedidos' ? lista : PE.ordenar(lista, modo), consulta: consulta, buscando: true };

@@ -135,13 +135,46 @@ test('al buscar con «Más pedidos» manda la relevancia; con otro orden, el ord
   await expect(nombres).toHaveText(['Vaso térmico 12 oz', 'Vaso 7 oz blanco Wau x50 und']);
 });
 
-test('una consulta de puras palabras de relleno se trata como vacía', async ({ page }) => {
+test('solo relleno se busca como cualquier palabra: «con», camino a «contenedor», no muestra toda la tienda', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('#q').fill('de');
+  await page.locator('#q').fill('con');
+  await expect(page.locator('#tituloVitrina')).toHaveText('Resultados para «con»');
+  await expect(page.locator('#grilla li h3')).toHaveText(['Contenedor icopor J1 x25 und']);
+  await page.locator('#q').fill('de la');
+  await expect(page.locator('#grilla li')).toHaveCount(0);
+  await expect(page.locator('#pedirloWa')).toHaveAttribute('href', 'https://wa.me/573183555246?text=' + encodeURIComponent('Hola, busco: de la'));
+});
+
+test('solo espacios es no buscar nada', async ({ page }) => {
+  await abrirTienda(page);
+  await page.locator('#q').fill('   ');
   await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
   await expect(page.locator('#grilla li')).toHaveCount(8);
   await expect(page.locator('#pedirloWa')).toBeHidden();
   await expect(page.locator('#limpiar')).toBeHidden();
+});
+
+test('una medida que no existe no muestra la de al lado: ofrece pedirla', async ({ page }) => {
+  await abrirTienda(page);
+  await page.locator('#q').fill('25x35');                     /* solo hay servilletas de 25x25 */
+  await expect(page.locator('#grilla li')).toHaveCount(0);
+  await expect(page.locator('#pedirloWa')).toHaveAttribute('href', 'https://wa.me/573183555246?text=' + encodeURIComponent('Hola, busco: 25x35'));
+  await page.locator('#q').fill('25x25');
+  await expect(page.locator('#grilla li h3')).toHaveText(['Servilleta 25x25 x300 und']);
+});
+
+test('si buscar.js no carga, la tienda sigue con la búsqueda simple de antes', async ({ page }) => {
+  await page.route('**/tienda/buscar.js*', (r) => r.fulfill({ status: 404, body: '' }));
+  await abrirTienda(page);
+  await expect(page.locator('#estado')).toHaveText('');
+  await page.locator('#q').fill('icopor');
+  await expect(page.locator('#grilla li h3')).toHaveText(['Contenedor icopor J1 x25 und']);
+  await page.locator('#q').fill('manguera');
+  await expect(page.locator('#grilla li')).toHaveCount(0);
+  await expect(page.locator('#pedirloWa')).toBeVisible();
+  await page.locator('#orden').selectOption('menor');        /* sin orden, pero sin romperse */
+  await page.locator('#q').fill('');
+  await expect(page.locator('#grilla li')).toHaveCount(8);   /* sin búsqueda: todos */
 });
 
 test('«Ver todo» limpia la búsqueda y conserva el orden elegido', async ({ page }) => {

@@ -16,23 +16,35 @@
      comparan por su raíz, así que «pitillos» y «pitillo» son lo mismo ahí también.
      Un valor con varias palabras cuenta como alternativas, no como una frase.
 
+   Las palabras de relleno («de», «para», «con»…) no cuentan mientras quede alguna
+   otra; si lo escrito es SOLO relleno se busca como cualquier palabra (así «con»,
+   camino a «contenedor», no muestra toda la tienda).
+
    Orden de lo que sale: el código exacto, luego los que EMPIEZAN por lo primero
-   que se escribió, luego los «Más pedidos» y al final por nombre. */
+   que se escribió, luego los que hay antes que los agotados, luego los «Más pedidos»
+   y al final por nombre. */
 (function (raiz) {
   'use strict';
 
   var RELLENO = ['de', 'del', 'la', 'el', 'los', 'las', 'para', 'con', 'y', 'x', 'por', 'un', 'una'];
-  var DESDE_LETRAS = 5;                    /* desde cuántas letras se perdona un error de dedo */
+  var DESDE_LETRAS = 5;                    /* desde cuántas letras (sin números) se perdona un error de dedo */
 
   /* minúsculas, sin tildes, y todo lo que no sea letra o número pasa a espacio */
   function normalizar(texto) {
     return String(texto == null ? '' : texto).toLowerCase().normalize('NFD')
-      .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ');
+      .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ');
   }
 
-  /* Las palabras de un texto, ya normalizadas y sin las de relleno */
+  /* Todas las palabras de un texto, ya normalizadas (las de un nombre de producto, con su relleno) */
+  function dividir(texto) {
+    return normalizar(texto).split(' ').filter(Boolean);
+  }
+
+  /* Las palabras de una búsqueda: sin las de relleno, salvo que todas lo sean (entonces valen todas) */
   function palabras(texto) {
-    return normalizar(texto).split(' ').filter(function (w) { return w && RELLENO.indexOf(w) < 0; });
+    var todas = dividir(texto);
+    var utiles = todas.filter(function (w) { return RELLENO.indexOf(w) < 0; });
+    return utiles.length ? utiles : todas;
   }
 
   /* Raíz: sin la marca de plural («contenedores» → «contenedor», «vasos» → «vaso») */
@@ -78,7 +90,7 @@
         raiz: r,
         numero: numero,
         sinonimos: claves[r] || [],
-        perdona: !numero && r.length >= DESDE_LETRAS
+        perdona: !/[0-9]/.test(r) && r.length >= DESDE_LETRAS      /* una medida como 25x35 no se confunde con 25x25 */
       };
     });
   }
@@ -109,17 +121,18 @@
     var primera = pedido[0].raiz;
     var hallados = [];
     productos.forEach(function (p, orden) {
-      var nombre = palabras(p.nombre).map(raizDe);
+      var nombre = dividir(p.nombre).map(raizDe);
       for (var k = 0; k < pedido.length; k++) if (!casa(pedido[k], p, nombre)) return;
       hallados.push({
         p: p,
         orden: orden,
         codigo: pedido.some(function (w) { return w.numero && w.palabra === String(p.id); }),
-        empieza: nombre.length > 0 && nombre[0].indexOf(primera) === 0
+        empieza: nombre.length > 0 && nombre[0].indexOf(primera) === 0,
+        hay: !!p.disponible
       });
     });
     hallados.sort(function (a, b) {
-      return (b.codigo - a.codigo) || (b.empieza - a.empieza) ||
+      return (b.codigo - a.codigo) || (b.empieza - a.empieza) || (b.hay - a.hay) ||
         (!!b.p.destacado - !!a.p.destacado) || comparar(a.p.nombre, b.p.nombre) || (a.orden - b.orden);
     });
     return hallados.map(function (h) { return h.p; });
@@ -142,5 +155,5 @@
   raiz.PE = raiz.PE || {};
   raiz.PE.buscar = buscar;
   raiz.PE.ordenar = ordenar;
-  raiz.PE.palabrasBuscadas = palabras;   /* para que la página sepa si lo escrito cuenta como consulta */
+  raiz.PE.palabrasBuscadas = palabras;   /* para que la página sepa si hay algo que buscar (solo espacios = nada) */
 })(typeof window !== 'undefined' ? window : globalThis);
