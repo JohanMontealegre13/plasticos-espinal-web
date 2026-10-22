@@ -159,11 +159,44 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   (nombre del archivo) y la imagen pasa por el intermediario
   (`/tienda/mi-cuenta/api/tienda/foto/<archivo>`), así que sale en la tienda
   sola en cuanto se sube al CRM. Sin foto, la de su categoría.
-- Lee `tienda/catalogo.json`. Hoy trae **productos de muestra**; en la fase 2 lo
-  publica el CRM cada noche con las 80 referencias marcadas «Se vende en línea».
-- Forma del archivo: `domicilio` (`tarifa`, `gratis_desde`), `whatsapp`,
-  `categorias` (`id`, `nombre`, `imagen`) y `productos` (`id`, `nombre`,
-  `categoria`, `precio` con IVA, `destacado` e `imagen` opcionales).
-- La canasta se guarda en el navegador y se envía a WhatsApp con un código
-  `PE-XXXX` y el `[#id]` de cada producto. El bot recalcula los precios con el
-  CRM: el total del mensaje es solo de referencia.
+- Los productos, precios, disponibilidad y domicilio salen del CRM (por el
+  intermediario `/tienda/mi-cuenta/api/tienda/catalogo`): la tienda no tiene
+  precios propios.
+- `tienda/catalogo.json` trae solo lo de la página y Johan lo cambia a mano.
+  Todo es opcional: si una clave falta, queda mal escrita o el archivo no
+  carga, la tienda sigue sin eso (sin horario, por ejemplo, queda el texto fijo
+  de la franja). Su `nota` repite esta explicación para quien abre el archivo.
+  - `whatsapp`: el número entre comillas, solo dígitos y con el 57 adelante.
+  - `pago`: `qr` (la imagen del QR Bre-B) y `llave` (el texto de la llave).
+  - `categorias`: la foto de cada categoría (`id`, `nombre`, `imagen`); va a
+    la categoría del CRM cuyo nombre lleva la primera palabra de este.
+  - `horario.alistar_min`: los minutos que tarda en alistar y llevar un pedido,
+    contando solo los minutos en que la tienda está abierta.
+  - `horario.dias`: los tramos abiertos de cada día, como
+    `[["08:00", "12:30"], ["14:00", "18:30"]]`: hora de 24 (`HH:MM`) y la de
+    abrir antes que la de cerrar. Los días van en minúscula y sin tilde
+    (`domingo`, `lunes`, `martes`, `miercoles`, `jueves`, `viernes`, `sabado`);
+    un día que no está, o con `[]`, no abre.
+  - `horario.festivos`: las fechas de los festivos, `"AAAA-MM-DD"`. **Hay que
+    renovar la lista cada año**: la que trae hoy llega hasta el 2027-12-25, y
+    después de la última fecha la tienda trata los festivos como días normales.
+  - `horario.festivo`: el día de `dias` con cuyo horario se atiende en
+    festivo, entre comillas (`"domingo"`). Sin esta clave, en festivo no se
+    atiende.
+  - `sinonimos`: `"palabra": ["otra", "otra más"]`. Quien busca la palabra
+    (una sola) también ve los productos que tienen alguna de las otras. Va en
+    **un solo sentido**: para que valga al revés, se escribe también al revés.
+  - `entrega`: el punto de la tienda (`tienda.lat`, `tienda.lng`) y
+    `radio_km`, hasta dónde en línea recta se acepta la ubicación del GPS del
+    cliente (solo El Espinal). Números sin comillas.
+  - `vendedor`: quién vende, como pide la Ley 1480 (`nombre`, `documento`,
+    `direccion`, `telefono`, `correo`), entre comillas. Sale en el pie de la
+    tienda y en los términos; lo vacío (`""`) no se muestra.
+- Después de cambiar el archivo: `cd pruebas && npm test`.
+  `unit/catalogo.test.mjs` es la única prueba que lee el archivo de verdad y
+  dice en palabras qué quedó mal escrito; las demás usan copias congeladas
+  (`pruebas/unit/fixtures/` y `SITIO_FIJO` en `pruebas/e2e/ayudas.js`), así
+  que cambiar una hora, un festivo o un sinónimo no las pone rojas.
+- La canasta se guarda en el navegador; «Pedir ya» manda el pedido al CRM
+  «Por confirmar» (el CRM pone precios y domicilio) y luego se paga con el QR
+  Bre-B o en efectivo.
