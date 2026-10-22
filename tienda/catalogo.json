@@ -94,5 +94,16 @@
       "2027-12-08",
       "2027-12-25"
     ]
+  },
+  "sinonimos": {
+    "icopor": ["poliestireno", "espuma"],
+    "portacomidas": ["contenedor", "coca"],
+    "coca": ["contenedor"],
+    "pitillo": ["pajilla", "popote", "sorbete"],
+    "pajilla": ["pitillo"],
+    "popote": ["pitillo"],
+    "sorbete": ["pitillo"],
+    "cubierto": ["tenedor", "cuchara", "cuchillo"],
+    "talego": ["bolsa"]
   }
 }

@@ -10,9 +10,10 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=10">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=11">
   <script src="/tienda/llegada.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=12" defer></script>
+  <script src="/tienda/buscar.js?v=1" defer></script>
+  <script src="/tienda/tienda.js?v=13" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -60,8 +61,16 @@
   </section>
 
   <section class="sec" id="vitrina">
-    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a></div>
+    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a>
+      <label class="orden" for="orden">Ordenar por <select id="orden">
+        <option value="pedidos">Más pedidos</option>
+        <option value="menor">Menor precio</option>
+        <option value="mayor">Mayor precio</option>
+        <option value="nombre">Nombre A-Z</option>
+      </select></label>
+    </div>
     <p class="estado" id="estado" role="status">Cargando productos…</p>
+    <a class="pedir-wa" id="pedirloWa" href="https://wa.me/" target="_blank" rel="noopener" hidden>¿No lo encuentra? Pídalo por WhatsApp</a>
     <ul class="grilla" id="grilla"></ul>
   </section>
 

@@ -1,6 +1,6 @@
 /* Plásticos Espinal · tienda en línea (versión de prueba, detrás de contraseña).
    Los productos salen del CRM (precio y si hay o no; nunca cuántas quedan).
-   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos y horario.
+   /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos, horario y sinónimos.
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
    (por el intermediario /tienda/mi-cuenta/api/tienda/…) → medio de pago (QR
    Bre-B o efectivo) → pantalla del pedido, que pregunta cada tanto en qué va.
@@ -169,20 +169,33 @@
     });
   }
 
-  function pintar() {
-    var g = $('grilla'), q = norm(filtro.q.trim());
-    g.textContent = '';
-    var lista = cat.productos.filter(function (p) {
+  /* Qué se ve y en qué orden. Buscando con «Más pedidos» manda lo más parecido a lo escrito
+     (PE.buscar: el código exacto va primero); con otro orden, el que escogió la persona. */
+  function listar() {
+    var PE = window.PE, consulta = filtro.q.trim(), modo = $('orden').value;   /* PE: tienda/buscar.js */
+    var base = cat.productos.filter(function (p) {
       if (filtro.cat && p.categoria !== filtro.cat) return false;
-      if (q && norm(p.nombre).indexOf(q) < 0) return false;
       return filtro.todo || p.destacado;
     });
+    var buscando = PE.palabrasBuscadas(consulta).length > 0;   /* solo «de», «la»… no es buscar */
+    if (!buscando) return { lista: PE.ordenar(base, modo), consulta: consulta, buscando: false };
+    var lista = PE.buscar(base, consulta, cat.sinonimos);
+    return { lista: modo === 'pedidos' ? lista : PE.ordenar(lista, modo), consulta: consulta, buscando: true };
+  }
+
+  function pintar() {
+    var g = $('grilla'), r = listar(), lista = r.lista;
+    g.textContent = '';
     var titulo = filtro.cat ? (cats[filtro.cat] || {}).nombre
-      : (q ? 'Resultados para «' + filtro.q.trim() + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
+      : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
-    $('limpiar').hidden = !(filtro.cat || q);
+    $('limpiar').hidden = !(filtro.cat || r.buscando);
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
+    /* Buscó y no hay nada: el pedido se lo llevamos nosotros, con lo que escribió */
+    var pedirlo = $('pedirloWa'), sinNada = r.buscando && !lista.length && !!cat.whatsapp;
+    pedirlo.hidden = !sinNada;
+    if (sinNada) pedirlo.href = 'https://wa.me/' + cat.whatsapp + '?text=' + encodeURIComponent('Hola, busco: ' + r.consulta);
     lista.forEach(function (p) {
       var li = el('li'), a = el('article', 'prod'), f = el('div', p.foto ? 'foto propia' : 'foto');
       if (p.fotos && p.fotos.length > 1) carrusel(f, p.fotos);
@@ -477,6 +490,7 @@
     $('verTodo').addEventListener('click', function () { verTodo(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); });
     $('limpiar').addEventListener('click', function (e) { e.preventDefault(); verTodo(); });
     $('q').addEventListener('input', function () { filtro = { cat: '', q: this.value, todo: true }; pintar(); });
+    $('orden').addEventListener('change', pintar);
     $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('vitrina').scrollIntoView({ behavior: 'smooth' }); });
     $('btnq').addEventListener('click', function () { $('vitrina').scrollIntoView({ behavior: 'smooth' }); });
     $('cerrar').addEventListener('click', cerrar);
@@ -531,6 +545,7 @@
       if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
         domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp, horario: sitio.horario,
+        sinonimos: sitio.sinonimos,
         categorias: crm.categorias.map(function (c) {
           return { id: c.id, nombre: c.nombre, imagen: fotoCategoria(c.nombre, sitio.categorias || []) };
         }),

@@ -333,3 +333,12 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .pqr.entra,.pqr.entra *,.pqr #yaPague,.panel[data-vista="final"],.aviso-pedido .pulso{animation:none!important}
   .pqr.entra .espera i::after{width:100%}
 }
+
+/* orden de la vitrina y «pídalo por WhatsApp» cuando la búsqueda no encuentra nada */
+.sec-cab{flex-wrap:wrap}
+.sec-cab .orden{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--texto2)}
+/* 16px: así el iPhone no acerca la pantalla al tocar la lista */
+.sec-cab .orden select{min-height:44px;max-width:100%;padding:0 12px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--texto);font:600 16px var(--font);cursor:pointer}
+.sec-cab .orden select:focus-visible{border-color:var(--azul)}
+.pedir-wa{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;margin:0 0 12px;border-radius:99px;background:var(--verde);color:#fff;font-weight:800;text-decoration:none}
+.pedir-wa:hover{background:#0b6236}
