@@ -177,6 +177,8 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - Guarda en el navegador el consecutivo, lo vendido por día (90 días),
   reimpresión con «* COPIA *» y anulación del último tiquete.
 - Los datos del encabezado están en el objeto `NEGOCIO` al inicio del script.
+- El archivo va en ASCII puro (tildes como `&#xF3;` en el HTML y `\u00f3` en el
+  JS): Gmail recodifica a Latin-1 los adjuntos `.html` y dañaba las tildes.
 - «Ajustes → Crear acceso directo» descarga un `.bat` que abre la caja como
   ventana propia con `--kiosk-printing` (imprime directo en la impresora
   predeterminada, sin ventana de impresión).

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Salsamentaria Espinal · Caja</title>
+<title>Salsamentaria Espinal &#xB7; Caja</title>
 <style>
 :root{--fondo:#f4f2ed;--tinta:#1c1b19;--suave:#5f5b53;--borde:#d8d2c6;--verde:#0f7a43;--verde-osc:#0a5c32;--rojo:#b3261e}
 *{box-sizing:border-box}
@@ -67,11 +67,11 @@ td:first-child,th:first-child{text-align:left}
   <label class="etiqueta" for="valor">Valor de la venta</label>
   <div class="monto"><span>$</span><input id="valor" inputmode="numeric" autocomplete="off" placeholder="0" autofocus></div>
   <button id="imprimir" type="button">IMPRIMIR TIQUETE</button>
-  <p class="pista">Escriba el valor y presione <b>Enter</b> o el botón verde.</p>
+  <p class="pista">Escriba el valor y presione <b>Enter</b> o el bot&#xF3;n verde.</p>
   <p id="aviso" role="status" aria-live="polite"></p>
   <section class="cuadro">
     <div class="fila hoy"><span>Vendido hoy (<span id="hoyCant">0</span> tiquetes)</span><strong id="hoyTotal">$0</strong></div>
-    <div class="fila ultimo"><span id="ultimo">Aún no hay tiquetes.</span>
+    <div class="fila ultimo"><span id="ultimo">A&#xFA;n no hay tiquetes.</span>
       <span><button class="chico" id="copia" type="button">Reimprimir copia</button> <button class="chico peligro" id="anular" type="button">Anular</button></span></div>
   </section>
   <details>
@@ -80,10 +80,10 @@ td:first-child,th:first-child{text-align:left}
       <div>Papel de la impresora:
         <label><input type="radio" name="papel" value="58"> 58 mm</label>
         <label><input type="radio" name="papel" value="80"> 80 mm</label></div>
-      <div>Número del próximo tiquete: <input id="proximo" type="number" min="1" step="1"> <button class="chico" id="guardarProx" type="button">Guardar</button></div>
-      <div><b>Imprimir sin que salga la ventana de impresión:</b> deje este archivo en su sitio definitivo (por ejemplo, el Escritorio), ponga la impresora de tiquetes como <i>predeterminada</i> en Windows y oprima
+      <div>N&#xFA;mero del pr&#xF3;ximo tiquete: <input id="proximo" type="number" min="1" step="1"> <button class="chico" id="guardarProx" type="button">Guardar</button></div>
+      <div><b>Imprimir sin que salga la ventana de impresi&#xF3;n:</b> deje este archivo en su sitio definitivo (por ejemplo, el Escritorio), ponga la impresora de tiquetes como <i>predeterminada</i> en Windows y oprima
         <button class="chico" id="acceso" type="button">Crear acceso directo</button>. Abra la caja siempre con ese acceso directo.</div>
-      <div><b>Últimos días</b><table><thead><tr><th>Día</th><th>Tiquetes</th><th>Total</th></tr></thead><tbody id="dias"></tbody></table></div>
+      <div><b>&#xDA;ltimos d&#xED;as</b><table><thead><tr><th>D&#xED;a</th><th>Tiquetes</th><th>Total</th></tr></thead><tbody id="dias"></tbody></table></div>
     </div>
   </details>
 </main>
@@ -181,7 +181,7 @@ td:first-child,th:first-child{text-align:left}
   function anular() {
     var u = estado.ultimo;
     if (!u || u.anulado) return;
-    if (!confirm('¿Anular el tiquete No. ' + numero(u.n) + ' por ' + dinero(u.v) + '?\nSe resta de lo vendido ese día.')) return;
+    if (!confirm('\u00bfAnular el tiquete No. ' + numero(u.n) + ' por ' + dinero(u.v) + '?\nSe resta de lo vendido ese d\u00eda.')) return;
     var dia = estado.dias[u.d];
     if (dia) { dia.t -= 1; dia.s -= u.v; }
     u.anulado = true;
@@ -204,8 +204,8 @@ td:first-child,th:first-child{text-align:left}
     $('hoyTotal').textContent = dinero(hoy.s);
     var u = estado.ultimo;
     $('ultimo').textContent = u
-      ? 'Último: No. ' + numero(u.n) + ' · ' + dinero(u.v) + ' · ' + u.h + (u.anulado ? ' (ANULADO)' : '')
-      : 'Aún no hay tiquetes.';
+      ? '\u00daltimo: No. ' + numero(u.n) + ' \u00b7 ' + dinero(u.v) + ' \u00b7 ' + u.h + (u.anulado ? ' (ANULADO)' : '')
+      : 'A\u00fan no hay tiquetes.';
     $('copia').disabled = $('anular').disabled = !u || !!u.anulado;
     document.body.classList.toggle('p80', Number(estado.papel) === 80);
     document.querySelectorAll('input[name=papel]').forEach(function (r) { r.checked = Number(r.value) === Number(estado.papel); });
@@ -213,10 +213,10 @@ td:first-child,th:first-child{text-align:left}
     $('dias').innerHTML = Object.keys(estado.dias).sort().reverse().slice(0, 14).map(function (d) {
       var p = d.split('-');
       return '<tr><td>' + p[2] + '/' + p[1] + '/' + p[0] + '</td><td>' + estado.dias[d].t + '</td><td>' + dinero(estado.dias[d].s) + '</td></tr>';
-    }).join('') || '<tr><td colspan="3">Sin ventas todavía.</td></tr>';
+    }).join('') || '<tr><td colspan="3">Sin ventas todav\u00eda.</td></tr>';
   }
 
-  // Descarga un .bat que abre esta página en Edge o Chrome, como ventana propia
+  // Descarga un .bat que abre esta pagina en Edge o Chrome, como ventana propia
   // y con --kiosk-printing (imprime directo en la impresora predeterminada).
   function crearAcceso() {
     var pagina = location.href.split('#')[0].split('?')[0].replace(/%/g, '%%');
@@ -241,7 +241,7 @@ td:first-child,th:first-child{text-align:left}
     document.body.appendChild(a);
     a.click();
     a.remove();
-    avisar('Acceso directo descargado: muévalo al Escritorio y abra la caja siempre desde ahí.');
+    avisar('Acceso directo descargado: mu\u00e9valo al Escritorio y abra la caja siempre desde ah\u00ed.');
   }
 
   valor.addEventListener('input', function () {
@@ -259,11 +259,11 @@ td:first-child,th:first-child{text-align:left}
   $('acceso').addEventListener('click', crearAcceso);
   $('guardarProx').addEventListener('click', function () {
     var n = Math.floor(Number($('proximo').value));
-    if (!(n >= 1)) { avisar('El número del tiquete debe ser 1 o mayor.', true); return; }
+    if (!(n >= 1)) { avisar('El n\u00famero del tiquete debe ser 1 o mayor.', true); return; }
     estado.siguiente = n;
     guardar();
     pintar();
-    avisar('El próximo tiquete será el No. ' + numero(n) + '.');
+    avisar('El pr\u00f3ximo tiquete ser\u00e1 el No. ' + numero(n) + '.');
   });
   document.querySelectorAll('input[name=papel]').forEach(function (r) {
     r.addEventListener('change', function () { estado.papel = Number(r.value); guardar(); pintar(); });
