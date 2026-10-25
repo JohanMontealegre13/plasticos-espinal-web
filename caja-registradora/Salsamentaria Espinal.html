@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Salsamentaria Espinal · Caja</title>
+<style>
+:root{--fondo:#f4f2ed;--tinta:#1c1b19;--suave:#5f5b53;--borde:#d8d2c6;--verde:#0f7a43;--verde-osc:#0a5c32;--rojo:#b3261e}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--fondo);color:var(--tinta);font:17px/1.45 "Segoe UI",Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+.caja{max-width:600px;margin:0 auto;padding:22px 18px 30px;display:flex;flex-direction:column;gap:16px}
+.cabeza{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:3px solid var(--tinta);padding-bottom:8px}
+.cabeza h1{margin:0;font-size:21px;letter-spacing:.05em}
+#reloj{color:var(--suave);font-variant-numeric:tabular-nums;white-space:nowrap}
+.etiqueta{font-size:19px;font-weight:600;margin-top:6px}
+.monto{display:flex;align-items:center;background:#fff;border:3px solid var(--tinta);border-radius:16px;padding:0 20px}
+.monto:focus-within{border-color:var(--verde);box-shadow:0 0 0 5px rgba(15,122,67,.2)}
+.monto span{font-size:52px;font-weight:700;color:var(--suave)}
+#valor{flex:1;min-width:0;border:0;outline:0;background:none;padding:8px 0 8px 10px;text-align:right;font-size:64px;font-weight:700;font-variant-numeric:tabular-nums}
+#valor::placeholder{color:#c9c3b6}
+#imprimir{border:0;border-radius:16px;background:var(--verde);color:#fff;font-size:30px;font-weight:700;letter-spacing:.04em;padding:24px;cursor:pointer}
+#imprimir:hover{background:var(--verde-osc)}
+#imprimir:active{transform:translateY(2px)}
+.pista{margin:-6px 0 0;text-align:center;color:var(--suave)}
+#aviso{margin:0;min-height:1.5em;text-align:center;font-weight:600;color:var(--verde)}
+#aviso.error{color:var(--rojo)}
+.cuadro{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:14px 18px}
+.fila{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hoy strong{font-size:24px;font-variant-numeric:tabular-nums}
+.ultimo{margin-top:10px;padding-top:10px;border-top:1px solid var(--borde);color:var(--suave)}
+.chico{border:1px solid var(--borde);background:var(--fondo);border-radius:10px;padding:6px 12px;cursor:pointer;font-size:15px}
+.chico:hover{border-color:var(--tinta)}
+.chico:disabled{opacity:.45;cursor:default}
+.peligro{color:var(--rojo)}
+details{color:var(--suave);font-size:15px}
+summary{cursor:pointer;font-weight:600}
+details .cuadro{margin-top:10px;display:grid;gap:14px}
+details label{display:inline-flex;align-items:center;gap:6px;margin-right:14px}
+#proximo{width:110px;padding:5px 8px;border:1px solid var(--borde);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:3px 4px;text-align:right;border-bottom:1px solid var(--borde)}
+td:first-child,th:first-child{text-align:left}
+:focus-visible{outline:3px solid var(--verde);outline-offset:2px}
+
+/* Tiquete: solo existe en papel */
+#tiquete{display:none}
+@page{margin:0}
+@media print{
+  body{background:#fff}
+  .caja{display:none}
+  #tiquete{display:block;width:48mm;margin:0 auto;padding:3mm 0 14mm;color:#000;font:700 11px/1.35 "Courier New",Courier,monospace}
+  .p80 #tiquete{width:72mm;font-size:13px}
+}
+.tc{text-align:center}
+.tf{display:flex;justify-content:space-between;gap:2mm}
+.tg{font-size:1.2em}
+.tt{font-size:1.5em}
+.esp{height:3mm}
+</style>
+</head>
+<body>
+<main class="caja">
+  <div class="cabeza"><h1>SALSAMENTARIA ESPINAL</h1><span id="reloj"></span></div>
+  <label class="etiqueta" for="valor">Valor de la venta</label>
+  <div class="monto"><span>$</span><input id="valor" inputmode="numeric" autocomplete="off" placeholder="0" autofocus></div>
+  <button id="imprimir" type="button">IMPRIMIR TIQUETE</button>
+  <p class="pista">Escriba el valor y presione <b>Enter</b> o el botón verde.</p>
+  <p id="aviso" role="status" aria-live="polite"></p>
+  <section class="cuadro">
+    <div class="fila hoy"><span>Vendido hoy (<span id="hoyCant">0</span> tiquetes)</span><strong id="hoyTotal">$0</strong></div>
+    <div class="fila ultimo"><span id="ultimo">Aún no hay tiquetes.</span>
+      <span><button class="chico" id="copia" type="button">Reimprimir copia</button> <button class="chico peligro" id="anular" type="button">Anular</button></span></div>
+  </section>
+  <details>
+    <summary>Ajustes</summary>
+    <div class="cuadro">
+      <div>Papel de la impresora:
+        <label><input type="radio" name="papel" value="58"> 58 mm</label>
+        <label><input type="radio" name="papel" value="80"> 80 mm</label></div>
+      <div>Número del próximo tiquete: <input id="proximo" type="number" min="1" step="1"> <button class="chico" id="guardarProx" type="button">Guardar</button></div>
+      <div><b>Imprimir sin que salga la ventana de impresión:</b> deje este archivo en su sitio definitivo (por ejemplo, el Escritorio), ponga la impresora de tiquetes como <i>predeterminada</i> en Windows y oprima
+        <button class="chico" id="acceso" type="button">Crear acceso directo</button>. Abra la caja siempre con ese acceso directo.</div>
+      <div><b>Últimos días</b><table><thead><tr><th>Día</th><th>Tiquetes</th><th>Total</th></tr></thead><tbody id="dias"></tbody></table></div>
+    </div>
+  </details>
+</main>
+<div id="tiquete" aria-hidden="true"></div>
+<script>
+(function () {
+  'use strict';
+
+  // ===== Datos del tiquete (se pueden cambiar abriendo este archivo con el Bloc de notas) =====
+  var NEGOCIO = {
+    nombre: 'SALSAMENTARIA ESPINAL',
+    propietaria: 'SOFIA PERDOMO',
+    nit: 'NIT: 1111122441-5 REG SI',
+    direccion: 'CRA 5#5-91 CE 3102404725',
+    ciudad: 'ESPINAL TOLIMA',
+    mensaje: 'GRACIAS POR SU COMPRA',
+    caja: '01',
+    empleado: '01',
+    departamento: '01'
+  };
+
+  var CLAVE = 'salsamentaria-espinal-caja';
+  var DIAS_GUARDADOS = 90;
+  var $ = function (id) { return document.getElementById(id); };
+  var valor = $('valor');
+
+  var estado = leer();
+
+  function leer() {
+    var base = { siguiente: 1, papel: 58, dias: {}, ultimo: null };
+    try {
+      var g = JSON.parse(localStorage.getItem(CLAVE));
+      if (g) for (var k in base) if (g[k] != null) base[k] = g[k];
+    } catch (e) {}
+    return base;
+  }
+  function guardar() {
+    try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) {}
+  }
+
+  var dos = function (n) { return String(n).padStart(2, '0'); };
+  var miles = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  var dinero = function (n) { return '$' + miles(n); };
+  var numero = function (n) { return String(n).padStart(6, '0'); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var fecha = function (d) { return dos(d.getDate()) + '/' + dos(d.getMonth() + 1) + '/' + d.getFullYear(); };
+  var hora = function (d) { var h = d.getHours(); return dos(h % 12 || 12) + ':' + dos(d.getMinutes()) + (h < 12 ? ' AM' : ' PM'); };
+  var claveDia = function (d) { return d.getFullYear() + '-' + dos(d.getMonth() + 1) + '-' + dos(d.getDate()); };
+
+  function avisar(texto, error) {
+    var a = $('aviso');
+    a.textContent = texto;
+    a.className = error ? 'error' : '';
+  }
+
+  function armarTiquete(t, copia) {
+    var c = function (s, cl) { return '<div class="tc' + (cl ? ' ' + cl : '') + '">' + esc(s) + '</div>'; };
+    var f = function (a, b, cl) { return '<div class="tf' + (cl ? ' ' + cl : '') + '"><span>' + esc(a) + '</span><span>' + esc(b) + '</span></div>'; };
+    var esp = '<div class="esp"></div>';
+    $('tiquete').innerHTML =
+      c(NEGOCIO.nombre, 'tg') + c(NEGOCIO.propietaria) + c(NEGOCIO.nit) + c(NEGOCIO.direccion) + esp +
+      c(NEGOCIO.ciudad, 'tg') + c(NEGOCIO.mensaje) + esp +
+      f(t.f + ' ' + t.h, NEGOCIO.caja) + f('No. ' + numero(t.n), 'EMPL.' + NEGOCIO.empleado) + esp +
+      (copia ? c('* COPIA *', 'tg') : '') +
+      f('DEPT.' + NEGOCIO.departamento, dinero(t.v)) + f('ARTICULO', '1') + f('TOTAL', dinero(t.v), 'tt');
+  }
+
+  function imprimir() {
+    var v = Number(valor.value.replace(/\D/g, ''));
+    if (!v) { avisar('Escriba primero el valor de la venta.', true); valor.focus(); return; }
+    var ahora = new Date();
+    var t = { n: estado.siguiente, v: v, f: fecha(ahora), h: hora(ahora), d: claveDia(ahora) };
+    var dia = estado.dias[t.d] || (estado.dias[t.d] = { t: 0, s: 0 });
+    dia.t += 1;
+    dia.s += v;
+    estado.siguiente += 1;
+    estado.ultimo = t;
+    podar();
+    guardar();
+    armarTiquete(t, false);
+    window.print();
+    valor.value = '';
+    pintar();
+    avisar('Tiquete No. ' + numero(t.n) + ' por ' + dinero(v) + ' enviado a la impresora.');
+    valor.focus();
+  }
+
+  function reimprimir() {
+    if (!estado.ultimo || estado.ultimo.anulado) return;
+    armarTiquete(estado.ultimo, true);
+    window.print();
+    valor.focus();
+  }
+
+  function anular() {
+    var u = estado.ultimo;
+    if (!u || u.anulado) return;
+    if (!confirm('¿Anular el tiquete No. ' + numero(u.n) + ' por ' + dinero(u.v) + '?\nSe resta de lo vendido ese día.')) return;
+    var dia = estado.dias[u.d];
+    if (dia) { dia.t -= 1; dia.s -= u.v; }
+    u.anulado = true;
+    guardar();
+    pintar();
+    avisar('Tiquete No. ' + numero(u.n) + ' anulado.');
+    valor.focus();
+  }
+
+  function podar() {
+    var dias = Object.keys(estado.dias).sort().reverse();
+    dias.slice(DIAS_GUARDADOS).forEach(function (d) { delete estado.dias[d]; });
+  }
+
+  function pintar() {
+    var ahora = new Date();
+    $('reloj').textContent = fecha(ahora) + '  ' + hora(ahora);
+    var hoy = estado.dias[claveDia(ahora)] || { t: 0, s: 0 };
+    $('hoyCant').textContent = hoy.t;
+    $('hoyTotal').textContent = dinero(hoy.s);
+    var u = estado.ultimo;
+    $('ultimo').textContent = u
+      ? 'Último: No. ' + numero(u.n) + ' · ' + dinero(u.v) + ' · ' + u.h + (u.anulado ? ' (ANULADO)' : '')
+      : 'Aún no hay tiquetes.';
+    $('copia').disabled = $('anular').disabled = !u || !!u.anulado;
+    document.body.classList.toggle('p80', Number(estado.papel) === 80);
+    document.querySelectorAll('input[name=papel]').forEach(function (r) { r.checked = Number(r.value) === Number(estado.papel); });
+    if (document.activeElement !== $('proximo')) $('proximo').value = estado.siguiente;
+    $('dias').innerHTML = Object.keys(estado.dias).sort().reverse().slice(0, 14).map(function (d) {
+      var p = d.split('-');
+      return '<tr><td>' + p[2] + '/' + p[1] + '/' + p[0] + '</td><td>' + estado.dias[d].t + '</td><td>' + dinero(estado.dias[d].s) + '</td></tr>';
+    }).join('') || '<tr><td colspan="3">Sin ventas todavía.</td></tr>';
+  }
+
+  // Descarga un .bat que abre esta página en Edge o Chrome, como ventana propia
+  // y con --kiosk-printing (imprime directo en la impresora predeterminada).
+  function crearAcceso() {
+    var pagina = location.href.split('#')[0].split('?')[0].replace(/%/g, '%%');
+    var bat = [
+      '@echo off',
+      'rem Abre la caja de Salsamentaria Espinal e imprime directo en la impresora predeterminada.',
+      'set "PAGINA=' + pagina + '"',
+      'set "PERFIL=%LOCALAPPDATA%\\CajaSalsamentariaEspinal"',
+      'for %%N in ("%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe" "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe" "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe" "%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe" "%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe") do (',
+      '  if exist "%%~N" (',
+      '    start "" "%%~N" --kiosk-printing --no-first-run --no-default-browser-check --user-data-dir="%PERFIL%" --app="%PAGINA%"',
+      '    exit /b',
+      '  )',
+      ')',
+      'echo No se encontro Microsoft Edge ni Google Chrome en este computador.',
+      'pause',
+      ''
+    ].join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bat], { type: 'application/octet-stream' }));
+    a.download = 'Abrir caja Salsamentaria Espinal.bat';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    avisar('Acceso directo descargado: muévalo al Escritorio y abra la caja siempre desde ahí.');
+  }
+
+  valor.addEventListener('input', function () {
+    var digitos = valor.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 8);
+    valor.value = digitos ? miles(digitos) : '';
+    if (digitos) avisar('');
+  });
+  valor.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.repeat) { e.preventDefault(); imprimir(); }
+    if (e.key === 'Escape') valor.value = '';
+  });
+  $('imprimir').addEventListener('click', imprimir);
+  $('copia').addEventListener('click', reimprimir);
+  $('anular').addEventListener('click', anular);
+  $('acceso').addEventListener('click', crearAcceso);
+  $('guardarProx').addEventListener('click', function () {
+    var n = Math.floor(Number($('proximo').value));
+    if (!(n >= 1)) { avisar('El número del tiquete debe ser 1 o mayor.', true); return; }
+    estado.siguiente = n;
+    guardar();
+    pintar();
+    avisar('El próximo tiquete será el No. ' + numero(n) + '.');
+  });
+  document.querySelectorAll('input[name=papel]').forEach(function (r) {
+    r.addEventListener('change', function () { estado.papel = Number(r.value); guardar(); pintar(); });
+  });
+
+  pintar();
+  setInterval(pintar, 10000);
+  valor.focus();
+})();
+</script>
+</body>
+</html>

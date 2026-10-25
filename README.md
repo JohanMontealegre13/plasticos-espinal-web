@@ -167,3 +167,18 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - La canasta se guarda en el navegador y se envía a WhatsApp con un código
   `PE-XXXX` y el `[#id]` de cada producto. El bot recalcula los precios con el
   CRM: el total del mensaje es solo de referencia.
+
+## Caja registradora de la salsamentaria (`caja-registradora/`)
+
+- `caja-registradora/Salsamentaria Espinal.html` **no es parte del sitio**: es
+  un programa de un solo archivo para imprimir tiquetes en el portátil de la
+  tienda (Edge o Chrome, sin instalar nada ni internet). Se escribe el valor,
+  Enter, y sale el tiquete con los datos de la registradora vieja.
+- Guarda en el navegador el consecutivo, lo vendido por día (90 días),
+  reimpresión con «* COPIA *» y anulación del último tiquete.
+- Los datos del encabezado están en el objeto `NEGOCIO` al inicio del script.
+- «Ajustes → Crear acceso directo» descarga un `.bat` que abre la caja como
+  ventana propia con `--kiosk-printing` (imprime directo en la impresora
+  predeterminada, sin ventana de impresión).
+- En línea no funcionaría: la CSP de `_headers` bloquea su script inline. Se
+  usa abriendo el archivo en el computador.
