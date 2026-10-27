@@ -6,6 +6,9 @@
   <!-- Seguridad: respaldo por si el hosting no envía cabeceras (las reales van en _headers) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
+  <!-- Abre siempre desde arriba aunque la dirección traiga #ancla (fix e7352f9). Si cambia este script, cambia su huella sha256 en la CSP de aquí, de _headers y de .htaccess: pruebas/unit/sitio.test.mjs lo vigila. -->
+  <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual';if(location.hash)history.replaceState(null,'',location.pathname+location.search);</script>
+
   <title>Plásticos Espinal — Distribuidora de desechables en el Tolima</title>
   <meta name="description" content="Desechables y plásticos al por mayor y al detal en El Espinal, Tolima: vasos, platos, contenedores, cubiertos y línea biodegradable. Pida por WhatsApp.">
 
@@ -37,8 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=10">
-  <script src="js/principal.js?v=10" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=11">
+  <script src="js/principal.js?v=11" defer></script>
 
   <script type="application/ld+json">
   {

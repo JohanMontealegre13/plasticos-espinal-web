@@ -181,7 +181,7 @@ test('la dirección y el teléfono traen texto de respaldo a la vista: la secci�
   for (const campo of ['direccion', 'telefono']) {
     const nodos = nodosDe(TERMINOS, campo);
     assert.ok(nodos.length >= 1, `falta data-vendedor="${campo}"`);
-    for (const { apertura, dentro } of nodos) assert.doesNotMatch(apertura, /\bhidden\b/, `data-vendedor="${campo}" debe verse sin JavaScript`);
+    for (const { apertura } of nodos) assert.doesNotMatch(apertura, /\bhidden\b/, `data-vendedor="${campo}" debe verse sin JavaScript`);
   }
   const primeroDir = nodosDe(TERMINOS, 'direccion')[0].dentro;
   assert.ok(primeroDir.includes(direccion), 'la dirección de respaldo');

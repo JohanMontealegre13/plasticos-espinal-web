@@ -39,7 +39,13 @@ jobs:
       - name: Instalar herramientas de prueba
         run: npm ci
 
-      - name: Pruebas rápidas (la lógica pura de la tienda)
+      - name: Lint (HTML, CSS y JS)
+        run: npm run lint
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Pruebas rápidas (sitio, candado, Mi cuenta y la lógica de la tienda)
         run: npm run test:unit
 
       - name: Caché (?v=N) al día frente a la rama base
