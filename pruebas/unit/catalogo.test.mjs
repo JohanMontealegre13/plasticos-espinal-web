@@ -5,7 +5,7 @@
    cambiar una hora, quitar un festivo o agregar un sinónimo no la pone roja. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cargarPE, leer } from '../lib.mjs';
+import { cargarPE, leer, WHATSAPP } from '../lib.mjs';
 
 const { entregaValida } = cargarPE(['tienda/ubicacion.js']);
 const DIAS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
@@ -115,6 +115,11 @@ test('tienda/catalogo.json está bien escrito', () => {
   }
   const mal = revisar(sitio);
   assert.deepEqual(mal, [], 'Corrija en tienda/catalogo.json:\n  · ' + mal.join('\n  · '));
+});
+
+test('el WhatsApp de tienda/catalogo.json es el del negocio (el mismo de los enlaces del sitio)', () => {
+  /* Si el negocio cambia de número, se cambia aquí (WHATSAPP en pruebas/lib.mjs) y en los enlaces de las páginas */
+  assert.equal(JSON.parse(leer('tienda/catalogo.json')).whatsapp, WHATSAPP);
 });
 
 /* ---------- la revisión encuentra los errores de escribir a mano ---------- */
