@@ -460,11 +460,9 @@ b, strong { font-weight: 700; color: var(--texto); }
 .porque__rejilla { display: grid; gap: 32px; }
 /* En el HTML la lista va antes que la foto (orden de lectura); en escritorio la foto se ve a la izquierda */
 @media (min-width: 940px) {
-  .porque__rejilla { grid-template-columns: 5fr 7fr; gap: 40px; align-items: start; }
-  .porque__rejilla .lamina { order: -1; }
   /* La foto se estira hasta el alto de la lista: las dos tarjetas terminan juntas */
-  .porque__rejilla { align-items: stretch; }
-  .porque__rejilla .lamina { display: flex; flex-direction: column; }
+  .porque__rejilla { grid-template-columns: 5fr 7fr; gap: 40px; align-items: stretch; }
+  .porque__rejilla .lamina { order: -1; display: flex; flex-direction: column; }
   .porque__rejilla .lamina img { flex: 1 1 0; min-height: 0; object-fit: cover; }
 }
 @media (max-width: 939px) {

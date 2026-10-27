@@ -33,14 +33,14 @@ test('el aviso del enlace viejo es una región viva que está desde el comienzo:
   await abrirTienda(page);
   const aviso = page.locator('#avisoFicha');
   await expect(aviso).toHaveAttribute('role', 'status');
-  expect(await aviso.evaluate((e) => e.hidden), 'vacía pero no escondida: ya está en el árbol de accesibilidad').toBe(false);
+  expect(await aviso.evaluate((e) => /** @type {HTMLElement} */ (e).hidden), 'vacía pero no escondida: ya está en el árbol de accesibilidad').toBe(false);
   await expect(aviso).toBeHidden();                                    /* vacía no ocupa lugar en la pantalla */
   await aviso.evaluate((e) => { e.dataset.prueba = 'el-mismo'; });
   await page.evaluate(() => { location.hash = '#p=999999'; });         /* un enlace viejo con la tienda ya abierta */
   await expect(aviso).toHaveText('Ese producto ya no está en la tienda.');
   await expect(aviso).toBeVisible();
   await expect(aviso).toHaveAttribute('data-prueba', 'el-mismo');      /* el texto cambió en el mismo nodo */
-  expect(await aviso.evaluate((e) => e.hidden)).toBe(false);
+  expect(await aviso.evaluate((e) => /** @type {HTMLElement} */ (e).hidden)).toBe(false);
   await page.locator('#grilla').getByText('Contenedor icopor J1 x25 und').click();   /* abrir otra ficha lo borra */
   await expect(aviso).toHaveText('');
   await expect(aviso).toBeHidden();
@@ -219,12 +219,12 @@ test('el − n + de la ficha y el de la tarjeta se mueven juntos', async ({ page
 
 test('compartir con navigator.share manda el nombre, el precio y el enlace', async ({ page }) => {
   await page.addInitScript(() => {
-    window.__compartido = [];
-    Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: (datos) => { window.__compartido.push(datos); return Promise.resolve(); } });
+    /** @type {any} */ (window).__compartido = [];
+    Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: (/** @type {any} */ datos) => { /** @type {any} */ (window).__compartido.push(datos); return Promise.resolve(); } });
   });
   await abrirTienda(page, { ruta: '/tienda/#p=141' });
   await page.locator('#compartir').click();
-  const enviado = await page.evaluate(() => window.__compartido);
+  const enviado = await page.evaluate(() => /** @type {any} */ (window).__compartido);
   expect(enviado).toEqual([{
     title: 'Contenedor icopor J1 x25 und',
     text: 'Contenedor icopor J1 x25 und · $9.800',

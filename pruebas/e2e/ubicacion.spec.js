@@ -204,7 +204,7 @@ test('si el pedido no pudo enviarse, la ubicación sigue lista para reintentar',
 
 /* ---------- el GPS falla, tarda o cambia ---------- */
 
-for (const [que, codigo] of [['el permiso se niega', 1], ['no hay señal', 2], ['no responde a tiempo', 3]]) {
+for (const [que, codigo] of /** @type {[string, number][]} */ ([['el permiso se niega', 1], ['no hay señal', 2], ['no responde a tiempo', 3]])) {
   test(`si ${que} (${codigo}) se avisa y se puede pedir igual`, async ({ page }) => {
     const enviados = await simularPedido(page);
     await gpsFalso(page, [{ codigo }]);

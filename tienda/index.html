@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=17">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=18">
   <script src="/tienda/llegada.js?v=2" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
@@ -128,6 +128,7 @@
       <div class="foto" id="fichaFotos"></div>
       <div class="ficha-info">
         <p class="ficha-cat" id="fichaCat"></p>
+        <!-- [html-validate-disable-next empty-heading -- tienda.js le pone el nombre del producto al abrir la ficha] -->
         <h2 id="fichaNombre" tabindex="-1"></h2>
         <p class="unidad" id="fichaCodigo"></p>
         <p class="ficha-precio" id="fichaPrecio"></p>
@@ -199,6 +200,7 @@
   <section class="pago" id="pago" hidden>
     <p class="cod">Pedido <b id="pCodigo"></b> · Total <b id="pTotal"></b></p>
     <div class="medios" role="radiogroup" aria-label="Cómo va a pagar">
+      <!-- [html-validate-disable-block prefer-native-element -- botones grandes con role="radio": tienda.js les pone aria-checked] -->
       <button type="button" class="medio" data-medio="qr" role="radio" aria-checked="false"><b>QR Bre-B</b><span>Pague ya desde la app de su banco</span></button>
       <button type="button" class="medio" data-medio="efectivo" role="radio" aria-checked="false"><b>Efectivo</b><span>Paga al recibir el pedido</span></button>
     </div>
@@ -215,7 +217,7 @@
   <section class="pqr" id="pqr" hidden>
     <button class="volver" type="button" id="volverPago">‹ Cambiar medio de pago</button>
     <div class="pqr-monto"><span>Transfiera</span><b id="qrTotal"></b><small>Pedido <b id="qCodigo"></b></small></div>
-    <div class="qr" id="qrCaja"><img id="qrImg" alt="Código QR Bre-B de Plásticos Espinal" width="240" height="240"><span class="barrido" aria-hidden="true"></span><p id="qrFalta" hidden>El código QR estará aquí muy pronto. Mientras tanto, elija efectivo.</p></div>
+    <div class="qr" id="qrCaja"><!-- [html-validate-disable-next element-required-attributes -- tienda.js le pone el src cuando hay QR] --><img id="qrImg" alt="Código QR Bre-B de Plásticos Espinal" width="240" height="240"><span class="barrido" aria-hidden="true"></span><p id="qrFalta" hidden>El código QR estará aquí muy pronto. Mientras tanto, elija efectivo.</p></div>
     <p class="llave" id="qrLlave" hidden></p>
     <ol class="pqr-pasos">
       <li>Abra la app de su banco</li>
