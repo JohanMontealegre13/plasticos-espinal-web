@@ -1,1 +1,133 @@
-{"generado":"2026-10-07T10:00:00-05:00","whatsapp":"573183555246","pago":{"qr":"/tienda/img/qr-breb-prueba.png","llave":"PRUEBA (no pague aquí)"},"categorias":[{"id":"platos","nombre":"Platos","imagen":"/img/productos/platos.webp"},{"id":"vasos","nombre":"Vasos","imagen":"/img/productos/vasos.webp"},{"id":"bolsas","nombre":"Bolsas","imagen":"/img/productos/bolsas.webp"},{"id":"cubiertos","nombre":"Cubiertos","imagen":"/img/productos/cubiertos.webp"},{"id":"contenedores","nombre":"Contenedores","imagen":"/img/productos/contenedores.webp"},{"id":"tapas","nombre":"Tapas y domos","imagen":"/img/productos/tapas.webp"},{"id":"empaques","nombre":"Empaques","imagen":"/img/productos/empaques.webp"},{"id":"pitillos","nombre":"Pitillos","imagen":"/img/productos/pitillos.webp"},{"id":"bandejas","nombre":"Bandejas","imagen":"/img/productos/bandejas.webp"},{"id":"aseo","nombre":"Servilletas y aseo","imagen":"/img/productos/servilletas.webp"}],"nota":"Los productos, precios, disponibilidad y domicilio salen del CRM. Aquí solo va lo de la página: WhatsApp, pago y fotos por categoría."}
+{
+  "generado": "2026-10-07T10:00:00-05:00",
+  "whatsapp": "573183555246",
+  "pago": {
+    "qr": "/tienda/img/qr-breb-prueba.png",
+    "llave": "PRUEBA (no pague aquí)"
+  },
+  "categorias": [
+    {
+      "id": "platos",
+      "nombre": "Platos",
+      "imagen": "/img/productos/platos.webp"
+    },
+    {
+      "id": "vasos",
+      "nombre": "Vasos",
+      "imagen": "/img/productos/vasos.webp"
+    },
+    {
+      "id": "bolsas",
+      "nombre": "Bolsas",
+      "imagen": "/img/productos/bolsas.webp"
+    },
+    {
+      "id": "cubiertos",
+      "nombre": "Cubiertos",
+      "imagen": "/img/productos/cubiertos.webp"
+    },
+    {
+      "id": "contenedores",
+      "nombre": "Contenedores",
+      "imagen": "/img/productos/contenedores.webp"
+    },
+    {
+      "id": "tapas",
+      "nombre": "Tapas y domos",
+      "imagen": "/img/productos/tapas.webp"
+    },
+    {
+      "id": "empaques",
+      "nombre": "Empaques",
+      "imagen": "/img/productos/empaques.webp"
+    },
+    {
+      "id": "pitillos",
+      "nombre": "Pitillos",
+      "imagen": "/img/productos/pitillos.webp"
+    },
+    {
+      "id": "bandejas",
+      "nombre": "Bandejas",
+      "imagen": "/img/productos/bandejas.webp"
+    },
+    {
+      "id": "aseo",
+      "nombre": "Servilletas y aseo",
+      "imagen": "/img/productos/servilletas.webp"
+    }
+  ],
+  "nota": [
+    "Los productos, precios, disponibilidad y domicilio salen del CRM. Aquí va solo lo de la página, y todo es opcional: si algo falta o queda mal escrito, la tienda sigue sin eso.",
+    "Después de cambiar algo, corra las pruebas (carpeta pruebas, npm test): catalogo.test.mjs dice en palabras qué quedó mal escrito.",
+    "whatsapp: el número entre comillas, solo dígitos y con el 57 adelante.",
+    "pago: la imagen del QR Bre-B (qr) y el texto de la llave (llave).",
+    "categorias: la foto de cada categoría; va a la categoría del CRM cuyo nombre lleva la primera palabra de este (Platos, Vasos…).",
+    "horario.alistar_min: los minutos que tarda en alistar y llevar un pedido; solo cuentan los minutos en que la tienda está abierta.",
+    "horario.dias: los tramos abiertos de cada día, cada uno [\"HH:MM\", \"HH:MM\"] en hora de 24, la de abrir antes que la de cerrar. Los días van en minúscula y sin tilde (miercoles, sabado). Un día que no está, o con [], no abre.",
+    "horario.festivos: las fechas de los festivos, \"AAAA-MM-DD\". Renueve la lista cada año: después de la última fecha la tienda trata los festivos como días normales.",
+    "horario.festivo: el día de \"dias\" con cuyo horario se atiende en festivo, entre comillas. Sin esta línea, en festivo no se atiende.",
+    "sinonimos: quien busca la palabra de la izquierda (una sola palabra) también ve los productos que tienen alguna de las de la derecha. Va en un solo sentido: para que valga al revés, escriba también la línea al revés.",
+    "entrega: el punto de la tienda (tienda.lat, tienda.lng) y radio_km, hasta dónde en línea recta se acepta la ubicación del GPS del cliente: solo El Espinal. Números sin comillas.",
+    "vendedor: quién vende, como pide la Ley 1480 (nombre, documento, direccion, telefono y correo), entre comillas. Sale en el pie de la tienda y en los términos; lo vacío (\"\") no se muestra."
+  ],
+  "horario": {
+    "alistar_min": 60,
+    "dias": {
+      "domingo": [["08:00", "13:00"]],
+      "lunes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "martes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "miercoles": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "jueves": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "viernes": [["08:00", "12:30"], ["14:00", "18:30"]],
+      "sabado": [["08:00", "12:30"], ["14:00", "18:30"]]
+    },
+    "festivo": "domingo",
+    "festivos": [
+      "2026-11-02",
+      "2026-11-16",
+      "2026-12-08",
+      "2026-12-25",
+      "2027-01-01",
+      "2027-01-11",
+      "2027-03-22",
+      "2027-03-25",
+      "2027-03-26",
+      "2027-05-01",
+      "2027-05-10",
+      "2027-05-31",
+      "2027-06-07",
+      "2027-07-05",
+      "2027-07-20",
+      "2027-08-07",
+      "2027-08-16",
+      "2027-10-18",
+      "2027-11-01",
+      "2027-11-15",
+      "2027-12-08",
+      "2027-12-25"
+    ]
+  },
+  "sinonimos": {
+    "icopor": ["poliestireno", "espuma"],
+    "portacomidas": ["contenedor", "coca"],
+    "coca": ["contenedor"],
+    "pitillo": ["pajilla", "popote", "sorbete"],
+    "pajilla": ["pitillo"],
+    "popote": ["pitillo"],
+    "sorbete": ["pitillo"],
+    "cubierto": ["tenedor", "cuchara", "cuchillo"],
+    "talego": ["bolsa"]
+  },
+  "entrega": {
+    "tienda": { "lat": 4.1525081, "lng": -74.8828245 },
+    "radio_km": 8
+  },
+  "vendedor": {
+    "nombre": "",
+    "documento": "",
+    "direccion": "Calle 7 #5-35, Centro, El Espinal, Tolima",
+    "telefono": "318 355 5246",
+    "correo": ""
+  }
+}

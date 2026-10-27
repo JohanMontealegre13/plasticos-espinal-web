@@ -10,16 +10,21 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=9">
-  <script src="/tienda/tienda.js?v=11" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=17">
+  <script src="/tienda/llegada.js?v=2" defer></script>
+  <script src="/tienda/buscar.js?v=1" defer></script>
+  <script src="/tienda/guardados.js?v=2" defer></script>
+  <script src="/tienda/ubicacion.js?v=1" defer></script>
+  <script src="/tienda/vendedor.js?v=1" defer></script>
+  <script src="/tienda/tienda.js?v=18" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
 <body>
 <div class="proto"><div class="envolver"><span>Versión de prueba · solo con contraseña · precios de muestra</span><a class="url" href="/tienda/salir">Salir</a></div></div>
 <div class="franja"><div class="envolver">
-  <span>🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
-  <span>Gratis desde <b>$60.000</b> en productos</span>
+  <span id="franjaLlegada">🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
+  <span>Gratis desde <b id="gratisDesde">$50.000</b> en productos</span>
   <span>Pague con <b>Bre-B</b> o efectivo</span>
 </div></div>
 
@@ -33,6 +38,7 @@
 </header>
 
 <main class="envolver">
+  <p class="aviso-ficha" id="avisoFicha" role="status"></p>
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
 
   <section class="portada">
@@ -51,6 +57,8 @@
     </div>
   </section>
 
+  <div class="ultima" id="ultima" hidden><button class="ultima-btn" id="ultimaVez" type="button">Pedir lo de la última vez</button></div>
+
   <section class="benef" aria-label="Por qué comprar aquí">
     <div><svg class="ico" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span><b>Llega en 1 hora</b>En horario de tienda</span></div>
     <div><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></svg><span><b>Pago con Bre-B</b>O efectivo al recibir</span></div>
@@ -58,9 +66,27 @@
     <div><svg class="ico" viewBox="0 0 24 24"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><b>Le confirmamos por WhatsApp</b>Al 318 355 5246</span></div>
   </section>
 
+  <section class="sec guardados" id="favoritos" aria-labelledby="favoritosTit" hidden>
+    <div class="sec-cab"><h2 id="favoritosTit">Sus favoritos</h2></div>
+    <ul class="mini-lista"></ul>
+  </section>
+
+  <section class="sec guardados" id="vistos" aria-labelledby="vistosTit" hidden>
+    <div class="sec-cab"><h2 id="vistosTit">Lo que vio hace poco</h2></div>
+    <ul class="mini-lista"></ul>
+  </section>
+
   <section class="sec" id="vitrina">
-    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a></div>
+    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a>
+      <label class="orden" for="orden">Ordenar por <select id="orden">
+        <option value="pedidos">Más pedidos</option>
+        <option value="menor">Menor precio</option>
+        <option value="mayor">Mayor precio</option>
+        <option value="nombre">Nombre A-Z</option>
+      </select></label>
+    </div>
     <p class="estado" id="estado" role="status">Cargando productos…</p>
+    <a class="pedir-wa" id="pedirloWa" href="https://wa.me/" target="_blank" rel="noopener" hidden>¿No lo encuentra? Pídalo por WhatsApp</a>
     <ul class="grilla" id="grilla"></ul>
   </section>
 
@@ -88,19 +114,48 @@
   <div><img src="/tienda/img/logo-negativo-noche.svg" alt="Plásticos Espinal" width="210" height="80"><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
   <div><h4>Tienda</h4><a href="#cats">Categorías</a><a href="#vitrina">Lo más pedido</a></div>
   <div><h4>Plásticos Espinal</h4><a href="/">Quiénes somos</a><span>Calle 7 #5-35, Centro, El Espinal</span></div>
-  <div><h4>Ayuda</h4><a href="/tienda/mi-cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="/tienda/privacidad/">Política de datos</a></div>
+  <div><h4>Ayuda</h4><a href="/tienda/mi-cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="/tienda/terminos/">Términos, cambios y retracto</a><a href="/tienda/privacidad/">Política de datos</a></div>
+  <p class="vendedor" data-vendedor-linea hidden></p>
 </div></footer>
 
 <button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
+
+<!-- Ficha de un producto: se abre con un toque y tiene su dirección (#p=ID) para compartir -->
+<dialog class="ficha" id="ficha" aria-labelledby="fichaNombre">
+  <div class="ficha-hoja">
+    <button class="ficha-x" id="fichaCerrar" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="ficha-cuerpo">
+      <div class="foto" id="fichaFotos"></div>
+      <div class="ficha-info">
+        <p class="ficha-cat" id="fichaCat"></p>
+        <h2 id="fichaNombre" tabindex="-1"></h2>
+        <p class="unidad" id="fichaCodigo"></p>
+        <p class="ficha-precio" id="fichaPrecio"></p>
+        <p class="ficha-disp" id="fichaDisp"></p>
+        <div class="ficha-control" id="fichaControl"></div>
+        <div class="ficha-acciones">
+          <button class="fav fav-ficha" id="fichaFav" type="button" aria-pressed="false" hidden><span class="fav-txt">Guardar en favoritos</span></button>
+          <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
+        </div>
+      </div>
+      <section class="ficha-parecidos" id="parecidosCaja" aria-labelledby="parecidosTit" hidden>
+        <h3 id="parecidosTit">También le sirve</h3>
+        <ul id="parecidos"></ul>
+      </section>
+    </div>
+  </div>
+</dialog>
 
 <div class="velo" id="velo" hidden></div>
 <aside class="panel" id="panel" hidden aria-label="Su canasta">
   <header><h2 id="panelTitulo">Su canasta</h2><button class="vaciar" type="button" id="vaciar" hidden>Vaciar</button><button class="cerrar" type="button" id="cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="txt">Cerrar</span></button></header>
 
   <!-- 1. Canasta: casi toda la pantalla para los productos -->
+  <p class="aviso" id="noEstan" hidden></p>
   <p class="vacio" id="vacio">Todavía no ha agregado productos.</p>
   <ul class="items" id="items"></ul>
   <div class="resumen" id="resumen">
+    <p class="llegada" id="llegada" hidden></p>
     <div class="fila"><span>Domicilio <small id="falta"></small></span><b id="dom">$0</b></div>
     <div class="fila total"><span>Total</span><span id="tot">$0</span></div>
     <button class="enviar" id="seguir" type="button" disabled>Pedir ya</button>
@@ -123,12 +178,19 @@
       <label for="d-barrio">Barrio (El Espinal)<input id="d-barrio" name="barrio" list="barrios" required maxlength="80" autocomplete="off" placeholder="Escriba y elija su barrio"></label>
       <datalist id="barrios"></datalist>
       <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="address-line1" required maxlength="160" placeholder="Calle, número y casa o local"></label>
+      <!-- Ubicación con el GPS (solo se muestra si el navegador la da y catalogo.json trae "entrega") -->
+      <div class="ubicar" id="ubicarCaja" hidden>
+        <button class="ubicar-btn" id="ubicar" type="button">📍 Usar mi ubicación actual</button>
+        <small id="ubicado" role="status"></small>
+        <small>Solo la usamos para llevarle el pedido.</small>
+      </div>
       <label for="d-extra">Indicaciones (opcional)<textarea id="d-extra" name="extra" rows="2" maxlength="300" placeholder="Algo que ayude a encontrarlo"></textarea></label>
     </fieldset>
     <label class="check" for="d-acepto"><input id="d-acepto" name="acepto" type="checkbox" required> <span>Autorizo a Plásticos Espinal a usar mis datos para entregar mis pedidos, según la <a href="/tienda/privacidad/" target="_blank" rel="noopener">política de datos</a>.</span></label>
     <p class="errores" id="errores" role="alert" hidden></p>
     <div class="cierre">
       <div class="fila total"><span>Total</span><span id="tot2">$0</span></div>
+      <p class="acepta-terminos">Al pedir acepta los <a href="/tienda/terminos/" target="_blank" rel="noopener">términos de la tienda</a>.</p>
       <button class="enviar" id="enviar" type="submit">Seguir al pago</button>
     </div>
   </form>

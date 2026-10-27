@@ -1,0 +1,15 @@
+{
+  "name": "plasticos-espinal-web",
+  "private": true,
+  "description": "Pruebas y controles del sitio. Vive en pruebas/ a propósito: si hubiera un package.json en la raíz, Cloudflare Pages instalaría dependencias y podría publicar node_modules.",
+  "type": "module",
+  "scripts": {
+    "test:unit": "node --test \"unit/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "versiones": "node versiones.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

@@ -101,23 +101,33 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 @media (max-width:860px){.grilla{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:600px){.grilla{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 .prod{height:100%;display:flex;flex-direction:column;border:1px solid var(--linea);border-radius:var(--r);overflow:hidden;background:#fff}
-.prod .foto{position:relative}
-.prod .foto img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--suave)}
+.prod .foto,.ficha .foto{position:relative}
+.prod .foto img,.ficha .foto img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--suave)}
 /* Foto propia (del CRM): entera sobre blanco; el sello va a la derecha para no tapar el PE */
-.prod .foto.propia img{object-fit:contain;background:#fff}
+.prod .foto.propia img,.ficha .foto.propia img{object-fit:contain;background:#fff}
 .prod .foto.propia .sello{left:auto;right:8px}
 /* Dos fotos (la principal y la del producto en uso): se pasan con el dedo o con los puntos.
    Los puntos van arriba al centro: abajo taparían la fila de tamaños de la foto. */
-.prod .foto .tira{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
-.prod .foto .tira::-webkit-scrollbar{display:none}
-.prod .foto .tira img{flex:0 0 100%;scroll-snap-align:start}
-.prod .foto .puntos{position:absolute;left:0;right:0;top:2px;display:flex;justify-content:center}
-.prod .foto .punto{width:24px;height:24px;border:0;padding:0;background:none;display:grid;place-items:center;cursor:pointer}
-.prod .foto .punto::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(14,26,71,.3);box-shadow:0 0 0 2px #fff}
-.prod .foto .punto[aria-current="true"]::before{background:var(--azul)}
+.prod .foto .tira,.ficha .foto .tira{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.prod .foto .tira::-webkit-scrollbar,.ficha .foto .tira::-webkit-scrollbar{display:none}
+.prod .foto .tira img,.ficha .foto .tira img{flex:0 0 100%;scroll-snap-align:start}
+.prod .foto .puntos,.ficha .foto .puntos{position:absolute;left:0;right:0;top:2px;display:flex;justify-content:center}
+.prod .foto .punto,.ficha .foto .punto{width:24px;height:24px;border:0;padding:0;background:none;display:grid;place-items:center;cursor:pointer}
+.prod .foto .punto::before,.ficha .foto .punto::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(14,26,71,.3);box-shadow:0 0 0 2px #fff}
+.prod .foto .punto[aria-current="true"]::before,.ficha .foto .punto[aria-current="true"]::before{background:var(--azul)}
 .prod .sello{position:absolute;left:8px;top:8px;background:var(--rojo);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
 .prod .cuerpo{flex:1;display:flex;flex-direction:column;gap:4px;padding:10px 12px 12px}
 .prod h3{font-size:14.5px;font-weight:600;line-height:1.3}
+/* El nombre es un botón y su toque se estira a todo el cuerpo de la tarjeta (la foto tiene el suyo);
+   el control − n + queda por encima para que siga siendo suyo */
+.prod .foto{cursor:pointer}
+.prod .cuerpo{position:relative}
+.prod .nombre{display:block;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left}
+.prod .nombre::after{content:"";position:absolute;inset:0}
+.prod .nombre:hover{text-decoration:underline}
+.prod .nombre:focus-visible{outline:none}
+.prod .nombre:focus-visible::after{outline:3px solid var(--azul);outline-offset:-3px;border-radius:0 0 var(--r) var(--r)}
+.prod .cuerpo [data-ctrl]{position:relative;z-index:1}
 .prod .precio{margin-top:auto;padding-top:6px;font-family:var(--display);font-weight:400;font-size:19px}
 .prod .unidad{font-size:12px;color:var(--texto2)}
 .mas{margin-top:8px;height:40px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -155,7 +165,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 @media (max-width:860px){.pie .envolver{grid-template-columns:minmax(0,1fr)}}
 .pie img{height:42px;width:auto;margin-bottom:10px}
 .pie h4{margin:0 0 8px;color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
-.pie a{color:#fff;text-decoration:none;display:block;padding:2px 0}
+.pie a{color:#fff;text-decoration:none;display:flex;align-items:center;min-height:44px;padding:2px 0}
+/* quién vende (Ley 1480, art. 50): una línea al pie de todo el ancho; se pinta desde tienda/catalogo.json y sin datos queda escondida */
+.pie .vendedor{grid-column:1/-1;padding-top:16px;border-top:1px solid rgba(201,210,242,.25);font-size:14px;overflow-wrap:anywhere}
+/* las páginas de texto no tienen la barra de la canasta: el pie no necesita el hueco de abajo */
+.texto-legal ~ .pie .envolver{padding-bottom:34px}
 
 /* barra de canasta en celular */
 .barra{display:none}
@@ -180,6 +194,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .vacio{padding:30px 20px;color:var(--texto2)}
 .resumen{padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--linea);display:grid;gap:6px;box-shadow:0 -6px 16px rgba(14,26,71,.06)}
 .resumen small{font-size:13px;color:var(--verde);font-weight:700}
+/* hora de llegada: lo primero que se lee al abrir la canasta */
+.llegada{font-size:14px;font-weight:700;color:var(--verde);background:var(--verde2);border-radius:10px;padding:8px 12px;text-align:center}
 .fila{display:flex;justify-content:space-between}
 .fila.total{font-family:var(--display);font-size:20px}
 .meta{font-size:14px;font-weight:600;color:var(--verde);background:var(--verde2);border-radius:10px;padding:8px 12px}
@@ -216,11 +232,19 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .datos .check input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--verde)}
 .errores{background:#fdecea;color:#8f1a10;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600}
 .cierre{display:grid;gap:8px;position:sticky;bottom:-20px;background:#fff;padding:10px 0 4px;border-top:1px solid var(--linea)}
+.cierre .acepta-terminos{font-size:13px;color:var(--texto2);text-align:center}
+.cierre .acepta-terminos a{color:var(--azul);font-weight:700}
 
 /* página de política de datos */
 .texto-legal{max-width:720px;padding-block:28px 64px;display:grid;gap:14px}
 .texto-legal h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,32px)}
 .texto-legal ul{margin:0;padding-left:20px;display:grid;gap:4px}
+/* términos: quién vende y las vías para reclamar son listas de datos, no de viñetas; cada renglón se toca con el dedo */
+.texto-legal .vende,.texto-legal .vias{list-style:none;padding-left:0;overflow-wrap:anywhere}
+.texto-legal .vende-nombre{font-weight:800}
+.texto-legal .vias li{display:flex;align-items:center;min-height:44px}
+/* el que se toca es el enlace, no el renglón: su caja también mide 44 px */
+.texto-legal .vende a,.texto-legal .vias a,.texto-legal .volver-tienda{display:inline-flex;align-items:center;min-height:44px}
 
 /* aviso del pedido en curso: cinta azul pegada bajo la cabecera.
    Arriba y no abajo: en el iPhone nada blanco toca el borde de abajo
@@ -331,3 +355,111 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .pqr.entra,.pqr.entra *,.pqr #yaPague,.panel[data-vista="final"],.aviso-pedido .pulso{animation:none!important}
   .pqr.entra .espera i::after{width:100%}
 }
+
+/* orden de la vitrina y «pídalo por WhatsApp» cuando la búsqueda no encuentra nada */
+.sec-cab{flex-wrap:wrap}
+.sec-cab .orden{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--texto2)}
+/* 16px: así el iPhone no acerca la pantalla al tocar la lista */
+.sec-cab .orden select{min-height:44px;max-width:100%;padding:0 12px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--texto);font:600 16px var(--font);cursor:pointer}
+.sec-cab .orden select:focus-visible{border-color:var(--azul)}
+.pedir-wa{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;margin:0 0 12px;border-radius:99px;background:var(--verde);color:#fff;font-weight:800;text-decoration:none}
+.pedir-wa:hover{background:#0b6236}
+
+/* ficha de un producto: encima de la tienda, con su dirección #p=ID para compartir.
+   En el celular sube desde abajo como una hoja; en el computador queda al centro. */
+.ficha{width:min(780px,100%);max-width:100%;max-height:100%;margin:auto;padding:0;border:0;background:transparent;color:var(--texto);overflow:visible}
+.ficha::backdrop{background:rgba(14,26,71,.55)}
+.ficha:not([open]){display:none}   /* un navegador sin <dialog> (Safari antes de 15.4) la pintaría vacía al final de la página */
+html.con-ficha{overflow:hidden}
+.ficha-hoja{position:relative;display:flex;flex-direction:column;max-height:min(90vh,820px);max-height:min(90dvh,820px);overflow:hidden;border-radius:22px;background:#fff;box-shadow:0 20px 60px rgba(14,26,71,.35)}
+.ficha[open] .ficha-hoja{animation:hoja .3s ease-out}
+.ficha-x{position:absolute;top:10px;right:10px;z-index:3;display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid var(--linea);border-radius:50%;background:#fff;color:var(--noche);box-shadow:0 2px 8px rgba(14,26,71,.2)}
+.ficha-x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+.ficha-x:hover{background:var(--suave)}
+.ficha-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:20px 28px;align-content:start;grid-auto-rows:max-content;padding:24px}
+.ficha .foto{align-self:start;border-radius:16px;overflow:hidden;background:var(--suave)}
+.ficha-info{display:grid;gap:6px;align-content:start;min-width:0;padding-right:44px}
+.ficha-cat{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--rojo)}
+.ficha-cat:empty{display:none}
+.ficha h2{font-family:var(--font);font-weight:800;font-size:clamp(20px,3vw,25px);line-height:1.2;overflow-wrap:anywhere}
+.ficha h2:focus{outline:none}
+.ficha .unidad{font-size:13px;color:var(--texto2)}
+.ficha-precio{margin-top:6px;font-family:var(--display);font-size:32px;line-height:1.1}
+.ficha-disp{font-size:15px;font-weight:800}
+.ficha-disp.hay{color:var(--verde)}
+.ficha-disp.hay::before{content:"✓ "}
+.ficha-disp.no-hay{color:#5b6478}
+.ficha-control{margin-top:8px;max-width:320px}
+.ficha-control .mas{margin-top:0;width:100%;height:48px;font-size:17px}
+.ficha-control .cant{margin-top:0;height:48px;grid-template-columns:48px minmax(0,1fr) 48px}
+.compartir{justify-self:start;display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:10px;padding:0 20px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--noche);font-weight:800}
+.compartir:hover{border-color:var(--azul);color:var(--azul)}
+.ficha-parecidos{grid-column:1/-1;display:grid;gap:12px;padding-top:6px;border-top:1px solid var(--linea)}
+.ficha-parecidos h3{margin-top:14px;font-family:var(--display);font-weight:400;font-size:19px}
+.ficha-parecidos ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.parecido{display:grid;align-content:start;gap:4px;width:100%;height:100%;min-height:44px;padding:8px;border:1px solid var(--linea);border-radius:12px;background:#fff;color:var(--texto);text-align:left}
+.parecido:hover{border-color:var(--azul)}
+.parecido img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--suave)}
+.parecido img.propia{object-fit:contain;background:#fff}
+.parecido .nm{font-size:13.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.parecido .pr{margin-top:auto;font-family:var(--display);font-size:16px}
+.parecido .ag{font-size:12px;font-weight:700;color:#5b6478}
+@media (max-width:760px){
+  .ficha{margin:auto 0 0}
+  .ficha-hoja{max-height:92vh;max-height:92dvh;border-radius:22px 22px 0 0}
+  .ficha-cuerpo{grid-template-columns:minmax(0,1fr);gap:14px;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+  .ficha .foto img{max-height:min(38vh,320px);max-height:min(38dvh,320px)}
+  .ficha-info{padding-right:0}
+  .ficha-control{max-width:none}
+}
+
+/* aviso cuando un enlace compartido apunta a un producto que ya no está. Es una región viva (role=status) que
+   está siempre en la página: vacía no ocupa lugar, y el lector de pantalla anuncia el texto cuando llega */
+.aviso-ficha{margin:14px 0 0;padding:12px 16px;border:1px solid #ecd08a;border-radius:12px;background:#fff6dd;color:#5a4200;font-weight:600}
+.aviso-ficha:empty{margin:0;padding:0;border:0}
+
+@media (prefers-reduced-motion:reduce){
+  .ficha[open] .ficha-hoja{animation:none}
+}
+
+/* favoritos: el corazón. En la tarjeta es un círculo sobre la foto (arriba a la derecha; si hay sello
+   en esa esquina, queda debajo); en la ficha es un botón con su texto, junto a «Compartir». */
+.fav{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0;border:0;background:rgba(255,255,255,.94);color:var(--noche);font-weight:800}
+.fav svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fav[aria-pressed="true"] svg{color:var(--rojo);fill:currentColor}
+.prod .foto .fav{position:absolute;top:6px;right:6px;z-index:2;width:44px;height:44px;border-radius:50%;box-shadow:0 1px 6px rgba(14,26,71,.25)}
+.prod .foto.propia .sello{top:56px}
+.ficha-acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.ficha-acciones .compartir{margin-top:0}
+.fav-ficha{min-height:44px;padding:0 18px;border:2px solid var(--linea);border-radius:99px;background:#fff}
+.fav-ficha:hover,.fav-ficha[aria-pressed="true"]{border-color:var(--rojo)}
+
+/* favoritos y vistos hace poco: tarjetas chicas en una fila que se desliza; tocar una abre su ficha.
+   Reusan la tarjeta de «También le sirve» (.parecido) */
+.guardados{padding-block:12px 0}
+.guardados .sec-cab{margin-bottom:10px}
+/* La fila se desliza (overflow) y eso recorta lo que se sale de su caja: el relleno de 6px deja ver entero el anillo de
+   foco (3px + 2px de separación) y el margen negativo deja las tarjetas donde estaban */
+.mini-lista{list-style:none;margin:-4px -4px 0;padding:6px 6px 8px;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.mini-lista li{flex:0 0 140px;scroll-snap-align:start}
+.mini-foto{position:relative;display:block}
+.mini-foto .sello{position:absolute;left:6px;top:6px;background:#5b6478;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
+
+/* «Pedir lo de la última vez» (debajo de la portada) y el aviso de lo que hoy no está (arriba de la canasta).
+   El aviso lleva su id porque mi-cuenta/cuenta.css también tiene un .aviso, verde */
+.ultima{padding-block:6px 2px}
+.ultima-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800}
+.ultima-btn:hover{background:var(--verde);color:#fff}
+#noEstan{margin:10px 16px 0;padding:10px 12px;border:1px solid #ecd08a;border-radius:12px;background:#fff6dd;color:#5a4200;font-size:14px;font-weight:600}
+
+/* ubicación de entrega con el GPS: el botón, su resultado (#ubicado, role=status) y para qué se usa.
+   #ubicado queda en el diseño aunque esté vacío, para que el lector de pantalla lo anuncie al cambiar */
+.ubicar{display:grid;justify-items:start}
+.ubicar-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--azul);font-weight:800;font-size:15px}
+@media (hover:hover){.ubicar-btn:hover:not(:disabled){background:var(--azul);color:#fff}}   /* en el celular el toque dejaría el botón relleno */
+.ubicar-btn:disabled{border-color:var(--linea);background:var(--suave);color:var(--texto2);cursor:progress}
+.ubicar small{margin-top:6px}
+.datos #ubicado{margin-top:0;font-size:14px;font-weight:700}
+.datos #ubicado:not(:empty){margin-top:6px}
+.datos #ubicado[data-estado="ok"]{color:var(--verde)}
+.datos #ubicado[data-estado="fuera"],.datos #ubicado[data-estado="error"]{color:#8f1a10}
