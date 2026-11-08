@@ -10,7 +10,9 @@
    celular: favoritos (el corazón), lo visto hace poco y el último pedido enviado,
    para pedirlo otra vez en un toque (PE.guardado: tienda/guardados.js). En los datos de
    entrega, «Usar mi ubicación actual» suma el punto del GPS si cae en El Espinal
-   (tienda/ubicacion.js). Datos de la base: siempre textContent. */
+   (tienda/ubicacion.js). En el celular, una barra fija abajo lleva a Inicio, Categorías, Favoritos,
+   Pedidos y la canasta; la ficha tiene el botón y la hora de llegada en un pie que no se mueve.
+   Datos de la base: siempre textContent. */
 (function () {
   'use strict';
 
@@ -120,6 +122,20 @@
     }
     if (nota.textContent !== (r ? r.texto : '')) nota.textContent = r ? r.texto : '';
     nota.hidden = !r;
+    intentar(function () { pintarLlegadaFicha(r); });
+  }
+  /* En el pie de la ficha: cuándo llega (solo si el producto hay) y, si faltan pocas horas para que deje
+     de llegar hoy, hasta qué hora se puede pedir. Sin horario o sin llegada.js, el pie queda solo con el botón. */
+  var LIMITE_VISIBLE_MIN = 180;
+  function pintarLlegadaFicha(r) {
+    var caja = $('fichaLlega'), p = ficha.id !== null ? por[ficha.id] : null;
+    var lim = r && p && p.disponible && window.PE && window.PE.limiteHoy
+      ? intentar(function () { return window.PE.limiteHoy(new Date(), cat.horario); }) || null : null;
+    var conLimite = !!lim && lim.minutos >= 1 && lim.minutos <= LIMITE_VISIBLE_MIN;
+    caja.hidden = !(r && p && p.disponible);
+    if ($('fichaLlegaTexto').textContent !== (r ? r.texto : '')) $('fichaLlegaTexto').textContent = r ? r.texto : '';
+    $('fichaLimite').hidden = !conLimite;
+    $('fichaLimite').textContent = conLimite ? lim.texto : '';
   }
 
   /* ---------- Cuentas ---------- */
@@ -326,6 +342,7 @@
     $('avisoFicha').textContent = '';
     pintarFicha(p);
     ficha.id = p.id;
+    intentar(pintarLlegada);   /* el pie de la ficha dice cuándo llega este producto */
     if (!yaAbierta) {
       /* El foco vuelve a la tarjeta que la abrió: la chica de favoritos o vistos si vino de ahí; si no, al nombre
          de su tarjeta de la vitrina (también si se tocó la foto o se entró por el enlace) */
@@ -839,10 +856,10 @@
     });
     var vacia = c.n === 0;
     $('n').hidden = vacia; $('n').textContent = c.n;
-    $('barra').hidden = vacia;
-    document.body.classList.toggle('con-barra', !vacia);
-    $('barraN').textContent = c.n + (c.n === 1 ? ' producto' : ' productos');
-    $('barraT').textContent = pesos(c.t);
+    /* Barra de abajo (celular): la canasta dice cuántos productos lleva y el total */
+    $('barraN').hidden = vacia; $('barraN').textContent = c.n;
+    $('barraT').textContent = vacia ? 'Canasta' : pesos(c.t);
+    $('barra').setAttribute('aria-label', vacia ? 'Canasta vacía' : 'Canasta: ' + c.n + (c.n === 1 ? ' producto, ' : ' productos, ') + pesos(c.t));
     $('dom').textContent = vacia ? '$0' : (c.d ? pesos(c.d) : 'Gratis');
     $('falta').textContent = !vacia && c.s < gratis ? '· gratis si agrega ' + pesos(gratis - c.s) : '';
     $('tot').textContent = pesos(c.t);
@@ -861,6 +878,34 @@
     vista('canasta');
   }
   function verTodo() { filtro = { cat: '', q: '', todo: true }; $('q').value = ''; pintar(); }
+
+  /* ---------- Barra de abajo (celular) ---------- */
+  /* Inicio: la tienda como al abrirla (sin búsqueda ni categoría) y arriba del todo */
+  function vistaInicial() {
+    filtro = { cat: '', q: '', todo: !cat.productos.some(function (p) { return p.destacado; }) };
+    $('q').value = '';
+    pintar();
+  }
+  function irAlInicio() { vistaInicial(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  /* Baja hasta una sección dejándola justo debajo de la cabecera fija (que crece con la cinta del pedido en curso) */
+  function irA(seccion) {
+    var cab = document.querySelector('.cab'), alto = cab ? cab.getBoundingClientRect().height : 0;
+    window.scrollTo({ top: Math.max(0, seccion.getBoundingClientRect().top + window.scrollY - alto - 8), behavior: 'smooth' });
+  }
+  /* Favoritos: la fila de favoritos; si todavía no hay, el aviso de arriba dice cómo se guardan */
+  function irAFavoritos() {
+    if (!guardados) return;
+    if (buscando || filtro.cat) vistaInicial();   /* buscando, la fila se esconde */
+    if (Number($('favoritos').dataset.n)) { irA($('favoritos')); return; }
+    $('avisoFicha').textContent = 'Todavía no tiene favoritos: toque el corazón de un producto y aquí lo encuentra.';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function eventosAbajo() {
+    $('abInicio').addEventListener('click', irAlInicio);
+    $('abCategorias').addEventListener('click', function () { irA($('cats')); });
+    $('abFavoritos').hidden = !guardados;
+    $('abFavoritos').addEventListener('click', irAFavoritos);
+  }
 
   function eventos() {
     document.addEventListener('click', function (e) {
@@ -969,6 +1014,7 @@
       pintarCategorias();
       eventos();
       eventosFicha();
+      intentar(eventosAbajo);
       pintar();
       intentar(pintarGuardados);   /* favoritos y vistos, solo lo que sigue en la tienda */
       intentar(pintarUltimaVez);

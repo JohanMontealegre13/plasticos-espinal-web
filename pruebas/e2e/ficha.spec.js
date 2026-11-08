@@ -285,3 +285,63 @@ test('en el celular la ficha cabe en la pantalla, sin barra de lado, y ✕ se al
   expect(medidas.xAncho).toBeGreaterThanOrEqual(44);
   expect(medidas.xAlto).toBeGreaterThanOrEqual(44);
 });
+
+/* ---- Pie fijo de la ficha: el botón y cuándo llega, siempre a la vista; y la confianza junto a lo que se compra ---- */
+test('el pie de la ficha trae el botón y cuándo llega; a lo agotado no le promete llegada', async ({ page }) => {
+  const v = vigilar(page);
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T10:00:00-05:00' });
+  const pie = page.locator('#ficha .ficha-pie');
+  await expect(pie.locator('#fichaLlegaTexto')).toHaveText('Llega hoy antes de las 11:00 a. m.');
+  await expect(pie.locator('#fichaLimite')).toBeHidden();   /* faltan más de 3 horas para que deje de llegar hoy */
+  await pie.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await expect(pie.getByRole('textbox', { name: 'Cantidad de Contenedor icopor J1 x25 und' })).toHaveValue('1');
+  await page.evaluate(() => { location.hash = '#p=398'; });   /* Plato 23 cm: agotado */
+  await expect(page.locator('#fichaNombre')).toHaveText('Plato 23 cm hondo Darnel x20 und');
+  await expect(page.locator('#fichaLlega')).toBeHidden();
+  await expect(pie.getByRole('button', { name: 'Agotado' })).toBeDisabled();
+  v.sinProblemas();
+});
+
+test('faltando pocas horas, el pie dice hasta qué hora pedir para que llegue hoy', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T16:00:00-05:00' });
+  await expect(page.locator('#fichaLlegaTexto')).toHaveText('Llega hoy antes de las 5:00 p. m.');
+  await expect(page.locator('#fichaLimite')).toHaveText('Pidiendo antes de las 5:30 p. m., llega hoy');
+});
+
+test('de noche el pie dice que llega mañana y no pone límite', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T20:00:00-05:00' });
+  await expect(page.locator('#fichaLlegaTexto')).toHaveText('Llega mañana antes de las 9:00 a. m.');
+  await expect(page.locator('#fichaLimite')).toBeHidden();
+});
+
+test('sin horario el pie queda solo con el botón', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', sitio: (sitio) => { delete sitio.horario; } });
+  await expect(page.locator('#fichaLlega')).toBeHidden();
+  await expect(page.locator('#ficha .ficha-pie').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toBeVisible();
+});
+
+test('en el celular el botón de la ficha sigue a la vista aunque se baje hasta «También le sirve»', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 700 });
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T10:00:00-05:00' });
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  await page.locator('#ficha .ficha-cuerpo').evaluate((c) => { c.scrollTop = c.scrollHeight; });
+  await expect(page.locator('#parecidosCaja')).toBeInViewport();
+  const m = await page.evaluate(() => {
+    const b = document.querySelector('#fichaControl button').getBoundingClientRect();
+    return { dentro: b.top >= 0 && b.bottom <= window.innerHeight, alto: b.height };
+  });
+  expect(m.dentro).toBe(true);
+  expect(m.alto).toBeGreaterThanOrEqual(44);
+});
+
+test('la ficha y la canasta dicen cómo se paga y dónde están los cambios y el retracto', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  const confianza = page.locator('#ficha .confianza');
+  await expect(confianza.locator('li')).toHaveText(['Paga al recibir o con Bre-B', 'Lo lleva el equipo de la tienda', 'Cambios y retracto']);
+  await expect(confianza.getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+  await page.locator('#ficha .ficha-pie').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#fichaCerrar').click();
+  await page.locator('.btn-canasta').click();
+  await expect(page.locator('#resumen .confianza-linea')).toHaveText('Paga al recibir o con Bre-B · Cambios y retracto');
+  await expect(page.locator('#resumen .confianza-linea').getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+});
