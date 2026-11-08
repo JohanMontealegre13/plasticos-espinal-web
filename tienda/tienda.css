@@ -274,7 +274,6 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .qr{display:grid;place-items:center;padding:14px;border:1px solid var(--linea);border-radius:var(--r)}
 .qr img{width:min(240px,70vw);height:auto;image-rendering:pixelated}
 .qr p{color:var(--texto2);text-align:center;font-size:14px}
-.llave{text-align:center;font-weight:700}
 .ayuda{font-size:14px;color:var(--texto2)}
 .pregunta{font-weight:700}
 .pregunta small{display:block;font-weight:400;color:var(--texto2);font-size:13px}
@@ -305,7 +304,9 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .cerrar .txt{display:none}
 
 /* pantalla del QR */
-.pqr{justify-items:center;text-align:center}
+/* max-content: con la llave y los pasos la pantalla pasa de alto y el recuadro del QR (overflow:hidden)
+   se aplastaba en vez de dejar bajar la pantalla */
+.pqr{justify-items:center;text-align:center;grid-auto-rows:max-content}
 .pqr .volver{justify-self:start;background:none;border:0;color:var(--azul);padding:4px 0;font:inherit;font-weight:700;cursor:pointer}
 .pqr-monto{display:grid;gap:2px}
 .pqr-monto > span{font-size:14px;color:var(--texto2);font-weight:600}
@@ -321,6 +322,31 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .espera i{display:block;height:6px;border-radius:99px;background:var(--linea);overflow:hidden}
 .espera i::after{content:"";display:block;height:100%;width:0;border-radius:inherit;background:var(--verde)}
 .pqr #yaPague{animation:boton .55s cubic-bezier(.2,1.4,.4,1) both}
+/* llave Bre-B y botones de copiar */
+.pqr-monto .copiar{justify-self:center;margin:4px 0 2px}
+.copiar{border:2px solid var(--azul);background:#fff;color:var(--azul);border-radius:99px;padding:6px 16px;font-weight:800;font-size:14px}
+.copiar.hecho{border-color:var(--verde);background:var(--verde2);color:var(--verde)}
+.llave{width:100%;display:grid;justify-items:center;gap:4px;padding:12px;border:2px dashed var(--linea);border-radius:var(--r);background:var(--suave)}
+.llave > span{font-size:13px;color:var(--texto2);font-weight:700}
+.llave > b{font-family:var(--display);font-weight:400;font-size:26px;letter-spacing:.06em;color:var(--noche)}
+/* En el computador la llave es la segunda opción: una sola línea, para que el botón quede cerca */
+.pqr:not(.celular) .llave{grid-auto-flow:column;align-items:center;justify-content:center;gap:10px;padding:8px 12px}
+.pqr:not(.celular) .llave > b{font-size:18px}
+.qr-alterno{font-size:14px;color:var(--texto2)}
+.guardar-qr{color:var(--azul);font-weight:800}
+.copiado{min-height:1.4em;font-size:13px;color:var(--verde);font-weight:700}
+.copiado:empty{min-height:0}
+.fuera{position:fixed;top:0;left:-9999px;opacity:0}
+/* En el celular manda la llave: el QR baja, más chico, como otra opción */
+.pqr.celular .llave{order:2}
+.pqr.celular #pasosCelu{order:3}
+.pqr.celular .copiado{order:4}
+.pqr.celular .espera,.pqr.celular #yaPague{order:5}
+.pqr.celular .errores{order:6}
+.pqr.celular .qr-alterno{order:7;margin-top:8px}
+.pqr.celular .qr{order:8}
+.pqr.celular .guardar-qr{order:9}
+.pqr.celular .qr img{width:min(170px,50vw)}
 
 /* animación de entrada: la pantalla sube, el QR se arma despacio, luego los pasos */
 .pqr.entra{animation:pantalla .5s ease-out both}
