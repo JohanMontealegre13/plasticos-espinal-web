@@ -44,6 +44,7 @@
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
   var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
+  var etiquetaLlega = '';         /* «Llega hoy», «Llega mañana»…: la línea verde de cada tarjeta que hay (vacía sin horario) */
   var ficha = { id: null, empujada: false, desde: null, lugar: null };   /* ficha abierta: cuál, si un toque empujó su entrada del historial, quién la abrió y qué se miraba al abrirla (lugarDe) */
   var guardados = null;           /* { favoritos, vistos, ultimo }; null si guardados.js no cargó (sin corazones ni secciones) */
   var buscando = false;           /* hay algo escrito en el buscador: favoritos y vistos se esconden */
@@ -123,6 +124,12 @@
     if (nota.textContent !== (r ? r.texto : '')) nota.textContent = r ? r.texto : '';
     nota.hidden = !r;
     intentar(function () { pintarLlegadaFicha(r); });
+    /* En las tarjetas basta el día: «Llega hoy antes de las 3:40 p. m.» → «Llega hoy» */
+    var etiqueta = r ? r.texto.split(' antes de ')[0] : '';
+    if (etiqueta !== etiquetaLlega) {
+      etiquetaLlega = etiqueta;
+      document.querySelectorAll('#grilla .llega').forEach(function (s) { s.textContent = etiqueta; s.hidden = !etiqueta; });
+    }
   }
   /* En el pie de la ficha: cuándo llega (solo si el producto hay) y, si faltan pocas horas para que deje
      de llegar hoy, hasta qué hora se puede pedir. Sin horario o sin llegada.js, el pie queda solo con el botón. */
@@ -243,7 +250,14 @@
     var titulo = filtro.cat ? (cats[filtro.cat] || {}).nombre
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
-    $('limpiar').hidden = !(filtro.cat || r.buscando);
+    /* Con filtro: cuántos productos hay y el filtro puesto, que se quita con su ✕ (deja ver todo) */
+    var conFiltro = !!(filtro.cat || r.buscando), puesto = filtro.cat ? titulo : '«' + r.consulta.trim() + '»';
+    $('filtroLinea').hidden = !conFiltro;
+    $('limpiar').hidden = !conFiltro;
+    /* sin resultados no se cuenta: el aviso de «No lo encontramos» ya lo dice */
+    $('conteo').textContent = lista.length ? lista.length + (lista.length === 1 ? ' producto' : ' productos') : '';
+    $('limpiarTexto').textContent = conFiltro ? puesto : '';
+    $('limpiar').setAttribute('aria-label', conFiltro ? 'Quitar ' + puesto + ' y ver todos los productos' : 'Ver todos los productos');
     $('avisoFicha').textContent = '';
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
@@ -272,7 +286,9 @@
       nombre.addEventListener('click', function () { abrirFicha(p.id, true); });
       h3.appendChild(nombre);
       f.addEventListener('click', function (e) { if (!e.target.closest('.puntos, .fav')) abrirFicha(p.id, true); });
-      c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)), ctrl);
+      c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)));
+      if (p.disponible) { var llega = el('span', 'llega', etiquetaLlega); llega.hidden = !etiquetaLlega; c.appendChild(llega); }
+      c.appendChild(ctrl);
       a.append(f, c);
       li.appendChild(a);
       g.appendChild(li);
@@ -315,6 +331,10 @@
     $('fichaControl').appendChild(ctrl);
     var fav = $('fichaFav');
     fav.hidden = !guardados; fav.dataset.fav = p.id; pintarCorazon(fav, esFavorito(p.id));
+    /* Preguntar por WhatsApp: el chat abre con el nombre y el código ya escritos (sin número en catalogo.json no sale) */
+    var wa = $('preguntarWa');
+    wa.hidden = !cat.whatsapp;
+    if (cat.whatsapp) wa.href = 'https://wa.me/' + cat.whatsapp + '?text=' + encodeURIComponent('Hola, tengo una pregunta sobre ' + p.nombre + ' (código ' + p.id + ').');
     var ul = $('parecidos'), lista = parecidos(p, 6);
     ul.textContent = '';
     $('parecidosCaja').hidden = !lista.length;
