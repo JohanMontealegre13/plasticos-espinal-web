@@ -16,7 +16,7 @@ export const SITIO_FIJO = Object.freeze({
   horario: fijo('horario.json'),
   sinonimos: fijo('sinonimos.json'),
   entrega: { tienda: { lat: 4.1525081, lng: -74.8828245 }, radio_km: 8 },
-  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-35, Centro, El Espinal, Tolima', telefono: '318 355 5246', correo: '' },
+  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-25, Centro, El Espinal, Tolima', telefono: '318 355 5246', correo: '' },
 });
 const SITIO_REAL = new URL('../../tienda/catalogo.json', import.meta.url);
 
