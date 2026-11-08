@@ -54,6 +54,19 @@
   var $ = function (i) { return document.getElementById(i); };
   var formato = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
   function pesos(n) { return '$' + formato.format(Math.round(n)); }
+  var formatoCentavos = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
+  /* Precio por unidad junto al del paquete (como lo pide la SIC y lo muestra MercadoLibre): «$392 c/u».
+     Sale de `contenido` del CRM (lo que trae el paquete, de la ficha completa); sin él, o si la unidad se
+     mide (kg, ml…) o el paquete trae una sola, no sale nada. Bajo $100 lleva centavos: «$12,4 c/u».
+     Devuelve { valor: '$392', corto: 'c/u', largo: 'unidad' } (con un empaque creado: 'c/rollo', 'rollo') o null. */
+  function precioPorUnidad(p) {
+    var c = p.contenido;
+    if (!c || typeof c !== 'object' || c.se_mide || typeof c.unidad !== 'string' || !c.unidad) return null;
+    if (typeof c.cantidad !== 'number' || !(c.cantidad > 1) || !(p.precio > 0)) return null;
+    var v = p.precio / c.cantidad, und = c.unidad === 'und';
+    return { valor: '$' + (v < 100 ? formatoCentavos.format(v) : formato.format(Math.round(v))),
+      corto: und ? 'c/u' : 'c/' + c.unidad, largo: und ? 'unidad' : c.unidad };
+  }
   function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
   /* Lo que es un extra (hora de llegada, favoritos, ubicación, la ficha de la dirección…) no tumba la tienda:
@@ -287,6 +300,8 @@
       h3.appendChild(nombre);
       f.addEventListener('click', function (e) { if (!e.target.closest('.puntos, .fav')) abrirFicha(p.id, true); });
       c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)));
+      var cu = intentar(function () { return precioPorUnidad(p); });
+      if (cu) c.appendChild(el('span', 'por-unidad', cu.valor + ' ' + cu.corto));
       if (p.disponible) { var llega = el('span', 'llega', etiquetaLlega); llega.hidden = !etiquetaLlega; c.appendChild(llega); }
       c.appendChild(ctrl);
       a.append(f, c);
@@ -322,6 +337,9 @@
     $('fichaNombre').textContent = p.nombre;
     $('fichaCodigo').textContent = 'Código ' + p.id;
     $('fichaPrecio').textContent = pesos(p.precio);
+    var cu = intentar(function () { return precioPorUnidad(p); });
+    $('fichaUnidad').textContent = cu ? 'Precio por ' + cu.largo + ': ' + cu.valor : '';
+    $('fichaUnidad').hidden = !cu;
     var disp = $('fichaDisp');
     disp.textContent = p.disponible ? 'Disponible' : 'Agotado';
     disp.className = 'ficha-disp ' + (p.disponible ? 'hay' : 'no-hay');

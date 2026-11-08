@@ -27,7 +27,12 @@
       "disponible": true,
       "destacado": true,
       "foto": "",
-      "fotos": []
+      "fotos": [],
+      "contenido": {
+        "cantidad": 25,
+        "unidad": "und",
+        "se_mide": false
+      }
     },
     {
       "id": 131,
@@ -37,7 +42,12 @@
       "disponible": true,
       "destacado": true,
       "foto": "",
-      "fotos": []
+      "fotos": [],
+      "contenido": {
+        "cantidad": 100,
+        "unidad": "und",
+        "se_mide": false
+      }
     },
     {
       "id": 191,
@@ -57,7 +67,12 @@
       "disponible": true,
       "destacado": true,
       "foto": "",
-      "fotos": []
+      "fotos": [],
+      "contenido": {
+        "cantidad": 50,
+        "unidad": "und",
+        "se_mide": false
+      }
     },
     {
       "id": 305,
@@ -97,7 +112,12 @@
       "disponible": true,
       "destacado": false,
       "foto": "",
-      "fotos": []
+      "fotos": [],
+      "contenido": {
+        "cantidad": 1,
+        "unidad": "kg",
+        "se_mide": true
+      }
     }
   ]
 }
