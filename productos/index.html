@@ -13,10 +13,10 @@
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/estilos.css?v=12">
+  <link rel="stylesheet" href="/css/estilos.css?v=13">
   <script src="/js/principal.js?v=12" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
-  <script src="/js/catalogo.js?v=1" defer></script>
+  <script src="/js/catalogo.js?v=2" defer></script>
 </head>
 <body>
   <svg hidden xmlns="http://www.w3.org/2000/svg">
@@ -28,6 +28,7 @@
     <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
     <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-filtros" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
   </svg>
 
   <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -91,15 +92,21 @@
           <div id="catCuerpo" hidden>
             <nav class="pestanas-cat" id="catPestanas" aria-label="Categorías"></nav>
             <div class="catalogo__cuerpo" id="catCuerpoInterno">
+              <button class="catalogo__ver-filtros" id="verFiltros" type="button" aria-expanded="false" aria-controls="catFiltros" hidden>
+                <svg class="icono" aria-hidden="true"><use href="#i-filtros"/></svg>
+                Filtros <span class="catalogo__ver-filtros-n" id="filtrosN" hidden></span>
+              </button>
               <aside class="catalogo__filtros" id="catFiltros" aria-label="Filtrar productos" hidden>
-                <div class="filtro-bloque" id="bloqueMarcas" hidden>
-                  <h2>Marca</h2>
-                  <ul class="filtro-lista" id="listaMarcas"></ul>
-                </div>
+                <div class="catalogo__facetas" id="catFacetas"></div>
                 <div class="filtro-bloque" id="bloqueHay" hidden>
-                  <h2>Disponibilidad</h2>
-                  <label class="casilla"><input id="soloHay" type="checkbox"><span>Solo lo que hay hoy</span></label>
+                  <h2 class="filtro-bloque__cabeza">
+                    <button class="filtro-bloque__titulo" type="button" data-plegar="hay" aria-expanded="true" aria-controls="faceta-hay"><span>Disponibilidad</span></button>
+                  </h2>
+                  <div class="filtro-bloque__cuerpo" id="faceta-hay">
+                    <label class="casilla"><input id="soloHay" type="checkbox"><span>Solo lo que hay hoy</span></label>
+                  </div>
                 </div>
+                <button class="catalogo__quitar" id="quitarFiltros" type="button" hidden>Quitar filtros</button>
               </aside>
               <div class="catalogo__lista">
                 <div class="catalogo__barra">
@@ -171,7 +178,7 @@
 
           <section class="ficha-pub__parecidos" id="parecidosCaja" aria-labelledby="parecidosTit" hidden>
             <h2 id="parecidosTit">También le puede servir</h2>
-            <ul class="rejilla-prod rejilla-prod--fila" id="fichaParecidos"></ul>
+            <ul class="rejilla-prod rejilla-prod--corta" id="fichaParecidos"></ul>
           </section>
           <p><a class="enlace-terciario" id="fichaVolver" href="/productos/"><span id="fichaVolverTexto">Ver todos los productos</span><svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></a></p>
         </article>

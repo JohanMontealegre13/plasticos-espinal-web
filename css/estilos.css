@@ -767,19 +767,16 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .legal__ayuda { padding: 4px 4px 0; color: var(--texto-2); }
 
 /* ---------- 23. Catálogo público: tarjetas de producto, pestañas, filtros y ficha ---------- */
-/* Rejilla: 2 / 3 / 4 columnas. En fila (inicio y parecidos) se desliza de lado sin filas cojas */
+/* Rejilla: 2 / 3 / 4 columnas. La corta (inicio y parecidos) no se desliza de lado: con el mouse
+   no se podía. Muestra 6 en celular y tableta (3 filas de 2, 2 de 3) y 8 en computador (2 de 4) */
 .rejilla-prod { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 700px) { .rejilla-prod { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .rejilla-prod { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.rejilla-prod--fila {
-  --por-vista: 2.2;
-  grid-template-columns: none; grid-auto-flow: column;
-  grid-auto-columns: calc((100% - (var(--por-vista) - 1) * var(--hueco)) / var(--por-vista));
-  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding: 4px 2px 14px; margin-inline: -2px;
+.rejilla-prod--corta > li:nth-child(n+7) { display: none; }
+@media (min-width: 1000px) {
+  .rejilla-prod--corta { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rejilla-prod--corta > li:nth-child(n+7) { display: flex; }
 }
-@media (min-width: 700px) { .rejilla-prod--fila { --por-vista: 3.2; } }
-@media (min-width: 1100px) { .rejilla-prod--fila { --por-vista: 4; } }
-.rejilla-prod--fila > li { scroll-snap-align: start; }
 .rejilla-prod > li { display: flex; }
 
 .tarjeta-prod {
@@ -879,13 +876,44 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (min-width: 1000px) {
   .catalogo__cuerpo { grid-template-columns: 240px minmax(0, 1fr); gap: 32px; align-items: start; }
   .catalogo__cuerpo.sin-filtros { grid-template-columns: minmax(0, 1fr); }
-  .catalogo__filtros { position: sticky; top: 168px; }
+  /* La columna se queda a la vista y, si los filtros abiertos no caben, se desliza por dentro */
+  .catalogo__filtros { position: sticky; top: 168px; max-height: calc(100vh - 184px); overflow-y: auto; overscroll-behavior: contain; padding: 2px; margin: -2px; }
 }
 @media (min-width: 1000px) and (max-width: 1239px) { .catalogo__cuerpo:not(.sin-filtros) .rejilla-prod { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .catalogo__filtros { display: grid; gap: 14px; align-content: start; }
-@media (max-width: 999px) { .catalogo__filtros { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
-.filtro-bloque { display: grid; gap: 10px; padding: 16px 18px; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg); }
-.filtro-bloque h2 { font-family: var(--display); font-weight: 400; font-size: .9375rem; letter-spacing: .04em; text-transform: uppercase; }
+/* Celular y tableta: plegados detrás de «Filtros», para que los productos salgan de una */
+@media (max-width: 999px) { .catalogo__filtros:not(.esta-abierto) { display: none; } }
+.catalogo__facetas { display: grid; gap: 10px; }
+.catalogo__ver-filtros {
+  display: inline-flex; align-items: center; justify-self: start; gap: 8px; min-height: 44px; padding: 0 18px;
+  border: 2px solid var(--linea-2); border-radius: var(--pill); background: #fff; color: var(--texto);
+  font: 700 var(--fs-chico) var(--font); cursor: pointer;
+}
+.catalogo__ver-filtros .icono { width: 20px; height: 20px; }
+@media (min-width: 1000px) { .catalogo__ver-filtros { display: none; } }   /* en computador la columna siempre se ve */
+.catalogo__ver-filtros[aria-expanded="true"] { border-color: var(--azul); color: var(--azul-osc); }
+.catalogo__ver-filtros-n { min-width: 24px; padding: 1px 7px; border-radius: var(--pill); background: var(--azul); color: #fff; font-size: .8125rem; text-align: center; }
+.catalogo__ver-filtros:focus-visible, .filtro-bloque__titulo:focus-visible, .filtro-bloque__mas:focus-visible, .catalogo__quitar:focus-visible { outline: 3px solid var(--amarillo); outline-offset: 2px; }
+.filtro-bloque { display: grid; padding: 4px 18px; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg); }
+.filtro-bloque__cabeza { font: inherit; }
+.filtro-bloque__titulo {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--display); font-weight: 400; font-size: .9375rem; letter-spacing: .04em; text-transform: uppercase; color: var(--texto); text-align: left;
+}
+/* La flecha que dice si está abierto: hacia abajo cerrado, hacia arriba abierto */
+.filtro-bloque__titulo::after {
+  content: ""; width: 9px; height: 9px; margin-left: auto; margin-right: 4px; flex: none;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-3px) rotate(45deg);
+  transition: transform var(--t-2) var(--curva);
+}
+.filtro-bloque__titulo[aria-expanded="true"]::after { transform: translateY(2px) rotate(-135deg); }
+.filtro-bloque__marcados { font-family: var(--font); font-size: .75rem; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--azul-osc); }
+.filtro-bloque__cuerpo { display: grid; gap: 4px; padding-bottom: 12px; }
+.filtro-bloque__mas, .catalogo__quitar {
+  justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: 700 var(--fs-chico) var(--font); color: var(--azul-osc); text-decoration: underline; text-underline-offset: 4px;
+}
+.catalogo__quitar { padding: 0 4px; }
 .filtro-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .casilla { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
 .casilla input { width: 20px; height: 20px; flex: none; accent-color: var(--azul); }
@@ -934,8 +962,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .ficha-pub__parecidos h2 { font-family: var(--display); font-weight: 400; font-size: clamp(1.25rem, 1rem + 1vw, 1.625rem); margin-bottom: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .tarjeta-prod:hover, .tarjeta-prod:hover .tarjeta-prod__foto img { transform: none; }
+  .filtro-bloque__titulo::after { transition: none; }
 }
 @media (forced-colors: active) {
-  .tarjeta-prod, .pestana, .pestana-cat { border: 2px solid CanvasText; }
+  .tarjeta-prod, .pestana, .pestana-cat, .catalogo__ver-filtros { border: 2px solid CanvasText; }
   .pestana[aria-selected="true"], .pestana-cat[aria-pressed="true"] { outline: 3px solid Highlight; }
 }

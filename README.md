@@ -177,10 +177,13 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   nombre y código, y el precio se confirma antes de despachar. Los precios solo
   existen en la tienda con contraseña.
 - `/productos/`: categorías en pestañas, buscador (el mismo de la tienda,
-  `js/buscar.js`), filtros de marca y «solo lo que hay» (salen solo cuando hay
-  de dónde escoger), orden y la ficha de cada producto (`?p=ID`): fotos,
-  pestañas de descripción, características y domicilio, y parecidos. El inicio
-  muestra los productos por categoría en pestañas («Productos de la bodega») y
+  `js/buscar.js`), filtros plegables de marca, medida, color, contenido y «solo
+  lo que hay» (salen de las características del CRM, solo cuando hay de dónde
+  escoger; en celular y tableta van detrás del botón «Filtros»), orden y la
+  ficha de cada producto (`?p=ID`): fotos, pestañas de descripción,
+  características y domicilio, y parecidos. El inicio muestra los productos por
+  categoría en pestañas («Productos de la bodega»), en una rejilla quieta (nada
+  que deslizar de lado: 8 en computador, 6 en celular) y
   las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
   distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
 - Datos: `functions/api/catalogo.js` le pide al CRM el mismo catálogo de la
