@@ -352,6 +352,7 @@ test('«Preguntar por WhatsApp» abre el chat con el nombre y el código del pro
   await expect(wa).toBeVisible();
   await expect(wa).toHaveAttribute('href', 'https://wa.me/573183555246?text=' + encodeURIComponent('Hola, tengo una pregunta sobre Contenedor icopor J1 x25 und (código 141).'));
   await expect(wa).toHaveAttribute('target', '_blank');
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));   /* medir con la ficha ya quieta */
   expect((await wa.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
 });
 
@@ -393,6 +394,7 @@ test('con varias fotos la ficha dice cuál va, trae miniaturas y una miniatura l
   await minis.nth(2).click();
   await expect(page.locator('#fichaFotos .foto-n')).toHaveText('3 / 3');
   await expect(minis.nth(2)).toHaveAttribute('aria-current', 'true');
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
   expect((await minis.nth(0).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
 });
 
