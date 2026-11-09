@@ -905,14 +905,58 @@
       $('yaPague').hidden = false;
     }, ESPERA_BOTON);
   }
+  /* En un celular (dedo, no mouse) el QR está en la misma pantalla que tendría que escanearlo:
+     ahí manda la llave Bre-B, que se copia y se pega en la app del banco. */
+  function enCelular() {
+    return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  }
   function pintarQr() {
     var pago = (cat && cat.pago) || {};
+    var llave = String(pago.llave || '').trim();
+    var celular = enCelular() && !!llave;
     $('qrImg').hidden = !pago.qr;
     $('qrFalta').hidden = !!pago.qr;
-    $('yaPague').disabled = !pago.qr;
+    $('yaPague').disabled = !pago.qr && !llave;
     if (pago.qr) $('qrImg').src = pago.qr;
-    $('qrLlave').hidden = !pago.llave;
-    $('qrLlave').textContent = pago.llave ? 'Llave Bre-B: ' + pago.llave : '';
+    $('qrLlave').hidden = !llave;
+    $('qrLlaveNum').textContent = llave;
+    $('pqr').classList.toggle('celular', celular);
+    $('pasosCelu').hidden = !celular;
+    $('pasosCompu').hidden = celular;
+    $('qrAlterno').hidden = !celular || !pago.qr;
+    $('guardarQr').hidden = !celular || !pago.qr;
+    if (pago.qr) $('guardarQr').setAttribute('href', pago.qr);
+    $('copiado').textContent = '';
+  }
+  /* Copiar la llave o el valor: con el portapapeles del navegador y, si no deja, a la antigua */
+  var relojCopia = {};
+  function copiar(texto, boton, que) {
+    function listo(ok) {
+      var antes = boton.dataset.texto || boton.textContent;
+      boton.dataset.texto = antes;
+      boton.textContent = ok ? '¡Copiado!' : antes;
+      boton.classList.toggle('hecho', ok);
+      $('copiado').textContent = ok ? que + ': ' + texto : 'No se pudo copiar. Mantenga el dedo sobre ' + texto + ' para copiarlo.';
+      clearTimeout(relojCopia[boton.id]);
+      relojCopia[boton.id] = setTimeout(function () { boton.textContent = antes; boton.classList.remove('hecho'); }, 2000);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(texto).then(function () { listo(true); }, function () { listo(copiarALaAntigua(texto)); });
+    } else {
+      listo(copiarALaAntigua(texto));
+    }
+  }
+  function copiarALaAntigua(texto) {
+    var t = document.createElement('textarea');
+    t.value = texto;
+    t.setAttribute('readonly', '');
+    t.className = 'fuera';
+    document.body.appendChild(t);
+    t.select();
+    var ok;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    t.remove();
+    return ok;
   }
   /* Billetes que alcanzan para el total: exacto y los siguientes redondos */
   function pintarBilletes() {
@@ -1099,6 +1143,8 @@
       enviarPedido(d);
     });
     $('yaPague').addEventListener('click', function () { pagar({ medio: 'qr', pagado: true }, this, 'errQr'); });
+    $('copiarLlave').addEventListener('click', function () { copiar($('qrLlaveNum').textContent, this, 'Llave copiada'); });
+    $('copiarValor').addEventListener('click', function () { copiar(String(Math.round(pedido.total)), this, 'Valor copiado'); });
     $('volverPago').addEventListener('click', function () { marcarMedio(''); vista('pago'); });
     $('pagaCon').addEventListener('input', function () {
       document.querySelectorAll('.billete').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
