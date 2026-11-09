@@ -123,6 +123,13 @@ test('descarta productos sin id o sin nombre, y categorías que nadie usa', () =
   assert.equal(c.productos[1].disponible, false);
 });
 
+test('las notas internas del CRM en la descripción no salen a la página', () => {
+  const nota = 'Importado de Siigo (inventario) 2026-07-06. Revisar precio de venta e IVA.';
+  assert.equal(catalogo.limpiarProducto({ id: 1, nombre: 'A', descripcion: nota }, false).descripcion, undefined);
+  assert.equal(catalogo.limpiarProducto({ id: 1, nombre: 'A', descripcion: 'Toca revisar precio' }, false).descripcion, undefined);
+  assert.equal(catalogo.limpiarProducto({ id: 1, nombre: 'A', descripcion: 'Para sopa caliente.' }, false).descripcion, 'Para sopa caliente.');
+});
+
 test('le pide al CRM con la clave en la cabecera (nunca en la dirección) y la respuesta no la trae', async () => {
   const { r, datos } = await pedirCatalogo();
   assert.equal(llamadas.length, 1);

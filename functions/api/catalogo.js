@@ -17,8 +17,12 @@ const FRESCA_MS = 5 * 60 * 1000;          /* más vieja que esto, se vuelve a pe
 const GUARDAR_S = 60 * 60 * 24 * 14;      /* cuánto la guarda Cloudflare por si el CRM no responde */
 const FOTO = /^[0-9a-f]{32}\.(?:png|jpe?g|gif|webp)$/;
 /* Una copia por modo: apagar PRECIOS_PUBLICOS nunca deja salir una copia guardada con precios */
-const LLAVE = 'https://cache.plasticosespinal.local/api/catalogo/v1';
+const LLAVE = 'https://cache.plasticosespinal.local/api/catalogo/v2';
 const LLAVE_CON_PRECIO = LLAVE + '?precio=1';
+
+/* Notas que el CRM guarda en la descripción para uso interno («Importado de Siigo…
+   Revisar precio de venta e IVA.»): son para el personal, nunca para la página. */
+const NOTA_INTERNA = /^importado de |revisar precio/i;
 
 /** Texto limpio y con tope, o '' */
 function texto(v, tope) {
@@ -47,7 +51,7 @@ export function limpiarProducto(p, conPrecio) {
     limpio.contenido = { cantidad: Number(c.cantidad), unidad: texto(c.unidad, 20), se_mide: !!c.se_mide };
   }
   const descripcion = texto(p.descripcion, 1500);
-  if (descripcion) limpio.descripcion = descripcion;
+  if (descripcion && !NOTA_INTERNA.test(descripcion)) limpio.descripcion = descripcion;
   const detalles = (Array.isArray(p.detalles) ? p.detalles : [])
     .map((d) => ({ nombre: texto(d && d.nombre, 40), valor: texto(d && d.valor, 120) }))
     .filter((d) => d.nombre && d.valor).slice(0, 12);
