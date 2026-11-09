@@ -2,7 +2,7 @@
    datos de tienda/catalogo.json, la página de términos tiene sus nueve secciones y el formulario de entrega
    avisa que pedir es aceptarlos. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, sitioDe, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, sitioDe, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const ANA = { nombre: 'Ana Prueba', documento: 'NIT 900.000.000-1', direccion: 'Calle 7 #5-35', telefono: '318 355 5246', correo: 'hola@ejemplo.co' };
@@ -10,7 +10,7 @@ const LINEA_ANA = 'Vende: Ana Prueba · NIT 900.000.000-1 · Calle 7 #5-35 · 31
 /** Lo que falta de llenar hoy (nombre, documento, correo), pero con otra dirección y otro teléfono: ninguna prueba depende de los valores reales de catalogo.json. */
 const A_MEDIAS = { nombre: '', documento: '', direccion: 'Carrera 9 #1-2, Barrio Prueba', telefono: '300 000 0000', correo: '' };
 /** El texto de respaldo que trae la página de términos (el mismo de la política de datos) */
-const RESPALDO_DIRECCION = 'Calle 7 #5-35, Centro, El Espinal, Tolima';
+const RESPALDO_DIRECCION = 'Calle 7 #5-25, Centro, El Espinal, Tolima';
 
 /** Pone en tienda/catalogo.json el `vendedor` de la prueba (o lo quita con `null`): para abrirTienda({ sitio }) o sitioDe. */
 const conVendedor = (/** @type {object | null} */ vendedor) => (/** @type {any} */ sitio) => {
@@ -140,7 +140,7 @@ test('«Seguir al pago» avisa que pedir es aceptar los términos, y el enlace s
   const v = vigilar(page);
   await abrirTienda(page);
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();
   await llenarDatos(page);

@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cargarPE, leer } from '../lib.mjs';
 
-const { llegada } = cargarPE(['tienda/llegada.js']);
+const { llegada, limiteHoy } = cargarPE(['tienda/llegada.js']);
 const H = JSON.parse(leer('pruebas/unit/fixtures/horario.json'));
 const en = (/** @type {string} */ iso) => llegada(new Date(iso), H);
 
@@ -96,4 +96,39 @@ test('un horario que falta o está mal escrito devuelve null, sin romper', () =>
   assert.equal(llegada(ahora, { alistar_min: 'mucho', dias: H.dias, festivos: [] }), null);
   assert.equal(llegada(ahora, { alistar_min: 60, dias: { jueves: 'siempre' } }), null);
   assert.equal(llegada(new Date('no es una fecha'), H), null);
+});
+
+/* ---- Hasta qué hora se puede pedir para que llegue hoy (la ficha lo muestra cuando faltan pocas horas) ---- */
+const limite = (/** @type {string} */ iso) => limiteHoy(new Date(iso), H);
+test('jueves 16:00: pidiendo antes de las 5:30 llega hoy, faltan 90 minutos', () => {
+  assert.deepEqual(limite('2026-10-22T16:00:00-05:00'), { texto: 'Pidiendo antes de las 5:30 p. m., llega hoy', hora: '17:30', minutos: 90 });
+});
+test('el límite es justo: a las 17:30 todavía llega hoy y a las 17:31 ya no', () => {
+  assert.equal(llegada(new Date('2026-10-22T17:30:00-05:00'), H).fecha, '2026-10-22');
+  assert.equal(llegada(new Date('2026-10-22T17:31:00-05:00'), H).fecha, '2026-10-23');
+  assert.equal(limite('2026-10-22T17:30:00-05:00').minutos, 0);
+  assert.equal(limite('2026-10-22T17:31:00-05:00'), null);
+});
+test('unos segundos pasados del minuto no regalan tiempo: los minutos se redondean hacia abajo', () => {
+  assert.equal(limite('2026-10-22T17:28:30-05:00').minutos, 1);
+  assert.equal(limite('2026-10-22T17:28:30-05:00').hora, '17:30');
+});
+test('en la mañana el límite salta el almuerzo: lo que se pide a las 12:00 llega a las 2:30', () => {
+  assert.equal(limite('2026-10-22T10:00:00-05:00').hora, '17:30');
+  assert.equal(limite('2026-10-22T10:00:00-05:00').minutos, 450);
+});
+test('domingo el límite es a las 12:00 (cierra a la 1)', () => {
+  assert.equal(limite('2026-10-25T11:00:00-05:00').hora, '12:00');
+  assert.equal(limite('2026-10-25T11:00:00-05:00').texto, 'Pidiendo antes de las 12:00 p. m., llega hoy');
+});
+test('si ya no llega hoy no hay límite', () => {
+  assert.equal(limite('2026-10-22T19:00:00-05:00'), null);   /* llega mañana */
+  assert.equal(limite('2026-10-24T20:00:00-05:00'), null);   /* sábado de noche */
+});
+test('el límite usa hora de Colombia aunque el equipo esté en otra zona', () => {
+  assert.equal(limite('2026-10-22T21:00:00Z').hora, '17:30');   /* 21:00 UTC = 16:00 en Colombia */
+});
+test('sin horario no hay límite, sin romper', () => {
+  assert.equal(limiteHoy(new Date('2026-10-22T16:00:00-05:00'), undefined), null);
+  assert.equal(limiteHoy(new Date('no es una fecha'), H), null);
 });

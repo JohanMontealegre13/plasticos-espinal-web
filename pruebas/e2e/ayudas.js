@@ -16,7 +16,7 @@ export const SITIO_FIJO = Object.freeze({
   horario: fijo('horario.json'),
   sinonimos: fijo('sinonimos.json'),
   entrega: { tienda: { lat: 4.1525081, lng: -74.8828245 }, radio_km: 8 },
-  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-35, Centro, El Espinal, Tolima', telefono: '318 355 5246', correo: '' },
+  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-25, Centro, El Espinal, Tolima', telefono: '318 355 5246', correo: '' },
 });
 const SITIO_REAL = new URL('../../tienda/catalogo.json', import.meta.url);
 
@@ -104,4 +104,13 @@ export async function llenarDatos(page) {
   await page.locator('#d-barrio').fill('Belén');
   await page.locator('#d-dir').fill('Calle 1 # 2-3');
   await page.locator('#d-acepto').check();
+}
+
+/**
+ * Abre la canasta con el botón que se ve: en el celular la de la barra de abajo (la de arriba se esconde),
+ * en el computador la de la cabecera.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function abrirCanasta(page) {
+  await page.locator('.cab .btn-canasta:visible, #barra:visible').first().click();
 }

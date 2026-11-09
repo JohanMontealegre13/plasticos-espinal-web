@@ -2,7 +2,7 @@
    la misma pantalla y no se puede escanear, así que allá manda la llave: se copia y se pega en la app del banco,
    y el QR queda abajo para guardarlo. El valor también se copia, sin puntos, para pegarlo tal cual. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const PEDIDO = { codigo: 'PE-ABCDE', secreto: 's', estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', medio: '', total: 13800 };
@@ -14,7 +14,7 @@ async function hastaElQr(/** @type {import('@playwright/test').Page} */ page, /*
   await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
   await abrirTienda(page, { sitio: (s) => { s.pago = { qr: '/tienda/img/qr-breb-bancolombia.png', llave: LLAVE }; }, ...op });
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
   await page.locator('#enviar').click();

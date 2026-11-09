@@ -129,7 +129,7 @@ const BUENO = {
   horario: JSON.parse(leer('pruebas/unit/fixtures/horario.json')),
   sinonimos: JSON.parse(leer('pruebas/unit/fixtures/sinonimos.json')),
   entrega: { tienda: { lat: 4.1525081, lng: -74.8828245 }, radio_km: 8 },
-  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-35', telefono: '318 355 5246', correo: '' },
+  vendedor: { nombre: '', documento: '', direccion: 'Calle 7 #5-25', telefono: '318 355 5246', correo: '' },
 };
 /** Una copia de BUENO con un cambio */
 const con = (/** @type {(s: any) => void} */ cambiar) => { const s = structuredClone(BUENO); cambiar(s); return revisar(s); };

@@ -1,6 +1,8 @@
 /* Plásticos Espinal · tienda en línea: cuándo llega un pedido hecho ahora.
-   Módulo puro (no toca la página): lo usa tienda.js para la franja de arriba y
-   la canasta, y se prueba en Node (pruebas/unit/llegada.test.mjs).
+   Módulo puro (no toca la página): lo usa tienda.js para la franja de arriba,
+   la canasta y la ficha de cada producto, y se prueba en Node
+   (pruebas/unit/llegada.test.mjs). `limiteHoy` dice hasta qué hora se puede
+   pedir para que llegue hoy (la ficha lo muestra cuando faltan pocas horas).
 
    La regla: se pasa `ahora` a hora de Colombia (ahora − 5 h, leída con getUTC*,
    NUNCA con getHours(): el celular puede tener otra zona o la hora corrida) y
@@ -84,6 +86,32 @@
     return null;
   }
 
+  /* ¿Hasta qué hora se puede pedir para que llegue hoy? { texto, hora: 'HH:MM', minutos } o null.
+     Solo hay límite si un pedido hecho en `ahora` llega hoy: se busca, minuto a minuto, el último
+     minuto de hoy (hora de Colombia) en que `llegada` todavía dice «hoy». `minutos` es lo que falta
+     desde `ahora` hasta ese minuto, redondeado hacia abajo (0 = se acaba en este minuto). */
+  function limiteHoy(ahora, horario) {
+    var r = llegada(ahora, horario);
+    if (!r) return null;
+    var col = new Date(ahora.getTime() - COLOMBIA_MIN * 60000);
+    var hoy = col.getUTCFullYear() + '-' + dos(col.getUTCMonth() + 1) + '-' + dos(col.getUTCDate());
+    if (r.fecha !== hoy) return null;
+    var base = Math.floor(ahora.getTime() / 60000) * 60000, ultimo = 0;
+    for (var m = 1; m <= 24 * 60; m++) {
+      var s = llegada(new Date(base + m * 60000), horario);
+      if (!s || s.fecha !== hoy) break;
+      ultimo = m;
+    }
+    var fin = new Date(base + ultimo * 60000 - COLOMBIA_MIN * 60000);
+    var finMin = fin.getUTCHours() * 60 + fin.getUTCMinutes();
+    return {
+      texto: 'Pidiendo antes de ' + hora12(finMin) + ', llega hoy',
+      hora: dos(fin.getUTCHours()) + ':' + dos(fin.getUTCMinutes()),
+      minutos: Math.max(0, Math.floor((base + ultimo * 60000 - ahora.getTime()) / 60000))
+    };
+  }
+
   raiz.PE = raiz.PE || {};
   raiz.PE.llegada = llegada;
+  raiz.PE.limiteHoy = limiteHoy;
 })(typeof window !== 'undefined' ? window : globalThis);

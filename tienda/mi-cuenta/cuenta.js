@@ -35,6 +35,16 @@
     });
   }
 
+  /* Mis pedidos se ve como ventana encima de la tienda (menu.js). Desde la
+     página de entrar se va directo a la tienda con la ventana abierta: pasar
+     por la página suelta era un salto más, y al irse cortaba lo que aún bajaba. */
+  var enMarco = false;
+  try { enMarco = window.self !== window.top && window.top.location.origin === location.origin; } catch (e) { enMarco = false; }
+  function aMisPedidos() {
+    var ruta = BASE + 'pedidos/';
+    location.href = enMarco ? ruta : '/tienda/#cuenta=' + encodeURIComponent(ruta);
+  }
+
   function error(nodo, texto) { nodo.textContent = texto; nodo.hidden = !texto; }
 
   function enviando(boton, si) { boton.disabled = si; }
@@ -94,7 +104,7 @@
   }
 
   function entrar() {
-    pedir('yo').then(function () { location.href = BASE + 'pedidos/'; }, function () {});
+    pedir('yo').then(aMisPedidos, function () {});
     window.addEventListener('hashchange', desdeHash);
     desdeHash();
 
@@ -104,7 +114,7 @@
       if (!$('clave').value) return 'Escriba su contraseña.';
       return { usuario: u, clave: $('clave').value };
     }, function (d) {
-      return pedir('entrar', d).then(function () { location.href = BASE + 'pedidos/'; });
+      return pedir('entrar', d).then(aMisPedidos);
     });
 
     formulario('f-crear', 'e-crear', function () {
@@ -135,7 +145,7 @@
       if (c !== $('repetir').value) return 'Las dos contraseñas no son iguales.';
       return { clave: c };
     }, function (d) {
-      return pedir('clave', d).then(function () { location.href = BASE + 'pedidos/'; });
+      return pedir('clave', d).then(aMisPedidos);
     });
   }
 
@@ -188,7 +198,7 @@
   function pedido() {
     var id = (new URLSearchParams(location.search).get('id') || '').replace(/\D/g, '');
     var caja = $('detalle');
-    if (!id) { location.href = BASE + 'pedidos/'; return; }
+    if (!id) { aMisPedidos(); return; }
     pedir('pedidos/' + id).then(function (p) {
       $('titulo').textContent = 'Compra ' + p.numero;
       var sub = [p.canal, fecha(p.fecha), p.forma_pago].filter(Boolean).join(' · ');
@@ -260,7 +270,11 @@
   }
 
   var paginas = { entrar: entrar, pedidos: pedidos, pedido: pedido, datos: datos };
-  function iniciar() { var p = paginas[document.body.dataset.pagina]; if (p) p(); }
+  function iniciar() {
+    if ('aLaTienda' in document.documentElement.dataset) return;   /* menu.js ya la manda a la tienda */
+    var p = paginas[document.body.dataset.pagina];
+    if (p) p();
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
   else iniciar();
 })();

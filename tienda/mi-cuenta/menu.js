@@ -11,8 +11,16 @@
   var enMarco = false;
   try { enMarco = window.self !== window.top && window.top.location.origin === location.origin; } catch (e) { enMarco = false; }
   var pagina = document.body ? document.body.dataset.pagina : '';
+  /* La dirección de la tienda con el portal abierto encima en esa ruta */
+  function sobreLaTienda(ruta) { return '/tienda/#cuenta=' + encodeURIComponent(ruta); }
+  function esVentana(url) {
+    return url.origin === location.origin && EN_VENTANA.some(function (p) { return url.pathname === PORTAL + p + '/'; });
+  }
+  /* Entró por la dirección suelta (un enlace guardado): se va a la tienda.
+     La marca le dice a cuenta.js que no arranque en una página que ya se va. */
   if (!enMarco && EN_VENTANA.indexOf(pagina) >= 0) {
-    location.replace('/tienda/#cuenta=' + encodeURIComponent(location.pathname + location.search));
+    document.documentElement.dataset.aLaTienda = '';
+    location.replace(sobreLaTienda(location.pathname + location.search));
     return;
   }
   if (enMarco) document.documentElement.classList.add('en-ventana');
@@ -77,22 +85,26 @@
       if (e.data.ir) location.href = e.data.ir;
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ventana) cerrarVentana(); });
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest('a[href]');
-      if (!a) return;
-      var url = new URL(a.href, location.href);
-      if (url.origin === location.origin && EN_VENTANA.some(function (p) { return url.pathname === PORTAL + p + '/'; })) {
-        e.preventDefault();
-        abrirVentana(url.pathname + url.search);
-      }
-    });
     var m = /^#cuenta=(.+)$/.exec(location.hash);
     if (m) abrirVentana(decodeURIComponent(m[1]));
   }
 
   function iniciar() {
     if (enMarco) { dentroDeLaVentana(); return; }
-    if (location.pathname === '/tienda/' || location.pathname === '/tienda/index.html') enLaTienda();
+    var enTienda = location.pathname === '/tienda/' || location.pathname === '/tienda/index.html';
+    if (enTienda) enLaTienda();
+    /* Mis pedidos y Mis datos: en la tienda se abren encima; desde otra página
+       se va directo a la tienda con la ventana abierta, sin pasar por la
+       página suelta (que haría un salto más). */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      var url = new URL(a.href, location.href);
+      if (!esVentana(url)) return;
+      e.preventDefault();
+      if (enTienda) abrirVentana(url.pathname + url.search);
+      else location.href = sobreLaTienda(url.pathname + url.search);
+    });
     var boton = document.querySelector('.btn-cuenta');
     if (!boton) return;
     var caja = el('div', 'mi-cuenta');
