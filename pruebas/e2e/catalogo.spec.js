@@ -3,7 +3,7 @@
    la cinta del pedido en curso y el enlace #p= siguen andando, y un pedido que el CRM recibió SIEMPRE llega al paso
    de pago (si no, el cliente lo pediría otra vez). Lo mismo si uno de los módulos de la tienda falla. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const HORA = '2026-10-22T10:00:00-05:00';   /* jueves: con el horario congelado llega hoy a las 11:00 */
@@ -26,7 +26,7 @@ async function simularCrm(/** @type {import('@playwright/test').Page} */ page) {
 /** Canasta → datos → «Seguir al pago»: el pedido llega al CRM y se ve el paso de pago, una sola vez. */
 async function pedir(/** @type {import('@playwright/test').Page} */ page, /** @type {any[]} */ enviados) {
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
   await page.locator('#d-extra').fill('Casa azul');
@@ -97,7 +97,7 @@ test('si repintar la tienda falla justo después de que el CRM recibió el pedid
   });
   await abrirTienda(page);
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
   await page.evaluate(() => { /** @type {any} */ (window).__romper = true; });

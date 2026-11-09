@@ -171,19 +171,26 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* las páginas de texto no tienen la barra de la canasta: el pie no necesita el hueco de abajo */
 .texto-legal ~ .pie .envolver{padding-bottom:34px}
 
-/* barra fija de abajo en el celular: Inicio, Categorías, Favoritos, Pedidos y Canasta.
-   Azul noche y no blanca: en el iPhone Safari pinta su barra con el color de lo que toca el borde de abajo */
+/* barra fija de abajo en el celular: Inicio, Categorías, Favoritos y Pedidos y, aparte, la canasta en amarillo
+   (en el celular es la única canasta: la de arriba se esconde). Azul noche y no blanca: en el iPhone Safari
+   pinta su barra con el color de lo que toca el borde de abajo */
 .abajo{display:none}
 @media (max-width:760px){
-  .abajo{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--noche);padding:4px 4px env(safe-area-inset-bottom);box-shadow:0 -4px 16px rgba(14,26,71,.18)}
-  .abajo-btn{flex:1 1 0;min-width:0;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 2px;border:0;border-radius:12px;background:none;color:#dfe6ff;font:inherit;font-size:12px;font-weight:700;line-height:1.1;text-decoration:none}
+  .abajo{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;gap:6px;background:var(--noche);padding:6px 8px calc(6px + env(safe-area-inset-bottom)) 4px;box-shadow:0 -4px 16px rgba(14,26,71,.18)}
+  .abajo-grupo{flex:1 1 auto;min-width:0;display:flex}
+  .abajo-btn{flex:1 1 0;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 1px;border:0;border-radius:12px;background:none;color:#dfe6ff;font:inherit;font-size:11.5px;font-weight:700;line-height:1.1;letter-spacing:-.01em;text-decoration:none}
   .abajo-btn > span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .abajo-btn:active{background:rgba(255,255,255,.1)}
   .abajo-btn .ico{width:24px;height:24px}
-  .abajo-btn:focus-visible{outline:3px solid var(--amarillo);outline-offset:-3px}
-  .abajo-canasta{color:#fff}
+  .abajo-btn:focus-visible,.abajo-canasta:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  /* la canasta: botón propio, amarillo y con relieve, para que se distinga de los accesos */
+  .abajo-canasta{flex:none;display:flex;align-items:center;gap:8px;min-height:52px;min-width:96px;padding:0 12px;border:0;border-radius:16px;background:var(--amarillo);color:var(--noche);font:inherit;font-size:15px;font-weight:800;line-height:1.1;white-space:nowrap;box-shadow:0 4px 0 #c99a12,0 6px 16px rgba(0,0,0,.28)}
+  .abajo-canasta:active{transform:translateY(2px);box-shadow:0 2px 0 #c99a12,0 3px 8px rgba(0,0,0,.25)}
+  .abajo-canasta .ico{width:26px;height:26px;stroke-width:2.2}
   .abajo-ico{position:relative;display:block;overflow:visible}
-  .abajo-canasta .n{position:absolute;top:-6px;right:-12px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--amarillo);color:var(--noche);font-size:12px;display:grid;place-items:center}
+  .abajo-canasta .n{position:absolute;top:-8px;right:-10px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--rojo);color:#fff;font-size:12px;display:grid;place-items:center;box-shadow:0 0 0 2px var(--amarillo)}
+  /* la canasta de arriba sobra: la de abajo hace lo mismo y está a la mano del pulgar */
+  .cab .btn-canasta{display:none}
 }
 
 /* panel de canasta */
@@ -222,8 +229,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 
 /* cuenta en la cabecera */
 .btn-cuenta{display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 16px;border-radius:99px;background:var(--suave);color:var(--noche);font-weight:800;text-decoration:none}
-.cab .envolver{grid-template-columns:auto minmax(0,1fr) auto auto}
-@media (max-width:760px){.btn-cuenta .txt{display:none}.btn-cuenta{width:50px;padding:0;justify-content:center}}
+@media (min-width:761px){.cab .envolver{grid-template-columns:auto minmax(0,1fr) auto auto}}
+/* celular: sin la canasta de arriba (va abajo), la cuenta queda sola a la derecha del logo */
+@media (max-width:760px){.btn-cuenta .txt{display:none}.btn-cuenta{width:50px;padding:0;justify-content:center;grid-column:3;grid-row:1;justify-self:end}}
 
 /* datos de entrega (paso 2 de la canasta) */
 .datos{flex:1;overflow-y:auto;padding:14px 20px 20px;display:grid;gap:14px;align-content:start}
@@ -376,7 +384,7 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 /* ficha de un producto: encima de la tienda, con su dirección #p=ID para compartir.
    En el celular sube desde abajo como una hoja; en el computador queda al centro. */
-.ficha{width:min(780px,100%);max-width:100%;max-height:100%;margin:auto;padding:0;border:0;background:transparent;color:var(--texto);overflow:visible}
+.ficha{width:min(960px,100%);max-width:100%;max-height:100%;margin:auto;padding:0;border:0;background:transparent;color:var(--texto);overflow:visible}
 .ficha::backdrop{background:rgba(14,26,71,.55)}
 .ficha:not([open]){display:none}   /* un navegador sin <dialog> (Safari antes de 15.4) la pintaría vacía al final de la página */
 html.con-ficha{overflow:hidden}
@@ -386,7 +394,7 @@ html.con-ficha{overflow:hidden}
 .ficha-x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
 .ficha-x:hover{background:var(--suave)}
 .ficha-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:20px 28px;align-content:start;grid-auto-rows:max-content;padding:24px}
-.ficha .foto{align-self:start;border-radius:16px;overflow:hidden;background:var(--suave)}
+.ficha .foto{align-self:start;border-radius:16px;overflow:hidden;background:var(--suave);cursor:zoom-in}
 .ficha-info{display:grid;gap:6px;align-content:start;min-width:0;padding-right:44px}
 .ficha-cat{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--rojo)}
 .ficha-cat:empty{display:none}
@@ -428,10 +436,14 @@ html.con-ficha{overflow:hidden}
 .parecido .pr{margin-top:auto;font-family:var(--display);font-size:16px}
 .parecido .ag{font-size:12px;font-weight:700;color:#5b6478}
 @media (max-width:760px){
-  .ficha{margin:auto 0 0}
-  .ficha-hoja{max-height:92vh;max-height:92dvh;border-radius:22px 22px 0 0}
-  .ficha-cuerpo{grid-template-columns:minmax(0,1fr);gap:14px;padding:16px 16px 20px}
-  .ficha .foto img{max-height:min(38vh,320px);max-height:min(38dvh,320px)}
+  /* en el celular la ficha es una pantalla propia, de borde a borde, con la foto de lado a lado */
+  .ficha{margin:0;width:100%;height:100%;max-height:none}
+  .ficha-hoja{height:100vh;height:100dvh;max-height:none;border-radius:0}
+  .ficha-cuerpo{grid-template-columns:minmax(0,1fr);gap:14px;padding:0 16px 20px}
+  .ficha-galeria{margin:0 -16px}
+  .ficha .foto{border-radius:0}
+  .ficha .foto img{max-height:min(56vh,480px);max-height:min(56dvh,480px)}
+  .miniaturas{padding-inline:16px}
   .ficha-info{padding-right:0}
   .ficha-pie{flex-direction:column;align-items:stretch;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
   .ficha-control{flex:none;width:100%;margin-left:0}
@@ -503,3 +515,36 @@ html.con-ficha{overflow:hidden}
 /* precio por unidad junto al del paquete (como lo pide la SIC): «$392 c/u» en la tarjeta, «Precio por unidad: $392» en la ficha */
 .prod .por-unidad{font-size:13px;color:var(--texto2)}
 .ficha-por-unidad{font-size:14px;color:var(--texto2)}
+
+
+/* ---------- ficha: galería, visor y detalles ---------- */
+.ficha-galeria{align-self:start;min-width:0;display:grid;gap:10px}
+.ficha .foto-n{position:absolute;left:10px;bottom:10px;z-index:2;padding:3px 10px;border-radius:99px;background:rgba(14,26,71,.72);color:#fff;font-size:12.5px;font-weight:700}
+.foto-ampliar{position:absolute;right:10px;bottom:10px;z-index:2;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:var(--noche);box-shadow:0 1px 6px rgba(14,26,71,.25);cursor:pointer}
+.foto-ampliar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.miniaturas{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.miniaturas::-webkit-scrollbar{display:none}
+.galeria-mini{flex:0 0 60px;height:60px;padding:0;border:2px solid var(--linea);border-radius:10px;overflow:hidden;background:#fff;cursor:pointer}
+.galeria-mini img{width:100%;height:100%;object-fit:contain}
+.galeria-mini[aria-current="true"]{border-color:var(--azul);box-shadow:0 0 0 1px var(--azul)}
+/* visor: las fotos en grande, de borde a borde y sobre fondo oscuro */
+.visor{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:#0b1233}
+.visor-tira{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.visor-tira::-webkit-scrollbar{display:none}
+.visor-tira img{flex:0 0 100%;width:100%;height:100%;object-fit:contain;scroll-snap-align:center;touch-action:pan-x pinch-zoom}
+.visor-x{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:2;display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:#fff;color:var(--noche);cursor:pointer}
+.visor-x svg,.visor-flecha svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.visor-flecha{position:absolute;top:50%;z-index:2;display:grid;place-items:center;width:48px;height:48px;margin-top:-24px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.9);color:var(--noche);cursor:pointer}
+.visor-flecha:disabled{opacity:.3;cursor:default}
+.visor-ant{left:12px}
+.visor-sig{right:12px}
+.visor-n{margin:0;padding:10px 0 calc(14px + env(safe-area-inset-bottom));color:#dfe6ff;text-align:center;font-weight:700;min-height:44px}
+/* características (tabla de dos columnas, como la de las tiendas grandes) y descripción */
+.ficha-detalle{grid-column:1/-1;display:grid;gap:18px;padding-top:6px;border-top:1px solid var(--linea)}
+.ficha-detalle h3{margin:14px 0 10px;font-family:var(--display);font-weight:400;font-size:19px}
+.caract{margin:0;border:1px solid var(--linea);border-radius:12px;overflow:hidden}
+.caract-fila{display:grid;grid-template-columns:minmax(110px,38%) minmax(0,1fr)}
+.caract-fila:nth-child(odd){background:var(--suave)}
+.caract dt{padding:10px 12px;font-weight:700;font-size:14.5px}
+.caract dd{margin:0;padding:10px 12px;font-size:14.5px;overflow-wrap:anywhere}
+.ficha-desc{white-space:pre-line;line-height:1.55;overflow-wrap:anywhere}

@@ -2,7 +2,7 @@
    dentro de El Espinal. El enlace del mapa va PRIMERO en las indicaciones (el CRM las corta a 300) y nunca
    se corta. Si el GPS se niega o no responde, se puede pedir igual. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const ENLACE = 'https://maps.google.com/?q=4.15000,-74.88500';
@@ -25,7 +25,7 @@ async function simularPedido(/** @type {import('@playwright/test').Page} */ page
 /** Agrega un producto, abre la canasta y toca «Pedir ya»: queda a la vista el formulario de entrega. */
 async function hastaLosDatos(/** @type {import('@playwright/test').Page} */ page) {
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();
 }

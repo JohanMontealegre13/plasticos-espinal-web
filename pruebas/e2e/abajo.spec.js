@@ -1,5 +1,6 @@
-/* Barra fija de abajo (solo en el celular): Inicio, Categorías, Favoritos, Pedidos y Canasta,
-   como la de las apps de compras. En el computador no sale. */
+/* Barra fija de abajo (solo en el celular): Inicio, Categorías, Favoritos y Pedidos y, aparte y en
+   amarillo, la Canasta, como la de las apps de compras. En el celular es la única canasta (la de arriba se
+   esconde); en el computador la barra no sale y queda la de arriba. */
 import { test, expect } from '@playwright/test';
 import { abrirTienda, vigilar } from './ayudas.js';
 
@@ -18,7 +19,7 @@ test('en el celular la barra de abajo trae los cinco accesos, pegada al borde y 
   await expect(barra.locator('#barra')).toHaveAccessibleName('Canasta vacía');
   const m = await page.evaluate(() => {
     const b = document.querySelector('#abajo').getBoundingClientRect();
-    const tocables = [...document.querySelectorAll('#abajo .abajo-btn')].filter((x) => !(/** @type {HTMLElement} */ (x).hidden)).map((x) => x.getBoundingClientRect());
+    const tocables = [...document.querySelectorAll('#abajo .abajo-btn, #abajo .abajo-canasta')].filter((x) => !(/** @type {HTMLElement} */ (x).hidden)).map((x) => x.getBoundingClientRect());
     return { abajo: Math.round(window.innerHeight - b.bottom), ancho: Math.round(b.width), chicos: tocables.filter((r) => r.width < 44 || r.height < 44).length };
   });
   expect(m.abajo).toBe(0);
@@ -111,4 +112,29 @@ test('Pedidos abre «Mis pedidos» del portal', async ({ page }) => {
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
   await expect(page.locator('#abajo').getByRole('link', { name: 'Pedidos' })).toHaveAttribute('href', '/tienda/mi-cuenta/pedidos/');
+});
+
+test('en el celular la canasta es una sola: la de abajo, amarilla y aparte de los accesos', async ({ page }) => {
+  await page.setViewportSize(CELULAR);
+  await abrirTienda(page);
+  await expect(page.locator('.cab .btn-canasta')).toBeHidden();
+  const m = await page.evaluate(() => {
+    const canasta = document.querySelector('#barra'), grupo = document.querySelector('.abajo-grupo');
+    const pedidos = [...grupo.querySelectorAll('.abajo-btn')].pop().getBoundingClientRect(), c = canasta.getBoundingClientRect();
+    return { fuera: !grupo.contains(canasta), fondo: getComputedStyle(canasta).backgroundColor, separada: c.left - pedidos.right, derecha: Math.round(window.innerWidth - c.right) };
+  });
+  expect(m.fuera, 'la canasta no va con los accesos').toBe(true);
+  expect(m.fondo).toBe('rgb(255, 201, 51)');                 /* el amarillo de la marca */
+  expect(m.separada).toBeGreaterThanOrEqual(4);
+  expect(m.derecha).toBeLessThanOrEqual(12);                  /* pegada a la derecha, a la mano del pulgar */
+  /* la cuenta de arriba sigue: queda a la derecha del logo */
+  await expect(page.locator('.cab .btn-cuenta')).toBeVisible();
+});
+
+test('en el computador sigue la canasta de arriba', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await abrirTienda(page);
+  await expect(page.locator('.cab .btn-canasta')).toBeVisible();
+  await page.locator('.cab .btn-canasta').click();
+  await expect(page.locator('#panel')).toBeVisible();
 });

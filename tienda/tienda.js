@@ -323,8 +323,106 @@
       .map(function (x) { return x.o; });
   }
 
+  /* Las direcciones de las fotos de un producto, la principal primero (sin fotos del CRM, la de su categoría) */
+  function fotosDe(p) {
+    return Array.isArray(p.fotos) && p.fotos.length
+      ? p.fotos.map(function (n) { return FOTOS + encodeURIComponent(n); }) : [foto(p)];
+  }
+  var galeria = { lista: [], tira: null };   /* fotos de la ficha abierta y su tira (si son varias) */
+  function fotoActual() { var t = galeria.tira; return t ? Math.round(t.scrollLeft / Math.max(1, t.clientWidth)) : 0; }
+  function iconoAmpliar() {
+    var s = document.createElementNS(SVG, 'svg'), t = document.createElementNS(SVG, 'path');
+    s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+    t.setAttribute('d', 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5');
+    s.appendChild(t);
+    return s;
+  }
+  /* Galería de la ficha: «2 / 3» sobre la foto, el botón de ampliar y las miniaturas que llevan a cada foto */
+  function pintarGaleria(f, lista) {
+    var minis = $('fichaMinis'), total = lista.length;
+    galeria = { lista: lista, tira: f.querySelector('.tira') };
+    minis.textContent = '';
+    minis.hidden = total < 2;
+    var cuenta = el('span', 'foto-n'), ampliar = el('button', 'foto-ampliar');
+    cuenta.hidden = total < 2; cuenta.setAttribute('aria-hidden', 'true');
+    ampliar.type = 'button'; ampliar.id = 'fichaAmpliar';
+    ampliar.setAttribute('aria-label', total > 1 ? 'Ver las ' + total + ' fotos en grande' : 'Ver la foto en grande');
+    ampliar.appendChild(iconoAmpliar());
+    f.append(cuenta, ampliar);
+    function marcar() {
+      var n = fotoActual();
+      cuenta.textContent = (n + 1) + ' / ' + total;
+      Array.prototype.forEach.call(minis.children, function (b, k) { b.setAttribute('aria-current', String(k === n)); });
+    }
+    if (total > 1) lista.forEach(function (url, n) {
+      var b = el('button', 'galeria-mini'), i = el('img');
+      b.type = 'button'; b.setAttribute('aria-label', 'Ver foto ' + (n + 1) + ' de ' + total);
+      i.src = url; i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
+      b.appendChild(i);
+      b.addEventListener('click', function () { if (galeria.tira) galeria.tira.scrollTo({ left: n * galeria.tira.clientWidth, behavior: 'smooth' }); });
+      minis.appendChild(b);
+    });
+    if (galeria.tira) galeria.tira.addEventListener('scroll', marcar, { passive: true });
+    marcar();
+    ampliar.addEventListener('click', function () { abrirVisor(fotoActual(), ampliar); });
+  }
+
+  /* ---------- Visor: las fotos en grande, encima de la ficha ---------- */
+  var visorDesde = null;   /* el botón que lo abrió: ahí vuelve el foco al cerrarlo */
+  function visorActual() { var t = $('visorTira'); return Math.round(t.scrollLeft / Math.max(1, t.clientWidth)); }
+  function pintarVisorN() {
+    var total = $('visorTira').children.length, n = visorActual();
+    $('visorN').textContent = total > 1 ? (n + 1) + ' de ' + total : '';
+    $('visorAnt').disabled = n <= 0; $('visorSig').disabled = n >= total - 1;
+  }
+  function abrirVisor(n, desde) {
+    var t = $('visorTira'), total = galeria.lista.length;
+    if (!total) return;
+    t.textContent = '';
+    galeria.lista.forEach(function (url, k) {
+      var i = el('img'); i.src = url; i.alt = 'Foto ' + (k + 1) + ' de ' + total; i.decoding = 'async';
+      t.appendChild(i);
+    });
+    $('visorAnt').hidden = $('visorSig').hidden = total < 2;
+    $('visor').hidden = false;
+    visorDesde = desde || null;
+    t.scrollLeft = Math.max(0, Math.min(n, total - 1)) * t.clientWidth;
+    pintarVisorN();
+    $('visorCerrar').focus();
+  }
+  function moverVisor(d) {
+    var t = $('visorTira'), n = Math.max(0, Math.min(t.children.length - 1, visorActual() + d));
+    t.scrollTo({ left: n * t.clientWidth, behavior: 'smooth' });
+  }
+  function cerrarVisor() {
+    if ($('visor').hidden) return false;
+    $('visor').hidden = true;
+    $('visorTira').textContent = '';
+    var d = visorDesde; visorDesde = null;
+    if (d && d.isConnected) { try { d.focus({ preventScroll: true }); } catch (e) { /* sin foco */ } }
+    return true;
+  }
+
+  /* Características y descripción: llegan del CRM; lo que no viene, o viene mal, no sale */
+  function pintarDetalle(p) {
+    var dets = Array.isArray(p.detalles) ? p.detalles.filter(function (x) {
+      return x && typeof x.nombre === 'string' && typeof x.valor === 'string' && x.nombre.trim() && x.valor.trim();
+    }) : [];
+    var dl = $('fichaCaract'), desc = typeof p.descripcion === 'string' ? p.descripcion.trim() : '';
+    dl.textContent = '';
+    dets.forEach(function (x) {
+      var fila = el('div', 'caract-fila');
+      fila.append(el('dt', null, x.nombre.trim()), el('dd', null, x.valor.trim()));
+      dl.appendChild(fila);
+    });
+    $('fichaDesc').textContent = desc;
+    $('caractCaja').hidden = !dets.length;
+    $('descCaja').hidden = !desc;
+    $('fichaDetalle').hidden = !dets.length && !desc;
+  }
+
   function pintarFicha(p) {
-    var f = $('fichaFotos');
+    var f = $('fichaFotos'), direcciones = fotosDe(p);
     f.textContent = '';
     f.className = p.foto ? 'foto propia' : 'foto';
     if (p.fotos && p.fotos.length > 1) carrusel(f, p.fotos);
@@ -333,6 +431,8 @@
       i.src = foto(p); i.alt = ''; i.decoding = 'async';
       f.appendChild(i);
     }
+    intentar(function () { pintarGaleria(f, direcciones); });
+    intentar(function () { pintarDetalle(p); });
     $('fichaCat').textContent = (cats[p.categoria] || {}).nombre || '';
     $('fichaNombre').textContent = p.nombre;
     $('fichaCodigo').textContent = 'Código ' + p.id;
@@ -404,11 +504,13 @@
 
   /* Cierra el diálogo y devuelve el foco, sin tocar el historial */
   function soltarFicha() {
+    intentar(cerrarVisor);
     var d = $('ficha'), desde = ficha.desde, id = ficha.id;
     ficha.id = null; ficha.desde = null; ficha.empujada = false;
     document.documentElement.classList.remove('con-ficha');
     if (d.open) d.close();
-    ['fichaFotos', 'fichaControl', 'parecidos'].forEach(function (i) { $(i).textContent = ''; });
+    ['fichaFotos', 'fichaControl', 'parecidos', 'fichaMinis'].forEach(function (i) { $(i).textContent = ''; });
+    galeria = { lista: [], tira: null };
     /* Favoritos y vistos se vuelven a pintar al abrir una ficha: el foco va a la tarjeta nueva del mismo producto */
     if (desde && !desde.isConnected && desde.dataset.zona) desde = document.querySelector('#' + desde.dataset.zona + ' [data-ficha="' + id + '"]');
     if (desde && desde.isConnected) { try { desde.focus({ preventScroll: true }); } catch (e) { /* sin foco */ } }
@@ -473,7 +575,18 @@
     var d = $('ficha');
     $('fichaCerrar').addEventListener('click', cerrarFicha);
     d.addEventListener('click', function (e) { if (e.target === d) cerrarFicha(); });   /* el fondo oscuro */
-    d.addEventListener('cancel', function (e) { e.preventDefault(); cerrarFicha(); });   /* Escape y el «atrás» de Android */
+    /* Escape y el «atrás» de Android: con el visor abierto cierra el visor; si no, la ficha */
+    d.addEventListener('cancel', function (e) { e.preventDefault(); if (!cerrarVisor()) cerrarFicha(); });
+    /* Tocar la foto grande la amplía (los puntos y el botón de ampliar hacen lo suyo) */
+    $('fichaFotos').addEventListener('click', function (e) { if (!e.target.closest('.puntos, .foto-ampliar')) abrirVisor(fotoActual(), $('fichaAmpliar')); });
+    $('visorCerrar').addEventListener('click', cerrarVisor);
+    $('visorAnt').addEventListener('click', function () { moverVisor(-1); });
+    $('visorSig').addEventListener('click', function () { moverVisor(1); });
+    $('visorTira').addEventListener('scroll', pintarVisorN, { passive: true });
+    $('visor').addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); moverVisor(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); moverVisor(1); }
+    });
     d.addEventListener('close', function () { if (!d.open) cerrarFicha(); });   /* si el navegador la cerró por su cuenta */
     $('compartir').addEventListener('click', function () { if (ficha.id !== null) compartir(por[ficha.id]); });
     $('fichaFav').insertBefore(iconoCorazon(), $('fichaFav').firstChild);
