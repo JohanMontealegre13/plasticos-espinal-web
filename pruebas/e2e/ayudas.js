@@ -105,3 +105,12 @@ export async function llenarDatos(page) {
   await page.locator('#d-dir').fill('Calle 1 # 2-3');
   await page.locator('#d-acepto').check();
 }
+
+/**
+ * Abre la canasta con el botón que se ve: en el celular la de la barra de abajo (la de arriba se esconde),
+ * en el computador la de la cabecera.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function abrirCanasta(page) {
+  await page.locator('.cab .btn-canasta:visible, #barra:visible').first().click();
+}

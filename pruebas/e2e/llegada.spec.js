@@ -1,7 +1,7 @@
 /* Hora de llegada: la franja de arriba y la canasta dicen cuándo llega según el horario
    (el congelado de SITIO_FIJO, no el de tienda/catalogo.json: ver ayudas.js). */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, vigilar } from './ayudas.js';
+import { abrirTienda, vigilar, abrirCanasta } from './ayudas.js';
 
 test('la franja y la canasta dicen la hora de llegada', async ({ page }) => {
   const v = vigilar(page);
@@ -9,7 +9,7 @@ test('la franja y la canasta dicen la hora de llegada', async ({ page }) => {
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Llega hoy antes de las 11:00 a. m.');
   await expect(page.locator('#llegada')).toBeHidden();   /* con la canasta cerrada no se ve */
   await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await expect(page.locator('#llegada')).toHaveText('Llega hoy antes de las 11:00 a. m.');
   v.sinProblemas();
 });
@@ -31,7 +31,7 @@ test('si el horario falta queda el texto de siempre', async ({ page }) => {
   await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00', sitio: (sitio) => { delete sitio.horario; } });
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Domicilio en El Espinal en menos de 1 hora');
   await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await expect(page.locator('#llegada')).toBeHidden();
 });
 
@@ -44,4 +44,22 @@ test('la hora se actualiza sola cada minuto mientras la página sigue abierta', 
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Llega hoy antes de las 11:30 a. m.');
   await page.clock.runFor(2 * 60 * 60 * 1000 + 10 * 60 * 1000);   /* 12:40: queda el almuerzo en medio */
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Llega hoy antes de las 3:00 p. m.');
+});
+
+test('las tarjetas de lo que hay dicen cuándo llega; lo agotado no lo promete', async ({ page }) => {
+  await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00' });
+  const j1 = page.locator('#grilla li', { hasText: 'Contenedor icopor J1 x25 und' });
+  await expect(j1.locator('.llega')).toHaveText('Llega hoy');
+  await page.locator('#q').fill('plato');   /* Plato 23 cm: agotado */
+  const plato = page.locator('#grilla li', { hasText: 'Plato 23 cm hondo Darnel x20 und' });
+  await expect(plato).toBeVisible();
+  await expect(plato.locator('.llega')).toHaveCount(0);
+});
+
+test('de noche las tarjetas dicen «Llega mañana» y sin horario no dicen nada', async ({ page }) => {
+  await abrirTienda(page, { hora: '2026-10-22T20:00:00-05:00' });
+  await expect(page.locator('#grilla .llega').first()).toHaveText('Llega mañana');
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await abrirTienda(page, { hora: '2026-10-22T20:00:00-05:00', sitio: (sitio) => { delete sitio.horario; } });
+  await expect(page.locator('#grilla .llega').first()).toBeHidden();
 });

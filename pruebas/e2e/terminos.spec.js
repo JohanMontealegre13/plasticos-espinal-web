@@ -2,7 +2,7 @@
    datos de tienda/catalogo.json, la página de términos tiene sus nueve secciones y el formulario de entrega
    avisa que pedir es aceptarlos. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, llenarDatos, sitioDe, vigilar } from './ayudas.js';
+import { abrirTienda, llenarDatos, sitioDe, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const ANA = { nombre: 'Ana Prueba', documento: 'NIT 900.000.000-1', direccion: 'Calle 7 #5-35', telefono: '318 355 5246', correo: 'hola@ejemplo.co' };
@@ -140,7 +140,7 @@ test('«Seguir al pago» avisa que pedir es aceptar los términos, y el enlace s
   const v = vigilar(page);
   await abrirTienda(page);
   await page.getByRole('button', { name: PRODUCTO }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();
   await llenarDatos(page);

@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=18">
-  <script src="/tienda/llegada.js?v=2" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=22">
+  <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=18" defer></script>
+  <script src="/tienda/tienda.js?v=22" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=3" defer></script>
 </head>
@@ -77,7 +77,7 @@
   </section>
 
   <section class="sec" id="vitrina">
-    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a>
+    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2>
       <label class="orden" for="orden">Ordenar por <select id="orden">
         <option value="pedidos">Más pedidos</option>
         <option value="menor">Menor precio</option>
@@ -85,6 +85,8 @@
         <option value="nombre">Nombre A-Z</option>
       </select></label>
     </div>
+    <!-- Buscando o en una categoría: cuántos productos hay y el filtro puesto, que se quita con su ✕ -->
+    <p class="filtro-linea" id="filtroLinea" hidden><span id="conteo"></span><a href="#" class="filtro-puesto" id="limpiar" hidden><span id="limpiarTexto"></span><span class="x" aria-hidden="true">✕</span></a></p>
     <p class="estado" id="estado" role="status">Cargando productos…</p>
     <a class="pedir-wa" id="pedirloWa" href="https://wa.me/" target="_blank" rel="noopener" hidden>¿No lo encuentra? Pídalo por WhatsApp</a>
     <ul class="grilla" id="grilla"></ul>
@@ -118,32 +120,70 @@
   <p class="vendedor" data-vendedor-linea hidden></p>
 </div></footer>
 
-<button class="barra" type="button" id="barra" data-abrir hidden><span id="barraN">0 productos</span><span id="barraT">$0</span><span>Ver canasta ›</span></button>
+<!-- Barra fija de abajo (solo en el celular): lo de siempre a un toque del pulgar y, aparte y en amarillo, la canasta.
+     En el celular la canasta de arriba se esconde: esta es la única. -->
+<nav class="abajo" id="abajo" aria-label="Accesos rápidos">
+  <div class="abajo-grupo">
+    <button class="abajo-btn" type="button" id="abInicio"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Inicio</span></button>
+    <button class="abajo-btn" type="button" id="abCategorias"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Categorías</span></button>
+    <button class="abajo-btn" type="button" id="abFavoritos"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Favoritos</span></button>
+    <a class="abajo-btn" href="/tienda/mi-cuenta/pedidos/"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Pedidos</span></a>
+  </div>
+  <button class="abajo-canasta" type="button" id="barra" data-abrir><span class="abajo-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="n" id="barraN" hidden>0</span></span><span id="barraT">Canasta</span></button>
+</nav>
 
 <!-- Ficha de un producto: se abre con un toque y tiene su dirección (#p=ID) para compartir -->
 <dialog class="ficha" id="ficha" aria-labelledby="fichaNombre">
   <div class="ficha-hoja">
     <button class="ficha-x" id="fichaCerrar" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <div class="ficha-cuerpo">
-      <div class="foto" id="fichaFotos"></div>
+      <!-- Galería: la foto grande (se pasa con el dedo), cuál va de cuántas, ampliar y las miniaturas -->
+      <div class="ficha-galeria">
+        <div class="foto" id="fichaFotos"></div>
+        <div class="miniaturas" id="fichaMinis" hidden></div>
+      </div>
       <div class="ficha-info">
         <p class="ficha-cat" id="fichaCat"></p>
         <!-- [html-validate-disable-next empty-heading -- tienda.js le pone el nombre del producto al abrir la ficha] -->
         <h2 id="fichaNombre" tabindex="-1"></h2>
         <p class="unidad" id="fichaCodigo"></p>
         <p class="ficha-precio" id="fichaPrecio"></p>
+        <p class="ficha-por-unidad" id="fichaUnidad" hidden></p>
         <p class="ficha-disp" id="fichaDisp"></p>
-        <div class="ficha-control" id="fichaControl"></div>
+        <ul class="confianza" aria-label="Al comprar aquí">
+          <li>Paga al recibir o con Bre-B</li>
+          <li>Lo lleva el equipo de la tienda</li>
+          <li><a href="/tienda/terminos/" target="_blank" rel="noopener">Cambios y retracto</a></li>
+        </ul>
         <div class="ficha-acciones">
           <button class="fav fav-ficha" id="fichaFav" type="button" aria-pressed="false" hidden><span class="fav-txt">Guardar en favoritos</span></button>
+          <a class="compartir preguntar" id="preguntarWa" href="https://wa.me/" target="_blank" rel="noopener" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg>Preguntar por WhatsApp</a>
           <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
         </div>
       </div>
+      <!-- Características (de la ficha del CRM) y la descripción que escribió la tienda; sin datos no sale -->
+      <section class="ficha-detalle" id="fichaDetalle" aria-label="Detalles del producto" hidden>
+        <div id="caractCaja" hidden><h3>Características</h3><dl class="caract" id="fichaCaract"></dl></div>
+        <div id="descCaja" hidden><h3>Descripción</h3><p class="ficha-desc" id="fichaDesc"></p></div>
+      </section>
       <section class="ficha-parecidos" id="parecidosCaja" aria-labelledby="parecidosTit" hidden>
         <h3 id="parecidosTit">También le sirve</h3>
         <ul id="parecidos"></ul>
       </section>
     </div>
+    <!-- Pie fijo de la ficha: cuándo llega y el botón, siempre a la vista mientras se miran las fotos -->
+    <div class="ficha-pie">
+      <p class="ficha-llega" id="fichaLlega" hidden><span id="fichaLlegaTexto"></span><small id="fichaLimite" hidden></small></p>
+      <div class="ficha-control" id="fichaControl"></div>
+    </div>
+  </div>
+  <!-- Visor: las fotos en grande, encima de la ficha. Se pasan con el dedo o con las flechas -->
+  <div class="visor" id="visor" hidden>
+    <button class="visor-x" id="visorCerrar" type="button" aria-label="Cerrar las fotos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="visor-tira" id="visorTira"></div>
+    <button class="visor-flecha visor-ant" id="visorAnt" type="button" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="visor-flecha visor-sig" id="visorSig" type="button" aria-label="Foto siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    <p class="visor-n" id="visorN" aria-live="polite"></p>
   </div>
 </dialog>
 
@@ -160,6 +200,7 @@
     <div class="fila"><span>Domicilio <small id="falta"></small></span><b id="dom">$0</b></div>
     <div class="fila total"><span>Total</span><span id="tot">$0</span></div>
     <button class="enviar" id="seguir" type="button" disabled>Pedir ya</button>
+    <p class="confianza-linea">Paga al recibir o con Bre-B · <a href="/tienda/terminos/" target="_blank" rel="noopener">Cambios y retracto</a></p>
   </div>
 
   <!-- 2. Datos de entrega (se llenan una vez y quedan en este celular) -->

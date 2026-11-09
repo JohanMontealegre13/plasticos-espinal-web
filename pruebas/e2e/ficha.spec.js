@@ -2,7 +2,7 @@
    sugiere productos de la misma categoría y el botón «atrás» del celular la cierra sin salir de la tienda. */
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
-import { abrirTienda, vigilar } from './ayudas.js';
+import { abrirTienda, vigilar, abrirCanasta } from './ayudas.js';
 
 const CATALOGO_CRM = JSON.parse(readFileSync(new URL('./catalogo-crm.json', import.meta.url), 'utf8'));
 
@@ -284,4 +284,166 @@ test('en el celular la ficha cabe en la pantalla, sin barra de lado, y ✕ se al
   expect(medidas.nombreSobreLaFoto).toBe(false);
   expect(medidas.xAncho).toBeGreaterThanOrEqual(44);
   expect(medidas.xAlto).toBeGreaterThanOrEqual(44);
+});
+
+/* ---- Pie fijo de la ficha: el botón y cuándo llega, siempre a la vista; y la confianza junto a lo que se compra ---- */
+test('el pie de la ficha trae el botón y cuándo llega; a lo agotado no le promete llegada', async ({ page }) => {
+  const v = vigilar(page);
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T10:00:00-05:00' });
+  const pie = page.locator('#ficha .ficha-pie');
+  await expect(pie.locator('#fichaLlegaTexto')).toHaveText('Llega hoy antes de las 11:00 a. m.');
+  await expect(pie.locator('#fichaLimite')).toBeHidden();   /* faltan más de 3 horas para que deje de llegar hoy */
+  await pie.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await expect(pie.getByRole('textbox', { name: 'Cantidad de Contenedor icopor J1 x25 und' })).toHaveValue('1');
+  await page.evaluate(() => { location.hash = '#p=398'; });   /* Plato 23 cm: agotado */
+  await expect(page.locator('#fichaNombre')).toHaveText('Plato 23 cm hondo Darnel x20 und');
+  await expect(page.locator('#fichaLlega')).toBeHidden();
+  await expect(pie.getByRole('button', { name: 'Agotado' })).toBeDisabled();
+  v.sinProblemas();
+});
+
+test('faltando pocas horas, el pie dice hasta qué hora pedir para que llegue hoy', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T16:00:00-05:00' });
+  await expect(page.locator('#fichaLlegaTexto')).toHaveText('Llega hoy antes de las 5:00 p. m.');
+  await expect(page.locator('#fichaLimite')).toHaveText('Pidiendo antes de las 5:30 p. m., llega hoy');
+});
+
+test('de noche el pie dice que llega mañana y no pone límite', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T20:00:00-05:00' });
+  await expect(page.locator('#fichaLlegaTexto')).toHaveText('Llega mañana antes de las 9:00 a. m.');
+  await expect(page.locator('#fichaLimite')).toBeHidden();
+});
+
+test('sin horario el pie queda solo con el botón', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', sitio: (sitio) => { delete sitio.horario; } });
+  await expect(page.locator('#fichaLlega')).toBeHidden();
+  await expect(page.locator('#ficha .ficha-pie').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toBeVisible();
+});
+
+test('en el celular el botón de la ficha sigue a la vista aunque se baje hasta «También le sirve»', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 700 });
+  await abrirTienda(page, { ruta: '/tienda/#p=141', hora: '2026-10-22T10:00:00-05:00' });
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  await page.locator('#ficha .ficha-cuerpo').evaluate((c) => { c.scrollTop = c.scrollHeight; });
+  await expect(page.locator('#parecidosCaja')).toBeInViewport();
+  const m = await page.evaluate(() => {
+    const b = document.querySelector('#fichaControl button').getBoundingClientRect();
+    return { dentro: b.top >= 0 && b.bottom <= window.innerHeight, alto: b.height };
+  });
+  expect(m.dentro).toBe(true);
+  expect(m.alto).toBeGreaterThanOrEqual(44);
+});
+
+test('la ficha y la canasta dicen cómo se paga y dónde están los cambios y el retracto', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  const confianza = page.locator('#ficha .confianza');
+  await expect(confianza.locator('li')).toHaveText(['Paga al recibir o con Bre-B', 'Lo lleva el equipo de la tienda', 'Cambios y retracto']);
+  await expect(confianza.getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+  await page.locator('#ficha .ficha-pie').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#fichaCerrar').click();
+  await abrirCanasta(page);
+  await expect(page.locator('#resumen .confianza-linea')).toHaveText('Paga al recibir o con Bre-B · Cambios y retracto');
+  await expect(page.locator('#resumen .confianza-linea').getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+});
+
+test('«Preguntar por WhatsApp» abre el chat con el nombre y el código del producto', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  const wa = page.locator('#preguntarWa');
+  await expect(wa).toBeVisible();
+  await expect(wa).toHaveAttribute('href', 'https://wa.me/573183555246?text=' + encodeURIComponent('Hola, tengo una pregunta sobre Contenedor icopor J1 x25 und (código 141).'));
+  await expect(wa).toHaveAttribute('target', '_blank');
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));   /* medir con la ficha ya quieta */
+  expect((await wa.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
+test('sin número de WhatsApp en catalogo.json no sale «Preguntar por WhatsApp»', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', sitio: (sitio) => { delete sitio.whatsapp; } });
+  await expect(page.locator('#fichaNombre')).toHaveText('Contenedor icopor J1 x25 und');
+  await expect(page.locator('#preguntarWa')).toBeHidden();
+});
+
+/* ---- Ficha como pantalla propia: galería con miniaturas, visor, características y descripción ---- */
+const conDetalles = () => {
+  const c = structuredClone(CATALOGO_CRM);
+  const j1 = c.productos.find((/** @type {any} */ p) => p.id === 141);
+  j1.fotos = ['uno.jpg', 'dos.jpg', 'tres.jpg'];
+  j1.foto = 'uno.jpg';
+  j1.descripcion = 'Con tapa de bisagra.\nAguanta comida caliente.';
+  j1.detalles = [{ nombre: 'Marca', valor: 'Ejemplo' }, { nombre: 'Contenido', valor: 'x25 und' }, { nombre: '', valor: 'sin nombre' }, { nombre: 'Viene en', valor: 'caja x20 paq = 500 und' }];
+  return c;
+};
+
+test('la ficha trae las características y la descripción del CRM; lo vacío o dañado no sale', async ({ page }) => {
+  const v = vigilar(page);
+  await abrirTienda(page, { ruta: '/tienda/#p=141', catalogo: conDetalles() });
+  await expect(page.locator('#fichaCaract dt')).toHaveText(['Marca', 'Contenido', 'Viene en']);
+  await expect(page.locator('#fichaCaract dd')).toHaveText(['Ejemplo', 'x25 und', 'caja x20 paq = 500 und']);
+  await expect(page.locator('#fichaDesc')).toHaveText('Con tapa de bisagra.\nAguanta comida caliente.');
+  await page.evaluate(() => { location.hash = '#p=131'; });   /* el tenedor no trae nada de eso */
+  await expect(page.locator('#fichaNombre')).toHaveText('Tenedor plástico x100 und');
+  await expect(page.locator('#fichaDetalle')).toBeHidden();
+  v.sinProblemas();
+});
+
+test('con varias fotos la ficha dice cuál va, trae miniaturas y una miniatura lleva a su foto', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', catalogo: conDetalles() });
+  const minis = page.locator('#fichaMinis .galeria-mini');
+  await expect(minis).toHaveCount(3);
+  await expect(page.locator('#fichaFotos .foto-n')).toHaveText('1 / 3');
+  await expect(minis.nth(0)).toHaveAttribute('aria-current', 'true');
+  await minis.nth(2).click();
+  await expect(page.locator('#fichaFotos .foto-n')).toHaveText('3 / 3');
+  await expect(minis.nth(2)).toHaveAttribute('aria-current', 'true');
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  expect((await minis.nth(0).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
+test('con una sola foto no hay miniaturas ni «1 / 1», pero sí se puede ampliar', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  await expect(page.locator('#fichaMinis')).toBeHidden();
+  await expect(page.locator('#fichaFotos .foto-n')).toBeHidden();
+  await page.locator('#fichaAmpliar').click();
+  await expect(page.locator('#visor')).toBeVisible();
+  await expect(page.locator('#visorAnt')).toBeHidden();
+  await expect(page.locator('#visorN')).toHaveText('');
+});
+
+test('ampliar abre el visor en la foto que se veía; las flechas pasan; Escape lo cierra y la ficha sigue', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', catalogo: conDetalles() });
+  await page.locator('#fichaMinis .galeria-mini').nth(1).click();
+  await expect(page.locator('#fichaFotos .foto-n')).toHaveText('2 / 3');
+  await page.locator('#fichaAmpliar').click();
+  await expect(page.locator('#visor')).toBeVisible();
+  await expect(page.locator('#visorTira img')).toHaveCount(3);
+  await expect(page.locator('#visorN')).toHaveText('2 de 3');
+  await expect(page.locator('#visorCerrar')).toBeFocused();
+  await page.locator('#visorSig').click();
+  await expect(page.locator('#visorN')).toHaveText('3 de 3');
+  await expect(page.locator('#visorSig')).toBeDisabled();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#visor')).toBeHidden();
+  await expect(page.locator('#ficha')).toBeVisible();
+  await expect(page.locator('#fichaAmpliar')).toBeFocused();
+  await page.keyboard.press('Escape');                          /* el segundo Escape ya cierra la ficha */
+  await expect(page.locator('#ficha')).toBeHidden();
+});
+
+test('tocar la foto grande también la amplía', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', catalogo: conDetalles() });
+  await page.locator('#fichaFotos .tira img').first().click();
+  await expect(page.locator('#visor')).toBeVisible();
+  await page.locator('#visorCerrar').click();
+  await expect(page.locator('#visor')).toBeHidden();
+});
+
+test('en el celular la ficha es una pantalla propia: ocupa toda la pantalla y la foto va de lado a lado', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  const m = await page.evaluate(() => {
+    const h = document.querySelector('#ficha .ficha-hoja').getBoundingClientRect();
+    const f = document.querySelector('#fichaFotos').getBoundingClientRect();
+    return { arriba: Math.round(h.top), abajo: Math.round(window.innerHeight - h.bottom), ancho: Math.round(h.width), fotoAncho: Math.round(f.width) };
+  });
+  expect(m).toEqual({ arriba: 0, abajo: 0, ancho: 390, fotoAncho: 390 });
 });

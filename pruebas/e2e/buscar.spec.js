@@ -174,7 +174,7 @@ test('si buscar.js no carga, la tienda sigue con la búsqueda simple de antes', 
   await expect(page.locator('#grilla li')).toHaveCount(8);   /* sin búsqueda: todos */
 });
 
-test('«Ver todo» limpia la búsqueda y conserva el orden elegido', async ({ page }) => {
+test('quitar el filtro puesto (su ✕) limpia la búsqueda y conserva el orden elegido', async ({ page }) => {
   await abrirTienda(page);
   await page.locator('#orden').selectOption('mayor');
   await page.locator('#q').fill('manguera');
@@ -201,4 +201,30 @@ test('la vitrina no se desborda de lado con el selector en celular y escritorio'
   await expect(page.locator('#pedirloWa')).toBeVisible();
   const ancho = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, ven: window.innerWidth }));
   expect(ancho.doc).toBeLessThanOrEqual(ancho.ven);
+});
+
+test('buscando dice cuántos productos hay y el filtro puesto, que se quita con su ✕', async ({ page }) => {
+  await abrirTienda(page);
+  await expect(page.locator('#filtroLinea')).toBeHidden();   /* sin filtro no hay nada que contar ni quitar */
+  await page.locator('#q').fill('vaso');
+  const n = await page.locator('#grilla li').count();
+  await expect(page.locator('#conteo')).toHaveText(n + (n === 1 ? ' producto' : ' productos'));
+  await expect(page.locator('#limpiarTexto')).toHaveText('«vaso»');
+  await expect(page.locator('#limpiar')).toHaveAccessibleName('Quitar «vaso» y ver todos los productos');
+  expect((await page.locator('#limpiar').boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  await page.locator('#limpiar').click();
+  await expect(page.locator('#q')).toHaveValue('');
+  await expect(page.locator('#filtroLinea')).toBeHidden();
+});
+
+test('en una categoría el filtro puesto lleva su nombre; sin resultados no hay conteo pero sí el ✕', async ({ page }) => {
+  await abrirTienda(page);
+  await page.locator('.cat').first().click();
+  const nombre = await page.locator('#tituloVitrina').textContent();
+  await expect(page.locator('#limpiarTexto')).toHaveText(nombre || '');
+  await expect(page.locator('#conteo')).toHaveText(/^\d+ productos?$/);
+  await page.locator('#q').fill('manguera');
+  await expect(page.locator('#grilla li')).toHaveCount(0);
+  await expect(page.locator('#conteo')).toHaveText('');      /* el aviso de «No lo encontramos» basta */
+  await expect(page.locator('#limpiarTexto')).toHaveText('«manguera»');   /* y el ✕ sigue para salir de ahí */
 });
