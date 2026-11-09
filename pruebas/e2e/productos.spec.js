@@ -32,6 +32,24 @@ async function simularCatalogo(page, op = {}) {
   await page.route('**/api/foto/**', (r) => r.fulfill({ status: 404 }));
 }
 
+/* Un catálogo con 9 platos (medidas, colores y dos marcas) para los filtros plegables y la rejilla del inicio */
+const MEDIDAS = ['26 cm', '12 cm', '15,5 cm', '18 cm', '6 cm', '20 cm', '23 cm', '9 cm', '30 cm'];
+const PLATOS = {
+  ...PUBLICO,
+  categorias: [...PUBLICO.categorias, { id: 'c99', nombre: 'Platos' }],
+  productos: [...PUBLICO.productos, ...MEDIDAS.map((m, i) => ({
+    id: 900 + i, nombre: `Plato ${m} ${i % 2 ? 'Negro' : 'Blanco'}`, categoria: 'c99', disponible: true, destacado: false,
+    foto: '', fotos: [], contenido: { cantidad: 20, unidad: 'und', se_mide: false },
+    detalles: [{ nombre: 'Marca', valor: i < 3 ? 'Darnel' : 'Wau' }, { nombre: 'Medida', valor: m }, { nombre: 'Color', valor: i % 2 ? 'Negro' : 'Blanco' }],
+  }))],
+};
+
+/** En celular y tableta los filtros van plegados detrás de «Filtros»: se abren si hace falta */
+async function abrirFiltros(/** @type {import('@playwright/test').Page} */ page) {
+  const boton = page.locator('#verFiltros');
+  if (await boton.isVisible() && (await boton.getAttribute('aria-expanded')) !== 'true') await boton.click();
+}
+
 /** Sin desborde lateral: nada se sale de la pantalla */
 async function sinDesborde(/** @type {import('@playwright/test').Page} */ page) {
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -69,12 +87,14 @@ test('pestañas de categoría, marca, «solo lo que hay» y orden filtran sin re
   await expect(page.locator('#catTitulo')).toHaveText('Contenedores');
   await expect(page.locator('#catRejilla > li')).toHaveCount(3);
   await expect(page.locator('#catPestanas [aria-pressed="true"]')).toContainText('Contenedores');
-  /* Marca: hay dos para escoger */
-  await expect(page.locator('#bloqueMarcas')).toBeVisible();
-  await page.locator('#listaMarcas').getByText('Darnel').click();
+  /* Marca: hay dos para escoger; Medida no sale (todas iguales) */
+  await abrirFiltros(page);
+  await expect(page.locator('#bloque-marca')).toBeVisible();
+  await expect(page.locator('#bloque-medida')).toHaveCount(0);
+  await page.locator('#lista-marca').getByText('Darnel').click();
   await expect(page.locator('#catRejilla > li')).toHaveCount(1);
   await expect(page.locator('#catRejilla')).toContainText('Tenedor plástico');
-  await page.locator('#listaMarcas').getByText('Darnel').click();
+  await page.locator('#lista-marca').getByText('Darnel').click();
   /* «Vasos y platos» trae un agotado: aparece «Solo lo que hay» */
   await page.locator('#catPestanas').getByRole('button', { name: /Vasos y platos/ }).click();
   await expect(page.locator('#catRejilla > li')).toHaveCount(3);
@@ -103,6 +123,79 @@ test('el buscador encuentra con plurales y tildes, y lo que no hay ofrece WhatsA
   await page.locator('#catBuscar').fill('manguera');
   await expect(page.locator('#catVacio')).toBeVisible();
   expect(decodeURIComponent(String(await page.locator('#catVacioWa').getAttribute('href')))).toContain('Busco: manguera');
+  v.sinProblemas();
+});
+
+test('los filtros se pliegan como lista: marca, medida y color, con «Ver más» y «Quitar filtros»', async ({ page }) => {
+  const v = vigilar(page);
+  await simularCatalogo(page, { catalogo: PLATOS });
+  await page.goto('/productos/?categoria=platos');
+  await expect(page.locator('#catRejilla > li')).toHaveCount(9);
+  await abrirFiltros(page);
+  /* Marca abierta de entrada; Medida y Color plegados (solo el título) */
+  const titulo = (/** @type {string} */ nombre) => page.locator('#catFiltros').getByRole('button', { name: new RegExp('^' + nombre) });
+  await expect(titulo('Marca')).toHaveAttribute('aria-expanded', 'true');
+  await expect(titulo('Medida')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#lista-medida')).toBeHidden();
+  await expect(titulo('Color')).toBeVisible();
+  /* Marca se pliega y se vuelve a abrir */
+  await titulo('Marca').click();
+  await expect(titulo('Marca')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#lista-marca')).toBeHidden();
+  await titulo('Marca').click();
+  await expect(page.locator('#lista-marca')).toBeVisible();
+  /* Medida: de menor a mayor, 6 a la vista y «Ver 3 más» */
+  await titulo('Medida').click();
+  const medidas = page.locator('#lista-medida li:visible span');
+  await expect(medidas).toHaveText(['6 cm', '9 cm', '12 cm', '15,5 cm', '18 cm', '20 cm']);
+  await page.locator('#bloque-medida').getByRole('button', { name: 'Ver 3 más' }).click();
+  await expect(medidas).toHaveCount(9);
+  await expect(page.locator('#bloque-medida').getByRole('button', { name: 'Ver menos' })).toBeFocused();
+  /* Entre filtros se cumplen todos: Negro y Wau */
+  await titulo('Color').click();
+  await page.locator('#lista-color').getByText('Negro').click();
+  await expect(page.locator('#catRejilla > li')).toHaveCount(4);
+  await expect(titulo('Color')).toContainText('1 marcado');
+  await expect(page.locator('#lista-marca label').filter({ hasText: 'Wau' }).locator('.casilla__n')).toHaveText('3');
+  await page.locator('#lista-marca').getByText('Wau').click();
+  await expect(page.locator('#catRejilla > li')).toHaveCount(3);
+  /* Quitar filtros deja todo como al entrar */
+  await page.locator('#quitarFiltros').click();
+  await expect(page.locator('#catRejilla > li')).toHaveCount(9);
+  await expect(page.locator('#quitarFiltros')).toBeHidden();
+  await expect(titulo('Medida')).toHaveAttribute('aria-expanded', 'true');   /* lo abierto sigue abierto */
+  await sinDesborde(page);
+  v.sinProblemas();
+});
+
+test('en computador los filtros van en la columna, al lado de los productos, sin el botón «Filtros»', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await simularCatalogo(page, { catalogo: PLATOS });
+  await page.goto('/productos/?categoria=platos');
+  await expect(page.locator('#catFiltros')).toBeVisible();
+  await expect(page.locator('#verFiltros')).toBeHidden();
+  const columna = await page.locator('#catFiltros').boundingBox();
+  const rejilla = await page.locator('#catRejilla').boundingBox();
+  expect(columna && rejilla && columna.x + columna.width <= rejilla.x, 'la columna va a la izquierda de la rejilla').toBe(true);
+});
+
+test('en una pantalla mediana los filtros van plegados y los productos salen de una', async ({ page }) => {
+  const v = vigilar(page);
+  await page.setViewportSize({ width: 945, height: 900 });   /* la ventana de Chrome de Johan */
+  await simularCatalogo(page, { catalogo: PLATOS });
+  await page.goto('/productos/');
+  await expect(page.locator('#catRejilla > li').first()).toBeVisible();
+  await expect(page.locator('#catFiltros')).toBeHidden();
+  const arriba = await page.locator('#catRejilla > li').first().evaluate((li) => li.getBoundingClientRect().top);
+  expect(arriba, 'la primera tarjeta queda en la primera pantalla').toBeLessThan(900);
+  await page.locator('#verFiltros').click();
+  await expect(page.locator('#verFiltros')).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#bloque-marca')).toBeVisible();
+  await page.locator('#lista-marca').getByText('Darnel').click();
+  await expect(page.locator('#filtrosN')).toHaveText('1');
+  await page.locator('#verFiltros').click();
+  await expect(page.locator('#catFiltros')).toBeHidden();
+  await sinDesborde(page);
   v.sinProblemas();
 });
 
@@ -210,6 +303,25 @@ test('el inicio muestra los productos de la bodega en pestañas por categoría',
   const todos = bloque.locator('[role="tabpanel"]:visible .pestanas__todos');
   await expect(todos).toHaveAttribute('href', /\/productos\/\?categoria=/);
   await expect(bloque).not.toContainText('$');
+  await sinDesborde(page);
+  v.sinProblemas();
+});
+
+test('inicio: la rejilla de productos no se desliza de lado; 8 en computador, 6 en celular y «Ver los 9»', async ({ page }) => {
+  const v = vigilar(page);
+  await simularCatalogo(page, { catalogo: PLATOS });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  const bloque = page.locator('#destacados');
+  await expect(bloque.getByRole('tab').first()).toHaveText('Platos');
+  const panel = bloque.locator('[role="tabpanel"]:visible');
+  await expect(panel.locator('.tarjeta-prod:visible')).toHaveCount(8);
+  const rejilla = panel.locator('.rejilla-prod');
+  expect(await rejilla.evaluate((r) => r.scrollWidth - r.clientWidth), 'nada escondido de lado').toBeLessThanOrEqual(0);
+  await expect(panel.locator('.pestanas__todos')).toHaveText(/Ver los 9 productos de platos/);
+  await page.setViewportSize({ width: 412, height: 900 });
+  await expect(panel.locator('.tarjeta-prod:visible')).toHaveCount(6);
+  expect(await rejilla.evaluate((r) => r.scrollWidth - r.clientWidth)).toBeLessThanOrEqual(0);
   await sinDesborde(page);
   v.sinProblemas();
 });

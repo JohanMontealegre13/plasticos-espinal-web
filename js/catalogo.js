@@ -1,8 +1,8 @@
 /* Plásticos Espinal · catálogo público (sin precios: decisión de Johan, 9-nov-2026).
    Lo usan dos páginas:
-   · /productos/ ([data-catalogo]): categorías como pestañas, buscador, filtros (categoría,
-     marca, lo que hay), orden y la ficha de cada producto (?p=ID) con fotos, pestañas de
-     descripción y características, y productos parecidos.
+   · /productos/ ([data-catalogo]): categorías como pestañas, buscador, filtros plegables
+     (marca, medida, color, contenido y lo que hay), orden y la ficha de cada producto (?p=ID)
+     con fotos, pestañas de descripción y características, y productos parecidos.
    · el inicio ([data-pestanas]): «Productos de la bodega» en pestañas por categoría.
    Los datos salen de /api/catalogo (functions/api/catalogo.js, que habla con el CRM). Cada
    producto se pide por WhatsApp. Si el catálogo no carga, la página lo dice y ofrece WhatsApp;
@@ -78,11 +78,15 @@
     var c = cat.cats[p.categoria];
     return referenciaDe(p.nombre) || referenciaDe(c ? c.nombre : '') || REF + 'bodega.webp';
   }
-  /** @param {Producto} p */
-  function marcaDe(p) {
-    var d = (p.detalles || []).filter(function (x) { return norm(x.nombre) === 'marca'; })[0];
-    return d ? d.valor : '';
+  /** Una característica del producto (marca, medida, color, contenido), o '' @param {Producto} p @param {string} clave */
+  function valorDe(p, clave) {
+    var d = (p.detalles || []).filter(function (x) { return norm(x.nombre) === clave; })[0];
+    if (d) return String(d.valor).trim();
+    if (clave === 'contenido' && p.contenido) return 'x' + p.contenido.cantidad + ' ' + p.contenido.unidad;
+    return '';
   }
+  /** «30K» y «30k» son el mismo valor @param {string} v */
+  function llaveDe(v) { return norm(v).replace(/\s+/g, ' ').trim(); }
   /** @param {Producto} p */
   function enlaceWa(p) {
     var texto = 'Hola, Plásticos Espinal 👋 Quiero pedir: ' + p.nombre + ' (código ' + p.id + '). ¿Me confirman precio y disponibilidad?';
@@ -216,10 +220,13 @@
         panel.setAttribute('role', 'tabpanel');
         panel.setAttribute('aria-labelledby', tab.id);
         panel.tabIndex = 0;
-        var ul = el('ul', 'rejilla-prod rejilla-prod--fila');
+        /* Rejilla quieta (nada que deslizar de lado: con el mouse no se podía): 6 en celular y
+           tableta, 8 en computador, y el enlace lleva a todos los de la categoría */
+        var ul = el('ul', 'rejilla-prod rejilla-prod--corta');
         ordenar(cat.productos.filter(function (p) { return p.categoria === c.id; }), 'pedidos').slice(0, 8)
           .forEach(function (p) { ul.appendChild(tarjeta(p, { compacta: true })); });
-        var todos = /** @type {HTMLAnchorElement} */ (el('a', 'enlace-terciario pestanas__todos', 'Ver todos los productos de ' + c.nombre.toLowerCase()));
+        var texto = c.n > 6 ? 'Ver los ' + c.n + ' productos de ' : 'Ver todos los productos de ';
+        var todos = /** @type {HTMLAnchorElement} */ (el('a', 'enlace-terciario pestanas__todos', texto + c.nombre.toLowerCase()));
         todos.href = '/productos/?categoria=' + c.slug;
         todos.appendChild(icono('i-flecha', 'icono'));
         panel.append(ul, todos);
@@ -233,7 +240,21 @@
   /* ======================================================================
      /productos/: listado con filtros y ficha
      ====================================================================== */
-  var estado = { categoria: '', q: '', marcas: /** @type {string[]} */ ([]), hay: false, orden: 'pedidos' };
+  /* Filtros de la columna: salen de las características que manda el CRM. En uno se pueden
+     marcar varios valores (cualquiera de ellos sirve); entre filtros, tienen que cumplirse todos. */
+  var FACETAS = [
+    { clave: 'marca', titulo: 'Marca', natural: false },
+    { clave: 'medida', titulo: 'Medida', natural: true },
+    { clave: 'color', titulo: 'Color', natural: false },
+    { clave: 'contenido', titulo: 'Contenido', natural: true }
+  ];
+  var VISIBLES = 6;   /* valores que se ven antes de «Ver más» */
+  /** @returns {Record<string, string[]>} */
+  function sinFiltros() { var f = /** @type {Record<string, string[]>} */ ({}); FACETAS.forEach(function (x) { f[x.clave] = []; }); return f; }
+  var estado = { categoria: '', q: '', filtros: sinFiltros(), hay: false, orden: 'pedidos' };
+  /* Qué bloques están abiertos y cuáles muestran todos sus valores (sobrevive a cada repintada) */
+  var abiertos = /** @type {Record<string, boolean>} */ ({ marca: true, hay: true });
+  var todosVisibles = /** @type {Record<string, boolean>} */ ({});
   /** @type {{ primera: () => void } | null} */
   var pestanasFicha = null;
 
@@ -254,7 +275,7 @@
     estado.q = (u.get('q') || '').slice(0, 80);
     /* Una categoría que el CRM llama distinto (el inicio pide «vasos»): se busca por el nombre */
     if (!c && pedida && !estado.q) estado.q = pedida.replace(/-/g, ' ').slice(0, 80);
-    estado.marcas = []; estado.hay = false;
+    estado.filtros = sinFiltros(); estado.hay = false;
     return u.get('p');
   }
   /** @param {boolean} empujar */
@@ -278,14 +299,97 @@
     return l;
   }
 
-  function pintarListado() {
-    var l = base(), marcas = {};
-    l.forEach(function (p) { var m = marcaDe(p); if (m) marcas[m] = (marcas[m] || 0) + 1; });
-    var hayAgotados = l.some(function (p) { return !p.disponible; });
-    var filtrada = l.filter(function (p) {
-      if (estado.hay && !p.disponible) return false;
-      return !estado.marcas.length || estado.marcas.indexOf(marcaDe(p)) >= 0;
+  /** ¿Pasa el producto los filtros puestos? Sin contar uno (para contar sus valores) @param {Producto} p @param {string} [menos] */
+  function pasa(p, menos) {
+    if (estado.hay && !p.disponible && menos !== 'hay') return false;
+    return FACETAS.every(function (f) {
+      var sel = estado.filtros[f.clave];
+      return f.clave === menos || !sel.length || sel.indexOf(llaveDe(valorDe(p, f.clave))) >= 0;
     });
+  }
+  function cuantosFiltros() {
+    return FACETAS.reduce(function (n, f) { return n + estado.filtros[f.clave].length; }, 0) + Number(estado.hay);
+  }
+
+  /** Un bloque plegable de la columna @param {{ clave: string, titulo: string, natural: boolean }} f @param {Producto[]} l */
+  function bloqueFaceta(f, l) {
+    var sel = estado.filtros[f.clave];
+    /* Cada valor cuenta los productos que quedarían con los demás filtros puestos */
+    var cuenta = /** @type {Record<string, { v: string, n: number }>} */ ({});
+    l.forEach(function (p) {
+      if (!pasa(p, f.clave)) return;
+      var v = valorDe(p, f.clave), k = llaveDe(v);
+      if (!k) return;
+      if (!cuenta[k]) cuenta[k] = { v: v, n: 0 };
+      cuenta[k].n++;
+    });
+    sel.forEach(function (k) { if (!cuenta[k]) cuenta[k] = { v: k, n: 0 }; });   /* lo marcado nunca se esconde */
+    var llaves = Object.keys(cuenta);
+    if (llaves.length < 2 && !sel.length) return null;
+    var limpio = function (/** @type {string} */ v) { return v.replace(/^[^0-9a-z]+/i, ''); };
+    llaves.sort(function (a, b) {
+      return f.natural ? limpio(cuenta[a].v).localeCompare(limpio(cuenta[b].v), 'es', { numeric: true, sensitivity: 'base' })
+        : (cuenta[b].n - cuenta[a].n) || cuenta[a].v.localeCompare(cuenta[b].v, 'es');
+    });
+
+    var bloque = el('div', 'filtro-bloque');
+    bloque.id = 'bloque-' + f.clave;
+    var cuerpo = el('div', 'filtro-bloque__cuerpo');
+    cuerpo.id = 'faceta-' + f.clave;
+    cuerpo.hidden = !abiertos[f.clave];
+    bloque.append(cabezaBloque(f.clave, f.titulo, sel.length, cuerpo.id), cuerpo);
+
+    var ul = el('ul', 'filtro-lista');
+    ul.id = 'lista-' + f.clave;
+    var todos = !!todosVisibles[f.clave], escondidos = 0;
+    llaves.forEach(function (k, i) {
+      var li = el('li'), lab = el('label', 'casilla'), inp = /** @type {HTMLInputElement} */ (el('input'));
+      inp.type = 'checkbox'; inp.value = k; inp.checked = sel.indexOf(k) >= 0;
+      inp.addEventListener('change', function () {
+        estado.filtros[f.clave] = inp.checked ? sel.concat(k) : sel.filter(function (x) { return x !== k; });
+        pintarListado();
+        var otra = /** @type {HTMLInputElement | null} */ (document.querySelector('#lista-' + f.clave + ' input[value="' + CSS.escape(k) + '"]'));
+        if (otra) otra.focus();
+      });
+      lab.append(inp, el('span', null, cuenta[k].v), el('small', 'casilla__n', String(cuenta[k].n)));
+      li.appendChild(lab);
+      if (!todos && i >= VISIBLES && !inp.checked) { li.hidden = true; escondidos++; }
+      ul.appendChild(li);
+    });
+    cuerpo.appendChild(ul);
+    if (escondidos || (todos && llaves.length > VISIBLES)) {
+      var mas = /** @type {HTMLButtonElement} */ (el('button', 'filtro-bloque__mas', todos ? 'Ver menos' : 'Ver ' + escondidos + ' más'));
+      mas.type = 'button';
+      mas.setAttribute('aria-controls', ul.id);
+      mas.addEventListener('click', function () {
+        todosVisibles[f.clave] = !todos;
+        pintarListado();
+        var b = document.querySelector('#bloque-' + f.clave + ' .filtro-bloque__mas');
+        if (b) /** @type {HTMLElement} */ (b).focus();
+      });
+      cuerpo.appendChild(mas);
+    }
+    return bloque;
+  }
+
+  /** El título de un bloque: un botón que lo abre y lo cierra @param {string} clave @param {string} titulo @param {number} n @param {string} controla */
+  function cabezaBloque(clave, titulo, n, controla) {
+    var h = el('h2', 'filtro-bloque__cabeza');
+    var b = /** @type {HTMLButtonElement} */ (el('button', 'filtro-bloque__titulo'));
+    b.type = 'button';
+    b.dataset.plegar = clave;
+    b.setAttribute('aria-expanded', String(!!abiertos[clave]));
+    b.setAttribute('aria-controls', controla);
+    b.appendChild(el('span', null, titulo));
+    if (n) b.appendChild(el('small', 'filtro-bloque__marcados', n + (n === 1 ? ' marcado' : ' marcados')));
+    h.appendChild(b);
+    return h;
+  }
+
+  function pintarListado() {
+    var l = base();
+    var hayAgotados = l.some(function (p) { return !p.disponible; });
+    var filtrada = l.filter(function (p) { return pasa(p); });
     if (!estado.q.trim() || estado.orden !== 'pedidos') filtrada = ordenar(filtrada, estado.orden);
 
     var c = cat.cats[estado.categoria];
@@ -301,27 +405,21 @@
       b.setAttribute('aria-pressed', String(/** @type {HTMLElement} */ (b).dataset.catId === estado.categoria));
     });
 
-    /* Marca: solo si hay de dónde escoger */
-    var nombres = Object.keys(marcas).sort(function (a, b) { return a.localeCompare(b, 'es'); });
-    var listaM = $('listaMarcas');
-    listaM.textContent = '';
-    nombres.forEach(function (m) {
-      var li = el('li'), lab = el('label', 'casilla'), inp = /** @type {HTMLInputElement} */ (el('input'));
-      inp.type = 'checkbox'; inp.value = m; inp.checked = estado.marcas.indexOf(m) >= 0;
-      inp.addEventListener('change', function () {
-        estado.marcas = inp.checked ? estado.marcas.concat(m) : estado.marcas.filter(function (x) { return x !== m; });
-        pintarListado();
-      });
-      lab.append(inp, el('span', null, m), el('small', 'casilla__n', String(marcas[m])));
-      li.appendChild(lab); listaM.appendChild(li);
-    });
-    $('bloqueMarcas').hidden = nombres.length < 2;
+    /* Filtros: solo los que tienen de dónde escoger en lo que se está mirando */
+    var facetas = $('catFacetas');
+    facetas.textContent = '';
+    FACETAS.forEach(function (f) { var b = bloqueFaceta(f, l); if (b) facetas.appendChild(b); });
     $('bloqueHay').hidden = !hayAgotados && !estado.hay;
     /** @type {HTMLInputElement} */ ($('soloHay')).checked = estado.hay;
-    /* Sin marcas ni agotados no hay qué filtrar: la rejilla usa todo el ancho */
-    var sinFiltros = $('bloqueMarcas').hidden && $('bloqueHay').hidden;
-    $('catFiltros').hidden = sinFiltros;
-    $('catCuerpoInterno').classList.toggle('sin-filtros', sinFiltros);
+    var n = cuantosFiltros();
+    $('quitarFiltros').hidden = !n;
+    $('filtrosN').textContent = n ? String(n) : '';
+    $('filtrosN').hidden = !n;
+    /* Sin nada que filtrar: la rejilla usa todo el ancho y no sale el botón «Filtros» */
+    var nada = !facetas.children.length && $('bloqueHay').hidden;
+    $('catFiltros').hidden = nada;
+    $('verFiltros').hidden = nada;
+    $('catCuerpoInterno').classList.toggle('sin-filtros', nada);
 
     var rejilla = $('catRejilla');
     rejilla.textContent = '';
@@ -342,7 +440,7 @@
       b.type = 'button'; b.dataset.catId = id;
       b.append(el('span', null, nombre), el('small', 'pestana-cat__n', String(n)));
       b.addEventListener('click', function () {
-        estado.categoria = id; estado.marcas = [];
+        estado.categoria = id; estado.filtros = sinFiltros();
         escribirDireccion(true);
         pintarListado();
         var lista2 = $('listado');
@@ -423,7 +521,7 @@
 
     /* Parecidos: misma categoría, primero los que hay y los más pedidos */
     var parecidos = ordenar(cat.productos.filter(function (o) { return o.categoria === p.categoria && o.id !== p.id; }), 'pedidos').slice(0, 8);
-    var ul = $('fichaParecidos');
+    var ul = $('fichaParecidos');   /* rejilla quieta: 6 en celular y tableta, 8 en computador */
     ul.textContent = '';
     parecidos.forEach(function (o) { ul.appendChild(tarjeta(o, { compacta: true, alAbrir: abrirFicha })); });
     $('parecidosCaja').hidden = !parecidos.length;
@@ -459,7 +557,7 @@
         clearTimeout(espera);
         espera = window.setTimeout(function () {
           estado.q = buscar.value.slice(0, 80);
-          estado.marcas = [];
+          estado.filtros = sinFiltros();
           if (estado.q.trim()) estado.categoria = '';
           escribirDireccion(false);
           if (!$('ficha').hidden) verListado(); else pintarListado();
@@ -473,6 +571,28 @@
       $('soloHay').addEventListener('change', function () {
         estado.hay = /** @type {HTMLInputElement} */ ($('soloHay')).checked;
         pintarListado();
+      });
+      /* Cada bloque de filtros se pliega como una lista; se acuerda mientras se navega */
+      $('catFiltros').addEventListener('click', function (e) {
+        var b = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (e.target).closest('[data-plegar]'));
+        if (!b) return;
+        var clave = b.dataset.plegar || '', abierto = b.getAttribute('aria-expanded') !== 'true';
+        abiertos[clave] = abierto;
+        b.setAttribute('aria-expanded', String(abierto));
+        var cuerpo = $(b.getAttribute('aria-controls') || '');
+        if (cuerpo) cuerpo.hidden = !abierto;
+      });
+      $('quitarFiltros').addEventListener('click', function () {
+        estado.filtros = sinFiltros(); estado.hay = false;
+        pintarListado();
+        $('catTitulo').focus({ preventScroll: true });
+      });
+      /* En celular y tableta los filtros van plegados detrás de un botón, para ver los productos de una */
+      var ver = $('verFiltros');
+      ver.addEventListener('click', function () {
+        var abrir = ver.getAttribute('aria-expanded') !== 'true';
+        ver.setAttribute('aria-expanded', String(abrir));
+        $('catFiltros').classList.toggle('esta-abierto', abrir);
       });
       $('fichaVolver').addEventListener('click', function (e) {
         var me = /** @type {MouseEvent} */ (e);
