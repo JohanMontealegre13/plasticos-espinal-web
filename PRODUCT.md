@@ -54,7 +54,7 @@ Secciones: portada, marquesina de contorno, catálogo (tarjetas → WhatsApp),
 sectores, eco, nosotros, reseñas (⚠️ testimonios de muestra, reemplazar por
 reales), FAQ (JSON-LD FAQPage), contacto.
 Seguridad: CSP con hash del script inline, `_headers` + `.htaccess` + `security.txt`.
-Fotos: Pexels (ver `img/productos/CREDITS.txt`).
+Fotos: escenas de referencia hechas con IA en el inicio (ver `img/escenas/CREDITS.txt`) y Pexels en la tienda (ver `img/productos/CREDITS.txt`).
 
 ## Accessibility & Inclusion
 

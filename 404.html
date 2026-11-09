@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/estilos.css?v=11">
+  <link rel="stylesheet" href="/css/estilos.css?v=12">
 </head>
 <body>
   <svg hidden xmlns="http://www.w3.org/2000/svg">
@@ -23,21 +23,23 @@
   </svg>
 
   <header class="cabecera">
-    <div class="contenedor">
-      <div class="capsula">
-        <a class="capsula-tel" href="tel:+573183555246" aria-label="Llamar al 318 355 5246">
-          <svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg>
-          <span class="capsula-tel__num">318 355 5246</span>
-        </a>
-        <a class="logo-caja" href="/">
-          <img src="/img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal, ir al inicio">
-        </a>
-        <a class="boton boton-cabecera" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
-          <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-          <span class="boton-cabecera__texto">Pida ahora</span>
-          <span class="sr-only"> (abre WhatsApp)</span>
-        </a>
-      </div>
+    <div class="contenedor cabecera__fila">
+      <a class="logo" href="/">
+        <img src="/img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal, ir al inicio">
+      </a>
+      <a class="contacto-corto contacto-corto--tel" href="tel:+573183555246">
+        <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-tel"/></svg></span>
+        <b>318 355 5246</b>
+        <small>Llame o escriba</small>
+      </a>
+      <a class="boton-redondo" href="tel:+573183555246" aria-label="Llamar al 318 355 5246">
+        <svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg>
+      </a>
+      <a class="boton boton-amarillo boton-cabecera" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
+        <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+        <span class="boton-cabecera__texto">Pida ahora</span>
+        <span class="sr-only"> (abre WhatsApp)</span>
+      </a>
     </div>
   </header>
 
@@ -48,7 +50,7 @@
         <h1>Esta página no existe</h1>
         <p>Puede que el enlace esté mal escrito o que la página se haya movido. Vuelva al inicio o escríbanos por WhatsApp y le ayudamos con su pedido.</p>
         <div class="error404__botones">
-          <a class="boton boton-fantasma boton-grande" href="/">Volver al inicio</a>
+          <a class="boton boton-azul boton-grande" href="/">Volver al inicio</a>
           <a class="boton boton-wa boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
             <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
             Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>

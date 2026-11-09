@@ -92,11 +92,13 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 
 ## ✏️ Datos pendientes de mejorar
 
-1. **Reseñas reales** — la sección «Por qué nos eligen» (`#resenas`) no
-   muestra testimonios: solo invita a dejar reseña en Google. Cuando haya
-   reseñas reales (con permiso) o ficha de Google Business Profile, pueden
-   sumarse ahí.
-2. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
+1. **Reseñas reales** — «Nosotros» solo invita a dejar reseña en Google.
+   Cuando haya reseñas reales (con permiso) o ficha de Google Business
+   Profile, pueden sumarse ahí.
+2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
+   hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
+   reemplaza 1:1: mismo nombre de archivo, mismo tamaño.
+3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
 
@@ -104,28 +106,31 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 
 | Archivo | Qué es |
 |---|---|
-| `index.html` | La página completa (portada, marcas, catálogo, sectores, línea ecológica, nosotros, por qué nos eligen, preguntas, contacto) |
-| `css/estilos.css` | Todos los estilos (sistema «hermana del CRM, más sobria»; colores del `:root` del CRM) |
-| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp); el sitio funciona sin JavaScript |
-| `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, fotos de producto, `ondas.svg` (relleno de la cápsula) y `og-image.jpg` |
+| `index.html` | La página completa (franja, cabecera, portada, marcas, categorías en carrusel, mosaico por negocio, banners mayorista y ecológico, confianza, nosotros, preguntas, contacto) |
+| `css/estilos.css` | Todos los estilos («vitrina de mostrador»: patrones de tienda grande con los colores del `:root` del CRM) |
+| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp, aparecer al bajar y el carrusel con flechas, puntos y pausa); el sitio funciona sin JavaScript |
+| `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, `escenas/` (fotos del inicio), `productos/` (fotos que usa la tienda), `ondas.svg` y `og-image.jpg` |
 | `favicon.ico`, `site.webmanifest` | Iconos del navegador y de "agregar a pantalla de inicio" |
 | `robots.txt`, `sitemap.xml` | Para Google |
 | `_headers` | Cabeceras de seguridad y caché que aplica Cloudflare Pages |
-| `404.html` | Página de error con la cápsula, «Volver al inicio» y pedido por WhatsApp (rutas desde la raíz) |
+| `404.html` | Página de error con la cabecera, «Volver al inicio» y pedido por WhatsApp (rutas desde la raíz) |
 | `pruebas/` | Pruebas automáticas y herramientas de revisión (no hacen parte de la página) |
 | `.github/workflows/` | Revisión automática en GitHub |
 
 ## Secciones de la página
 
-1. **Portada**: titular, doble CTA (WhatsApp + «Ver catálogo»), ficha de tres
-   datos y foto de la bodega.
-2. **Marcas** que distribuimos, en lista estática.
-3. **Catálogo** — 10 categorías; cada tarjeta abre una cotización por WhatsApp
-   con mensaje precargado propio.
-4. **Sectores** (restaurantes, panaderías, comidas rápidas…).
-5. **Línea ecológica** en verde.
-6. **Nosotros** con tres cifras.
-7. **Por qué nos eligen** (`#resenas`) y enlace para dejar reseña en Google.
+0. **Franja** noche con el domicilio gratis y **cabecera** blanca (logo,
+   dirección, teléfono, «Pida ahora») con la banda del menú debajo.
+1. **Portada** en escena: el título va en el aire de la izquierda de la foto
+   (computador), encima de la pared (celular) o arriba de la foto (tableta).
+2. **Marcas** que distribuimos.
+3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas; cada una abre una
+   cotización por WhatsApp con mensaje propio. Sin JS es una fila deslizable.
+4. **Sectores** — mosaico parejo (alta | dos | dos | alta), cada negocio con
+   su mensaje de WhatsApp.
+5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
+6. **Confianza**: cuatro tarjetas.
+7. **Nosotros** con tres cifras y enlace para dejar reseña en Google.
 8. **Preguntas** — `details` nativos + datos `FAQPage` (el texto visible debe
    seguir siendo espejo exacto del JSON-LD) y los términos del domicilio.
 9. **Contacto**: WhatsApp, dirección, horario, teléfono y enlace al mapa.

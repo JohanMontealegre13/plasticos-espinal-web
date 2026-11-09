@@ -40,8 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=11">
-  <script src="js/principal.js?v=11" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=12">
+  <script src="js/principal.js?v=12" defer></script>
 
   <script type="application/ld+json">
   {
@@ -93,93 +93,92 @@
     <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-ubicacion" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-lista" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5h6v3H9zM8.5 11l1.5 1.5 3-3M8.5 16.5h7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
-    <symbol id="i-cubiertos" viewBox="0 0 24 24"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17 21V3c-2.2 1.2-3.5 3.6-3.5 7v3H17"/></symbol>
-    <symbol id="i-torta" viewBox="0 0 24 24"><path d="M4 21h16v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z"/><path d="M4 16c1.3 1 2.7 1 4 0s2.7-1 4 0 2.7 1 4 0 2.7-1 4 0M12 11V7"/></symbol>
-    <symbol id="i-bolsa" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
-    <symbol id="i-vaso" viewBox="0 0 24 24"><path d="M6 8h12l-1.5 13h-9zM5 8h14M13 8l2-5h3"/></symbol>
-    <symbol id="i-globo" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6c0 4-3.5 7-6 7s-6-3-6-7a6 6 0 0 1 6-6zM11 18h2l-1-2zM12 18c0 2-2 2-2 4"/></symbol>
-    <symbol id="i-tienda" viewBox="0 0 24 24"><path d="M3 9 4.5 4h15L21 9M3 9h18M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 12v9h14v-9M10 21v-5h4v5"/></symbol>
+    <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-seguir" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
   </svg>
 
   <a class="saltar" href="#contenido">Saltar al contenido</a>
 
-  <header class="cabecera">
-    <div class="contenedor">
-      <div class="capsula">
-        <a class="capsula-tel" href="tel:+573183555246" aria-label="Llamar al 318 355 5246">
-          <svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg>
-          <span class="capsula-tel__num">318 355 5246</span>
-        </a>
-        <a class="logo-caja" href="#inicio">
-          <img src="img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal">
-        </a>
-        <a class="boton boton-cabecera" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
-          <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-          <span class="boton-cabecera__texto">Pida ahora</span>
-          <span class="sr-only"> (abre WhatsApp)</span>
-        </a>
-      </div>
-      <nav class="menu menu--fila" aria-label="Navegación principal">
-        <a href="#catalogo">Productos</a>
-        <a href="#sectores">Sectores</a>
-        <a href="#ecologicos">Línea ecológica</a>
-        <a href="#nosotros">Nosotros</a>
-        <a href="#preguntas">Preguntas</a>
-        <a href="#contacto">Contacto</a>
-      </nav>
+  <div class="anuncio">
+    <div class="contenedor anuncio__fila">
+      <p><svg class="icono" aria-hidden="true"><use href="#i-camion"/></svg><span>Domicilio <b>gratis desde $50.000</b> en El Espinal</span></p>
+      <p class="anuncio__extra">Al por mayor y al detal · 24 años en el Tolima</p>
     </div>
+  </div>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera__fila">
+      <a class="logo" href="#inicio">
+        <img src="img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal">
+      </a>
+      <a class="contacto-corto contacto-corto--dir" href="https://www.google.com/maps/search/?api=1&amp;query=Calle%207%20%235-25%2C%20Barrio%20Centro%2C%20Espinal%2C%20Tolima" target="_blank" rel="noopener">
+        <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-ubicacion"/></svg></span>
+        <b>Calle 7 #5-25, Centro</b>
+        <small>El Espinal, Tolima<span class="sr-only"> (abre Google Maps)</span></small>
+      </a>
+      <a class="contacto-corto contacto-corto--tel" href="tel:+573183555246">
+        <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-tel"/></svg></span>
+        <b>318 355 5246</b>
+        <small>Llame o escriba</small>
+      </a>
+      <a class="boton-redondo" href="tel:+573183555246" aria-label="Llamar al 318 355 5246">
+        <svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg>
+      </a>
+      <a class="boton boton-amarillo boton-cabecera" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
+        <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+        <span class="boton-cabecera__texto">Pida ahora</span>
+        <span class="sr-only"> (abre WhatsApp)</span>
+      </a>
+    </div>
+    <nav class="menu menu--banda" aria-label="Navegación principal">
+      <div class="contenedor">
+        <ul>
+          <li><a href="#catalogo">Productos</a></li>
+          <li><a href="#sectores">Sectores</a></li>
+          <li><a href="#ecologicos">Línea ecológica</a></li>
+          <li><a href="#nosotros">Nosotros</a></li>
+          <li><a href="#preguntas">Preguntas</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </div>
+    </nav>
   </header>
 
   <main id="contenido">
 
-    <!-- Portada -->
-    <section class="seccion portada" id="inicio" aria-labelledby="titulo-portada">
-      <div class="contenedor portada__rejilla">
-        <div class="portada__texto">
-          <h1 id="titulo-portada">
-            <span class="linea">Los mejores insumos</span>
-            <span class="linea">para su negocio,</span>
-            <span class="linea resaltado">a precio de bodega</span>
-          </h1>
-          <p class="portada__bajada">Vasos, platos, contenedores, cubiertos, bolsas y empaques de las marcas líderes del país. Al por mayor y al detal, con domicilios gratis en El Espinal.</p>
-          <div class="portada__botones">
-            <a class="boton boton-wa boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
-              <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-              Pida su cotización<span class="sr-only"> (abre WhatsApp)</span>
-            </a>
-            <a class="boton boton-fantasma boton-grande" href="#catalogo">Ver catálogo</a>
+    <!-- Portada: escena con aire a la izquierda para el título -->
+    <section class="portada" id="inicio" aria-labelledby="titulo-portada">
+      <div class="contenedor">
+        <div class="portada__marco">
+          <picture class="portada__foto">
+            <source media="(max-width: 599px)" srcset="img/escenas/portada-celular-480.webp 480w, img/escenas/portada-celular-768.webp 768w" sizes="100vw" width="768" height="960">
+            <img src="img/escenas/portada-960.webp" srcset="img/escenas/portada-960.webp 960w, img/escenas/portada-1536.webp 1536w" sizes="(min-width: 1264px) 1200px, 100vw" width="1536" height="640" alt="Contenedor con almuerzo, platos, caja de cartón con empanadas, servilletas y jugo en vaso desechable sobre un mesón claro" fetchpriority="high">
+          </picture>
+          <div class="portada__cabeza">
+            <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
+            <h1 id="titulo-portada">Desechables para su negocio <span class="resaltado">a precio de bodega</span></h1>
           </div>
-          <ul class="ficha">
-            <li>
-              <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-medalla"/></svg></span>
-              <b class="ficha__dato">24 años</b>
-              <span class="ficha__nota">cumpliéndole en el Tolima</span>
-            </li>
-            <li>
-              <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-caja"/></svg></span>
-              <b class="ficha__dato">Mayorista</b>
-              <span class="ficha__nota">y al detal</span>
-            </li>
-            <li>
-              <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-camion"/></svg></span>
-              <b class="ficha__dato">Domicilios gratis</b>
-              <span class="ficha__nota"><a href="#terminos-domicilio">ver términos y condiciones</a></span>
-            </li>
-          </ul>
+          <div class="portada__resto">
+            <p class="portada__bajada">Vasos, platos, contenedores, bolsas y empaques de las marcas líderes del país, al por mayor y al detal.</p>
+            <div class="portada__botones">
+              <a class="boton boton-amarillo boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
+                <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+                Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+              </a>
+              <a class="boton boton-azul boton-grande portada__secundario" href="#catalogo">Ver productos</a>
+            </div>
+          </div>
         </div>
-        <figure class="lamina">
-          <img src="img/productos/bodega.webp" width="1080" height="720" alt="Bodega mayorista con estanterías llenas de cajas listas para despachar" fetchpriority="high">
-          <figcaption>Compra mayorista directa: inventario al día para su negocio.</figcaption>
-        </figure>
       </div>
     </section>
 
     <!-- Marcas -->
     <section class="marcas" aria-label="Marcas que distribuimos">
       <div class="contenedor marcas__rejilla">
-        <h2 class="marcas__titulo">Distribuimos las marcas que su negocio ya conoce</h2>
+        <h2 class="marcas__titulo">Distribuimos las marcas que su negocio ya conoce:</h2>
         <ul class="marcas__lista">
           <li>Darnel</li>
           <li>Carvajal Empaques</li>
@@ -190,219 +189,297 @@
       </div>
     </section>
 
-    <!-- Catálogo -->
-    <section class="seccion catalogo" id="catalogo" aria-labelledby="titulo-catalogo">
+    <!-- Catálogo: categorías en carrusel -->
+    <section class="seccion" id="catalogo" aria-labelledby="titulo-catalogo">
       <div class="contenedor">
-        <div class="seccion-cabeza">
-          <h2 id="titulo-catalogo">Todo en un solo lugar</h2>
-          <p>Más de 50 referencias en inventario. Toque cualquier categoría y se la cotizamos por WhatsApp. Si no ve algo, pregúntenos: se lo conseguimos.</p>
-        </div>
-        <ul class="estantes">
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20platos%20desechables." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Platos</h3>
-                <p>Redondos, hondos y cuadrados, de 15 a 23 cm.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/platos.webp" width="720" height="540" loading="lazy" decoding="async" alt="Platos desechables rojos servidos con cupcakes en una mesa de fiesta">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20vasos%20desechables." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Vasos</h3>
-                <p>De 4 a 16 oz, para bebidas frías y calientes.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/vasos.webp" width="720" height="540" loading="lazy" decoding="async" alt="Torre de vasos desechables de papel blancos">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20bolsas%20pl%C3%A1sticas." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Bolsas</h3>
-                <p>De empaque, de basura y por kilo, todos los calibres.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/bolsas.webp" width="720" height="540" loading="lazy" decoding="async" alt="Bolsas plásticas de colores">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20cubiertos%20desechables." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Cubiertos</h3>
-                <p>Tenedores, cucharas y cuchillos, sueltos o en kit.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/cubiertos.webp" width="720" height="540" loading="lazy" decoding="async" alt="Cubiertos desechables rojos: tenedores, cucharas y cuchillos">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20empaques%20para%20domicilios." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Empaques</h3>
-                <p>Para domicilios, comidas rápidas y repostería.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/empaques.webp" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de papel kraft para empacar comida para llevar">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20contenedores%20para%20comida." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Contenedores</h3>
-                <p>Con divisiones, para porciones y almuerzos.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/contenedores.webp" width="720" height="540" loading="lazy" decoding="async" alt="Contenedor plástico transparente con tapa para comida">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20tapas%20y%20domos." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Tapas y domos</h3>
-                <p>Planas, con orificio y domos para tortas y postres.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/tapas.webp" width="720" height="540" loading="lazy" decoding="async" alt="Vaso térmico con tapa para sopa o bebida caliente para llevar">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20pitillos." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Pitillos</h3>
-                <p>Biodegradables: rectos y flexibles, por bolsa.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/pitillos.webp" width="720" height="540" loading="lazy" decoding="async" alt="Pitillos de colores en un vaso">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20bandejas." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Bandejas</h3>
-                <p>Para carnes, frutas, verduras y exhibición.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/bandejas.webp" width="720" height="540" loading="lazy" decoding="async" alt="Bandeja con comida servida sobre una mesa">
-            </a>
-          </li>
-          <li>
-            <a class="producto" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20servilletas%20y%20productos%20de%20aseo." target="_blank" rel="noopener">
-              <div class="producto__cuerpo">
-                <h3>Servilletas y más</h3>
-                <p>Servilletas, mezcladores, guantes y aseo.</p>
-                <span class="cotizar"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
-                <span class="sr-only"> (abre WhatsApp)</span>
-              </div>
-              <img src="img/productos/servilletas.webp" width="720" height="540" loading="lazy" decoding="async" alt="Servilletas rojas apiladas junto a platos blancos">
-            </a>
-          </li>
-        </ul>
-        <p class="catalogo__pie">
-          <a class="enlace-terciario" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20la%20lista%20de%20precios%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
-            Pida la lista de precios al por mayor<span class="sr-only"> (abre WhatsApp)</span>
+        <div class="titulo-fila" data-revela>
+          <div>
+            <h2 class="titulo" id="titulo-catalogo">Compre por categoría</h2>
+            <p class="titulo-bajada">Más de 50 referencias en inventario. Toque una categoría y se la cotizamos por WhatsApp; si no ve algo, se lo conseguimos.</p>
+          </div>
+          <a class="enlace-terciario" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20la%20lista%20de%20precios%20al%20por%20mayor%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
+            Pida la lista de precios<span class="sr-only"> (abre WhatsApp)</span>
             <svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
           </a>
-        </p>
+        </div>
+        <div class="carrusel" data-carrusel data-revela>
+          <ul class="carrusel__pista" aria-label="Categorías de productos">
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20contenedores%20para%20comida." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-contenedores-360.webp" srcset="img/escenas/cat-contenedores-360.webp 360w, img/escenas/cat-contenedores-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Contenedores de icopor, uno abierto con almuerzo y otro cerrado"></span>
+                <div class="cat__pie">
+                  <h3>Contenedores</h3>
+                  <p>Con divisiones, para porciones y almuerzos.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20vasos%20desechables." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-vasos-360.webp" srcset="img/escenas/cat-vasos-360.webp 360w, img/escenas/cat-vasos-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Vasos plásticos transparentes con jugos de colores y pitillo"></span>
+                <div class="cat__pie">
+                  <h3>Vasos</h3>
+                  <p>De 4 a 16 oz, para bebidas frías y calientes.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20platos%20desechables." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-platos-360.webp" srcset="img/escenas/cat-platos-360.webp 360w, img/escenas/cat-platos-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Platos desechables blancos apilados con una porción de torta"></span>
+                <div class="cat__pie">
+                  <h3>Platos</h3>
+                  <p>Redondos, hondos y cuadrados, de 15 a 23 cm.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20cubiertos%20desechables." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-cubiertos-360.webp" srcset="img/escenas/cat-cubiertos-360.webp 360w, img/escenas/cat-cubiertos-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Tenedores, cucharas y cuchillos plásticos blancos en abanico"></span>
+                <div class="cat__pie">
+                  <h3>Cubiertos</h3>
+                  <p>Tenedores, cucharas y cuchillos, sueltos o en kit.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20bolsas%20pl%C3%A1sticas." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-bolsas-360.webp" srcset="img/escenas/cat-bolsas-360.webp 360w, img/escenas/cat-bolsas-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsas plásticas blancas dobladas, una con pan y naranjas, y un rollo de bolsas"></span>
+                <div class="cat__pie">
+                  <h3>Bolsas</h3>
+                  <p>De empaque, de basura y por kilo, todos los calibres.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20empaques%20para%20domicilios." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-empaques-360.webp" srcset="img/escenas/cat-empaques-360.webp 360w, img/escenas/cat-empaques-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de papel con manijas y caja de hamburguesa con papas para domicilio"></span>
+                <div class="cat__pie">
+                  <h3>Empaques</h3>
+                  <p>Para domicilios, comidas rápidas y repostería.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20tapas%20y%20domos." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-tapas-360.webp" srcset="img/escenas/cat-tapas-360.webp 360w, img/escenas/cat-tapas-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Vasos con tapa domo, café frío y malteada, junto a tapas planas apiladas"></span>
+                <div class="cat__pie">
+                  <h3>Tapas y domos</h3>
+                  <p>Planas, con orificio y domos para tortas y postres.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20bandejas." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-bandejas-360.webp" srcset="img/escenas/cat-bandejas-360.webp 360w, img/escenas/cat-bandejas-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bandejas de icopor con fruta picada y tomates, y bandejas vacías apiladas"></span>
+                <div class="cat__pie">
+                  <h3>Bandejas</h3>
+                  <p>Para carnes, frutas, verduras y exhibición.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20pitillos." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-pitillos-360.webp" srcset="img/escenas/cat-pitillos-360.webp 360w, img/escenas/cat-pitillos-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Pitillos de papel a rayas rojas y blancas en un frasco, junto a un vaso de limonada"></span>
+                <div class="cat__pie">
+                  <h3>Pitillos</h3>
+                  <p>Biodegradables: rectos y flexibles, por bolsa.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="cat" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20servilletas%20y%20productos%20de%20aseo." target="_blank" rel="noopener">
+                <span class="cat__foto"><img src="img/escenas/cat-servilletas-360.webp" srcset="img/escenas/cat-servilletas-360.webp 360w, img/escenas/cat-servilletas-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Servilletas blancas apiladas, guantes desechables y mezcladores de madera"></span>
+                <div class="cat__pie">
+                  <h3>Servilletas y más</h3>
+                  <p>Servilletas, mezcladores, guantes y aseo.</p>
+                  <span class="cat__boton"><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>Cotizar</span>
+                  <span class="sr-only"> (abre WhatsApp)</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <!-- Sectores -->
+    <!-- Sectores: mosaico parejo -->
     <section class="seccion seccion--blanca" id="sectores" aria-labelledby="titulo-sectores">
       <div class="contenedor">
-        <div class="seccion-cabeza">
-          <h2 id="titulo-sectores">Pensado para su tipo de negocio</h2>
-          <p>Atendemos por igual al que arma un cumpleaños en casa y al negocio que surte su cocina cada semana.</p>
+        <div class="titulo-fila" data-revela>
+          <div>
+            <h2 class="titulo" id="titulo-sectores">Pensado para su tipo de negocio</h2>
+            <p class="titulo-bajada">Atendemos por igual al que arma un cumpleaños en casa y al negocio que surte su cocina cada semana.</p>
+          </div>
         </div>
-        <ul class="sectores">
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-cubiertos"/></svg><h3>Restaurantes y asaderos</h3></div>
-            <p>Que el almuerzo salga caliente y bien empacado: contenedores, domos y cubiertos que aguantan.</p>
+        <ul class="mosaico">
+          <li class="mosaico__alto" data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20un%20restaurante%20y%20quiero%20cotizar%20desechables." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-restaurantes-480.webp" srcset="img/escenas/sec-restaurantes-480.webp 480w, img/escenas/sec-restaurantes-720.webp 720w" sizes="(min-width: 900px) 300px, 50vw" width="720" height="960" loading="lazy" decoding="async" alt="">
+              <h3>Restaurantes y asaderos</h3>
+              <p>Contenedores, domos y cubiertos que aguantan el almuerzo caliente.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-torta"/></svg><h3>Panaderías y reposterías</h3></div>
-            <p>Luzca sus tortas y su pan con bandejas, cajas y domos que se ven tan bien como saben.</p>
+          <li data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20panader%C3%ADa%20y%20quiero%20cotizar%20empaques." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-panaderias-480.webp" srcset="img/escenas/sec-panaderias-480.webp 480w, img/escenas/sec-panaderias-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
+              <h3>Panaderías y reposterías</h3>
+              <p>Bandejas, bolsas y domos para lucir tortas y pan.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-bolsa"/></svg><h3>Comidas rápidas</h3></div>
-            <p>Empaques que aguantan la grasa, la salsa y el afán del domicilio sin rendirse.</p>
+          <li data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20un%20negocio%20de%20comidas%20r%C3%A1pidas%20y%20quiero%20cotizar%20empaques." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-rapidas-480.webp" srcset="img/escenas/sec-rapidas-480.webp 480w, img/escenas/sec-rapidas-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
+              <h3>Comidas rápidas</h3>
+              <p>Empaques que aguantan la grasa, la salsa y el domicilio.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-vaso"/></svg><h3>Heladerías y fruterías</h3></div>
-            <p>Vasos, cucharas y tapas para helados, cholados y granizados bien fríos.</p>
+          <li data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20helader%C3%ADa%20y%20quiero%20cotizar%20vasos%20y%20tapas." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-heladerias-480.webp" srcset="img/escenas/sec-heladerias-480.webp 480w, img/escenas/sec-heladerias-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
+              <h3>Heladerías y fruterías</h3>
+              <p>Vasos, cucharas y tapas para helados y granizados.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-globo"/></svg><h3>Eventos y catering</h3></div>
-            <p>Del grado a la fiesta: sirva a cien invitados sin que falte un solo plato.</p>
+          <li data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20estoy%20organizando%20un%20evento%20y%20quiero%20cotizar%20desechables." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-eventos-480.webp" srcset="img/escenas/sec-eventos-480.webp 480w, img/escenas/sec-eventos-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
+              <h3>Eventos y catering</h3>
+              <p>Del grado a la fiesta, sin que falte un solo plato.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
-          <li>
-            <div class="sector__cabeza"><svg class="icono" aria-hidden="true"><use href="#i-tienda"/></svg><h3>Tiendas y minimercados</h3></div>
-            <p>Surta por bulto y revenda con margen: el desechable que más rota, siempre en stock.</p>
+          <li class="mosaico__alto" data-revela>
+            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20tienda%20y%20quiero%20precio%20mayorista%20para%20surtir." target="_blank" rel="noopener">
+              <img src="img/escenas/sec-tiendas-480.webp" srcset="img/escenas/sec-tiendas-480.webp 480w, img/escenas/sec-tiendas-720.webp 720w" sizes="(min-width: 900px) 300px, 50vw" width="720" height="960" loading="lazy" decoding="async" alt="">
+              <h3>Tiendas y minimercados</h3>
+              <p>Surta por bulto y revenda con margen: lo que más rota, siempre en stock.</p>
+              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              <span class="sr-only"> (abre WhatsApp)</span>
+            </a>
           </li>
         </ul>
       </div>
     </section>
 
-    <!-- Línea ecológica -->
-    <section class="seccion" id="ecologicos" aria-labelledby="titulo-eco">
-      <div class="contenedor">
-        <div class="eco">
-          <div class="eco__texto">
-            <div class="seccion-cabeza">
-              <h2 id="titulo-eco">Desechables que cuidan el planeta</h2>
-            </div>
-            <p>Manejamos la línea biodegradable y compostable de nuestros proveedores, como <b>Darnel BIO®</b> y <b>Darnel Naturals</b> (pulpa de papel y materiales de fuentes renovables), para los negocios que quieren empacar rico sin dejar huella.</p>
-            <ul class="eco-lista">
-              <li><span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono"><use href="#i-check"/></svg></span>Productos reciclables y compostables</li>
-              <li><span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono"><use href="#i-check"/></svg></span>Pulpa de papel y fuentes renovables</li>
-              <li><span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono"><use href="#i-check"/></svg></span>Ideales para negocios con sello verde</li>
-            </ul>
-            <a class="boton boton-wa eco__boton" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20conocer%20la%20l%C3%ADnea%20ecol%C3%B3gica%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
+    <!-- Banners: mayorista (oscuro) y línea ecológica (claro) -->
+    <section class="seccion" aria-label="Mayoristas y línea ecológica">
+      <div class="contenedor banners">
+        <article class="banner banner--noche" data-revela>
+          <div class="banner__texto">
+            <p class="banner__eyebrow">Para negocios</p>
+            <h3>Surta su negocio con precio mayorista</h3>
+            <p>Restaurantes, panaderías y tiendas que compran seguido reciben precio especial. Pida la lista y compare.</p>
+            <a class="boton boton-amarillo" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20la%20lista%20de%20precios%20al%20por%20mayor%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
+              <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+              Pida la lista de precios<span class="sr-only"> (abre WhatsApp)</span>
+            </a>
+          </div>
+          <div class="banner__foto">
+            <img src="img/escenas/banner-mayorista-480.webp" srcset="img/escenas/banner-mayorista-480.webp 480w, img/escenas/banner-mayorista-800.webp 800w" sizes="(min-width: 1100px) 280px, (min-width: 900px) 50vw, (min-width: 600px) 45vw, 100vw" width="800" height="600" loading="lazy" decoding="async" alt="Pacas de contenedores de icopor y vasos plásticos apiladas sobre una estiba en una bodega">
+          </div>
+        </article>
+        <article class="banner banner--claro" id="ecologicos" data-revela>
+          <div class="banner__texto">
+            <p class="banner__eyebrow">Línea ecológica</p>
+            <h3>Desechables que cuidan el planeta</h3>
+            <p>Manejamos <b>Darnel BIO®</b> y <b>Darnel Naturals</b>: pulpa de papel, cartón y materiales de fuentes renovables.</p>
+            <a class="boton boton-wa" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20conocer%20la%20l%C3%ADnea%20ecol%C3%B3gica%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
               <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
               Conozca la línea verde<span class="sr-only"> (abre WhatsApp)</span>
             </a>
           </div>
-          <figure>
-            <img src="img/productos/eco.webp" width="720" height="540" loading="lazy" decoding="async" alt="Vajilla desechable biodegradable de pulpa de papel con cubiertos de madera">
-            <figcaption>Pulpa de papel, caña y cartón: la misma fiesta, menos huella.</figcaption>
-          </figure>
-        </div>
+          <div class="banner__foto">
+            <img src="img/escenas/cat-ecologica-360.webp" srcset="img/escenas/cat-ecologica-360.webp 360w, img/escenas/cat-ecologica-720.webp 720w" sizes="(min-width: 1100px) 280px, (min-width: 900px) 50vw, (min-width: 600px) 45vw, 100vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de papel kraft, caja de cartón con ensalada y cubiertos de madera">
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Confianza -->
+    <section class="seccion seccion--blanca seccion--franja" aria-label="Por qué comprarnos">
+      <div class="contenedor">
+        <ul class="confianza">
+          <li data-revela>
+            <span class="icono-tile icono-tile--amarillo" aria-hidden="true"><svg class="icono"><use href="#i-camion"/></svg></span>
+            <b>Domicilio gratis</b>
+            <span>desde $50.000 en El Espinal</span>
+          </li>
+          <li data-revela>
+            <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-caja"/></svg></span>
+            <b>Precio de bodega</b>
+            <span>al por mayor y al detal</span>
+          </li>
+          <li data-revela>
+            <span class="icono-tile icono-tile--rojo" aria-hidden="true"><svg class="icono"><use href="#i-lista"/></svg></span>
+            <b>Pedido completo</b>
+            <span>inventario al día</span>
+          </li>
+          <li data-revela>
+            <span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono icono-wa"><use href="#i-wa"/></svg></span>
+            <b>Pida por WhatsApp</b>
+            <span>le confirmamos precio y existencias</span>
+          </li>
+        </ul>
       </div>
     </section>
 
     <!-- Nosotros -->
-    <section class="seccion seccion--blanca" id="nosotros" aria-labelledby="titulo-nosotros">
+    <section class="seccion" id="nosotros" aria-labelledby="titulo-nosotros">
       <div class="contenedor nosotros__rejilla">
-        <div class="nosotros__texto">
-          <div class="seccion-cabeza">
-            <h2 id="titulo-nosotros">24 años cumpliéndole a los clientes del Tolima</h2>
+        <div class="nosotros__texto" data-revela>
+          <div class="titulo-fila">
+            <div>
+              <h2 class="titulo" id="titulo-nosotros">24 años cumpliéndole a los clientes del Tolima</h2>
+            </div>
           </div>
           <p>Desde hace 24 años Plásticos Espinal surte a los restaurantes, asaderos, panaderías, tiendas y familias de la región. En todo este tiempo hemos aprendido una cosa: el negocio necesita su pedido completo y a tiempo, y en eso no fallamos.</p>
           <p>Trabajamos directo con las marcas líderes del país para darle precio de distribuidora, inventario al día y la confianza de quien lleva más de dos décadas cumpliéndole a la región.</p>
+          <p class="nosotros__resena">
+            <span>¿Ya lo atendimos? Cuéntele a más gente:</span>
+            <a class="enlace-terciario" href="https://www.google.com/maps/search/?api=1&amp;query=Pl%C3%A1sticos%20Espinal%2C%20El%20Espinal%2C%20Tolima" target="_blank" rel="noopener">
+              déjenos su reseña en Google
+              <svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
+            </a>
+          </p>
         </div>
         <ul class="cifras">
-          <li class="cifra">
+          <li class="cifra" data-revela>
             <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-medalla"/></svg></span>
             <b class="cifra__num">24 años</b>
             <span class="cifra__texto">cumpliéndole a los clientes</span>
           </li>
-          <li class="cifra cifra--verde">
+          <li class="cifra cifra--verde" data-revela>
             <span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono"><use href="#i-calendario"/></svg></span>
             <b class="cifra__num">7 días</b>
             <span class="cifra__texto">abiertos para surtir su negocio</span>
           </li>
-          <li class="cifra cifra--rojo">
+          <li class="cifra cifra--rojo" data-revela>
             <span class="icono-tile icono-tile--rojo" aria-hidden="true"><svg class="icono"><use href="#i-caja"/></svg></span>
             <b class="cifra__num">3 marcas</b>
             <span class="cifra__texto">Darnel, Carvajal Empaques y Ajover, con las líneas BIO® y Naturals</span>
@@ -411,51 +488,18 @@
       </div>
     </section>
 
-    <!-- Por qué nos eligen -->
-    <section class="seccion" id="resenas" aria-labelledby="titulo-porque">
-      <div class="contenedor">
-        <div class="seccion-cabeza">
-          <h2 id="titulo-porque">Por qué los negocios del Tolima nos eligen</h2>
-          <p>Sin adornos: esto es lo que encuentra cuando surte su negocio con nosotros.</p>
-        </div>
-        <div class="porque__rejilla">
-          <ul class="razones">
-            <li>
-              <h3>24 años cumpliéndole a la región</h3>
-              <p>Más de dos décadas surtiendo a restaurantes, panaderías y tiendas del Espinal, con inventario al día y sin fallar.</p>
-            </li>
-            <li>
-              <h3>Marcas líderes, precio de distribuidora</h3>
-              <p>Distribuimos Darnel, Carvajal Empaques y Ajover: las marcas de mayor rotación y respaldo del país.</p>
-            </li>
-            <li>
-              <h3>Al por mayor y al detal, fácil y rápido</h3>
-              <p>Usted pide por WhatsApp y le confirmamos precio y disponibilidad. En El Espinal, domicilio gratis.</p>
-            </li>
-          </ul>
-          <figure class="lamina">
-            <img src="img/productos/fiesta.webp" width="1080" height="697" loading="lazy" decoding="async" alt="Globos amarillos, azules y rojos sobre una mesa con confeti">
-            <figcaption>Usted pone la fiesta, nosotros los desechables.</figcaption>
-          </figure>
-        </div>
-        <p class="porque__cierre">
-          <span>¿Ya lo atendimos? Cuéntele a más gente:</span>
-          <a class="enlace-terciario enlace-terciario--azul" href="https://www.google.com/maps/search/?api=1&query=Pl%C3%A1sticos%20Espinal%2C%20El%20Espinal%2C%20Tolima" target="_blank" rel="noopener">
-            déjenos su reseña en Google
-            <svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
-          </a>
-        </p>
-      </div>
-    </section>
-
     <!-- Preguntas -->
     <section class="seccion seccion--blanca" id="preguntas" aria-labelledby="titulo-preguntas">
-      <div class="contenedor">
-        <div class="seccion-cabeza">
-          <h2 id="titulo-preguntas">Resolvemos sus dudas</h2>
-          <p>Lo que más nos preguntan, respondido aquí. Y si le queda alguna, escríbanos: contestamos en horario de tienda.</p>
+      <div class="contenedor preguntas__rejilla">
+        <div class="preguntas__lado" data-revela>
+          <h2 class="titulo" id="titulo-preguntas">Resolvemos sus dudas</h2>
+          <p class="titulo-bajada">Lo que más nos preguntan, respondido aquí. Si le queda alguna, escríbanos: contestamos en horario de tienda.</p>
+          <a class="boton boton-fantasma" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20sus%20productos." target="_blank" rel="noopener">
+            <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+            Pregunte por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+          </a>
         </div>
-        <div class="preguntas__lista">
+        <div class="preguntas__lista" data-revela>
           <details class="faq">
             <summary>¿Venden al detal o solo al por mayor?<span class="chev" aria-hidden="true"><svg class="icono"><use href="#i-chevron"/></svg></span></summary>
             <p>Las dos. Puede comprar desde un paquete para su casa hasta cajas completas para su negocio, siempre con precio de distribuidora.</p>
@@ -476,12 +520,6 @@
             <summary>¿Tienen precios especiales para negocios?<span class="chev" aria-hidden="true"><svg class="icono"><use href="#i-chevron"/></svg></span></summary>
             <p>Sí. Restaurantes, panaderías, tiendas y demás negocios que compran con frecuencia reciben precio mayorista. Pida su lista de precios por WhatsApp.</p>
           </details>
-
-          <a class="boton boton-fantasma preguntas__boton" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20sus%20productos." target="_blank" rel="noopener">
-            <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-            Pregunte por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-          </a>
-
           <p class="letra-chica" id="terminos-domicilio"><b>Domicilio gratis, términos y condiciones:</b> aplica para pedidos desde $50.000 dentro del casco urbano de El Espinal. Los despachos salen en el horario de la tienda. Fuera de esa zona no hacemos domicilios.</p>
         </div>
       </div>
@@ -490,23 +528,21 @@
     <!-- Contacto -->
     <section class="seccion" id="contacto" aria-labelledby="titulo-contacto">
       <div class="contenedor contacto__rejilla">
-        <div class="contacto__texto">
-          <div class="seccion-cabeza">
-            <h2 id="titulo-contacto">Haga su pedido <span class="resaltado">hoy mismo</span></h2>
-            <p>Escríbanos por WhatsApp con lo que necesita y le respondemos con precio y disponibilidad.</p>
-          </div>
+        <div class="contacto__texto" data-revela>
+          <h2 class="titulo" id="titulo-contacto">Haga su pedido hoy mismo</h2>
+          <p class="titulo-bajada">Escríbanos por WhatsApp con lo que necesita y le respondemos con precio y disponibilidad.</p>
           <div class="contacto__acciones">
             <a class="boton boton-wa boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
               <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
               Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
             </a>
-            <a class="enlace-terciario enlace-terciario--azul" href="https://www.google.com/maps/search/?api=1&query=Calle%207%20%235-25%2C%20Barrio%20Centro%2C%20Espinal%2C%20Tolima" target="_blank" rel="noopener">
-              Abrir la ubicación en Google Maps
+            <a class="enlace-terciario" href="https://www.google.com/maps/search/?api=1&amp;query=Calle%207%20%235-25%2C%20Barrio%20Centro%2C%20Espinal%2C%20Tolima" target="_blank" rel="noopener">
+              Ver en Google Maps
               <svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
             </a>
           </div>
         </div>
-        <dl class="contacto-datos">
+        <dl class="contacto-datos" data-revela>
           <div class="dato">
             <dt><span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-ubicacion"/></svg></span>Dirección</dt>
             <dd>Calle 7 #5-25, Barrio Centro<br>El Espinal, Tolima</dd>
@@ -529,21 +565,35 @@
     <div class="contenedor">
       <div class="pie__rejilla">
         <div class="pie__marca">
-          <a class="logo-caja" href="#inicio">
-            <img src="img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal" loading="lazy">
+          <a class="pie__logo" href="#inicio">
+            <img src="img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal, ir arriba" loading="lazy">
           </a>
-          <p class="pie__lema">Desechables y plásticos · El Espinal, Tolima</p>
+          <p class="pie__lema">Desechables y plásticos al por mayor y al detal. 24 años surtiendo negocios en El Espinal, Tolima.</p>
         </div>
-        <nav class="menu menu--pie" aria-label="Enlaces del pie">
-          <a href="#catalogo">Productos</a>
-          <a href="#sectores">Sectores</a>
-          <a href="#ecologicos">Línea ecológica</a>
-          <a href="#nosotros">Nosotros</a>
-          <a href="#preguntas">Preguntas</a>
-          <a href="#contacto">Contacto</a>
+        <nav class="menu menu--pie" aria-labelledby="titulo-pie-menu">
+          <h2 id="titulo-pie-menu">Navegue</h2>
+          <ul>
+            <li><a href="#catalogo">Productos</a></li>
+            <li><a href="#sectores">Sectores</a></li>
+            <li><a href="#ecologicos">Línea ecológica</a></li>
+            <li><a href="#nosotros">Nosotros</a></li>
+            <li><a href="#preguntas">Preguntas</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
         </nav>
+        <div>
+          <h2>Visítenos</h2>
+          <ul class="pie__datos">
+            <li><svg class="icono" aria-hidden="true"><use href="#i-ubicacion"/></svg><span>Calle 7 #5-25, Barrio Centro, El Espinal, Tolima</span></li>
+            <li><svg class="icono" aria-hidden="true"><use href="#i-reloj"/></svg><span>Abierto los 7 días · <a href="#contacto">ver horario</a></span></li>
+            <li><svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg><a href="tel:+573183555246">+57 318 355 5246</a></li>
+          </ul>
+        </div>
       </div>
-      <p class="pie__legal">© <span id="anio">2026</span> Plásticos Espinal. Todos los derechos reservados.</p>
+      <div class="pie__legal">
+        <p>© <span id="anio">2026</span> Plásticos Espinal. Todos los derechos reservados.</p>
+        <p>Fotos de referencia: los productos pueden variar en marca y presentación.</p>
+      </div>
     </div>
   </footer>
 
