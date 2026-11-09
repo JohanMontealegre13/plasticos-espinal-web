@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=22">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=23">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=22" defer></script>
+  <script src="/tienda/tienda.js?v=23" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=3" defer></script>
 </head>
@@ -257,14 +257,25 @@
   <!-- 3b. Pantalla del QR: el código aparece despacio y el botón sale después -->
   <section class="pqr" id="pqr" hidden>
     <button class="volver" type="button" id="volverPago">‹ Cambiar medio de pago</button>
-    <div class="pqr-monto"><span>Transfiera</span><b id="qrTotal"></b><small>Pedido <b id="qCodigo"></b></small></div>
+    <div class="pqr-monto"><span>Transfiera</span><b id="qrTotal"></b><button class="copiar" type="button" id="copiarValor">Copiar valor</button><small>Pedido <b id="qCodigo"></b></small></div>
+    <!-- En el computador se escanea el código con el celular. En el celular el código está en la misma pantalla
+         y no se puede escanear: allá manda la llave (se copia y se pega en la app del banco) y el QR baja, para
+         guardarlo y abrirlo desde la app (el orden del celular lo pone tienda.css con .pqr.celular). -->
+    <p class="qr-alterno" id="qrAlterno" hidden>¿Su app lee el código QR desde una foto? Guárdelo y ábralo desde la app.</p>
     <div class="qr" id="qrCaja"><!-- [html-validate-disable-next element-required-attributes -- tienda.js le pone el src cuando hay QR] --><img id="qrImg" alt="Código QR Bre-B de Plásticos Espinal" width="240" height="240"><span class="barrido" aria-hidden="true"></span><p id="qrFalta" hidden>El código QR estará aquí muy pronto. Mientras tanto, elija efectivo.</p></div>
-    <p class="llave" id="qrLlave" hidden></p>
-    <ol class="pqr-pasos">
-      <li>Abra la app de su banco</li>
+    <a class="guardar-qr" id="guardarQr" download="qr-plasticos-espinal.png" href="/tienda/" hidden>Guardar el código QR</a>
+    <ol class="pqr-pasos" id="pasosCompu">
+      <li>Abra la app de su banco en el celular</li>
       <li>Escanee este código</li>
       <li>Transfiera el total y vuelva aquí</li>
     </ol>
+    <ol class="pqr-pasos" id="pasosCelu" hidden>
+      <li>Copie la llave Bre-B</li>
+      <li>En la app de su banco, envíe el total a esa llave</li>
+      <li>Vuelva aquí y toque «PAGO CONFIRMADO»</li>
+    </ol>
+    <div class="llave" id="qrLlave" hidden><span>Llave Bre-B</span><b id="qrLlaveNum"></b><button class="copiar" type="button" id="copiarLlave">Copiar llave</button></div>
+    <p class="copiado" id="copiado" role="status" aria-live="polite"></p>
     <div class="espera" id="qrEspera"><span>Preparando el botón para avisarnos…</span><i></i></div>
     <button class="enviar" type="button" id="yaPague" hidden>PAGO CONFIRMADO</button>
     <p class="errores" id="errQr" role="alert" hidden></p>
