@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
-    "lint:html": "cd .. && html-validate -c pruebas/.htmlvalidate.json \"*.html\" \"tienda/**/*.html\"",
+    "lint:html": "cd .. && html-validate -c pruebas/.htmlvalidate.json \"*.html\" \"productos/*.html\" \"privacidad/*.html\" \"terminos/*.html\" \"tienda/**/*.html\"",
     "lint:css": "cd .. && stylelint --config pruebas/.stylelintrc.json \"css/*.css\" \"tienda/**/*.css\"",
     "lint:js": "cd .. && eslint -c pruebas/eslint.config.js .",
     "typecheck": "tsc -p jsconfig.json",

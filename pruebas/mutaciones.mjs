@@ -37,7 +37,7 @@ const MUTACIONES = [
   { parte: 'Pedido', nombre: 'el combo agrega solo dos productos', archivo: 'tienda/index.html', buscar: 'data-combo="141,131,191"', poner: 'data-combo="141,131"', pruebas: ['e2e'] },
   { parte: 'Pedido', nombre: 'número de WhatsApp equivocado', archivo: 'tienda/catalogo.json', buscar: '"whatsapp": "573183555246"', poner: '"whatsapp": "573183555245"', pruebas: ['unit'] },
   /* Vitrina */
-  { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'tienda/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
+  { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'js/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
   { parte: 'Vitrina', nombre: 'nombres pintados como HTML (XSS)', archivo: 'tienda/tienda.js', buscar: 'n.textContent = x', poner: 'n.innerHTML = x', pruebas: ['e2e'] },
   /* tienda/catalogo.json (lo que Johan cambia a mano) */
   { parte: 'Catálogo', nombre: 'radio del GPS entre comillas', archivo: 'tienda/catalogo.json', buscar: '"radio_km": 8', poner: '"radio_km": "8"', pruebas: ['unit'] },

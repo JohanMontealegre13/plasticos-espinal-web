@@ -88,7 +88,7 @@ test('si repintar la tienda falla justo después de que el CRM recibió el pedid
   const v = vigilar(page);
   const enviados = await simularCrm(page);
   /* buscar.js de verdad, con ordenar() que se rompe cuando la prueba lo pide: la vitrina se repinta al vaciar la canasta */
-  await page.route('**/tienda/buscar.js*', async (r) => {
+  await page.route('**/js/buscar.js*', async (r) => {
     const real = await (await r.fetch()).text();
     await r.fulfill({
       contentType: 'text/javascript; charset=utf-8',

@@ -1,11 +1,11 @@
-/* Buscador de la tienda (tienda/buscar.js): plurales, tildes, sinónimos, errores de dedo y orden.
+/* Buscador de la tienda (js/buscar.js, lo comparten la tienda y /productos/): plurales, tildes, sinónimos, errores de dedo y orden.
    Los sinónimos son una copia congelada (fixtures/sinonimos.json): Johan puede agregar o quitar en
    tienda/catalogo.json sin que estas pruebas se pongan rojas. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cargarPE, leer } from '../lib.mjs';
 
-const { buscar, ordenar, palabrasBuscadas } = cargarPE(['tienda/buscar.js']);
+const { buscar, ordenar, palabrasBuscadas } = cargarPE(['js/buscar.js']);
 const P = JSON.parse(leer('pruebas/e2e/catalogo-crm.json')).productos;
 const S = JSON.parse(leer('pruebas/unit/fixtures/sinonimos.json'));
 const ids = (/** @type {{id: number}[]} */ l) => l.map((p) => p.id);
@@ -190,3 +190,4 @@ test('ordenar devuelve una lista nueva aunque no cambie nada', () => {
   const una = [prod(1, 'A')];
   assert.notEqual(ordenar(una, 'nombre'), una);
 });
+

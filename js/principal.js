@@ -169,19 +169,21 @@
       Array.prototype.forEach.call(puntos.children, function (/** @type {HTMLElement} */ d, /** @type {number} */ i) {
         if (i === a) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
       });
-      ant.disabled = pista.scrollLeft <= 4;
-      sig.disabled = pista.scrollLeft >= maximo() - 4;
+      /* aria-disabled y no disabled: un botón deshabilitado con el foco encima lo bota a <body> */
+      ant.setAttribute('aria-disabled', String(pista.scrollLeft <= 4));
+      sig.setAttribute('aria-disabled', String(pista.scrollLeft >= maximo() - 4));
     };
 
     /* Avance solo */
     var apagado = menosMovimiento;
-    var encima = false;
+    var raton = false;   /* el mouse encima */
+    var foco = false;    /* el foco del teclado adentro (cada uno pausa por su lado) */
     var visible = false;
     var reloj = 0;
     var parar = function () { if (reloj) { clearInterval(reloj); reloj = 0; } };
     var revisar = function () {
       parar();
-      if (apagado || encima || !visible || document.hidden || paginas() < 2) return;
+      if (apagado || raton || foco || !visible || document.hidden || paginas() < 2) return;
       reloj = window.setInterval(function () {
         var a = actual();
         irA(a >= paginas() - 1 ? 0 : a + 1);
@@ -195,8 +197,13 @@
       revisar();
     };
 
-    ant.addEventListener('click', function () { apagar(); irA(actual() - 1); });
-    sig.addEventListener('click', function () { apagar(); irA(actual() + 1); });
+    /* Las flechas mueven una vista entera desde donde esté la fila (también a medio deslizar) y se
+       detienen en los extremos; solo el avance solo vuelve al principio. */
+    var correr = function (/** @type {number} */ d) {
+      pista.scrollBy({ left: d * porVista() * paso(), behavior: menosMovimiento ? 'auto' : 'smooth' });
+    };
+    ant.addEventListener('click', function () { if (ant.getAttribute('aria-disabled') === 'true') return; apagar(); correr(-1); });
+    sig.addEventListener('click', function () { if (sig.getAttribute('aria-disabled') === 'true') return; apagar(); correr(1); });
     puntos.addEventListener('click', function (e) {
       var d = /** @type {HTMLElement} */ (e.target).closest('.carrusel__punto');
       if (!d) return;
@@ -213,11 +220,11 @@
 
     pista.addEventListener('pointerdown', apagar, { passive: true });
     pista.addEventListener('wheel', function (e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) apagar(); }, { passive: true });
-    raiz.addEventListener('mouseenter', function () { encima = true; revisar(); });
-    raiz.addEventListener('mouseleave', function () { encima = false; revisar(); });
-    raiz.addEventListener('focusin', function () { encima = true; revisar(); });
+    raiz.addEventListener('mouseenter', function () { raton = true; revisar(); });
+    raiz.addEventListener('mouseleave', function () { raton = false; revisar(); });
+    raiz.addEventListener('focusin', function () { foco = true; revisar(); });
     raiz.addEventListener('focusout', function (e) {
-      if (!raiz.contains(/** @type {Node} */ (e.relatedTarget))) { encima = false; revisar(); }
+      if (!raiz.contains(/** @type {Node} */ (e.relatedTarget))) { foco = false; revisar(); }
     });
     document.addEventListener('visibilitychange', revisar);
 

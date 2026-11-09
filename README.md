@@ -1,6 +1,6 @@
 # Sitio web público — Plásticos Espinal
 
-Página de presentación del negocio (una sola página, HTML/CSS/JS puro, sin
+Página de presentación del negocio con su catálogo sin precios (HTML/CSS/JS puro, sin
 dependencias externas). Diseño 4: **«hermana del CRM, más sobria»** (oct 2026).
 
 ## Diseño
@@ -170,6 +170,38 @@ los pares principales de la paleta. Probado en escritorio y móvil.
    y los botones del CRM sin su lado festivo (morado, neón, vidrio,
    animaciones de entrada).
 
+## Catálogo público (`/productos/`) y políticas
+
+- **Sin precios** (decisión de Johan, 9-nov-2026): el precio publicado obliga
+  (art. 26, Ley 1480), así que cada producto se pide por WhatsApp con su
+  nombre y código, y el precio se confirma antes de despachar. Los precios solo
+  existen en la tienda con contraseña.
+- `/productos/`: categorías en pestañas, buscador (el mismo de la tienda,
+  `js/buscar.js`), filtros de marca y «solo lo que hay» (salen solo cuando hay
+  de dónde escoger), orden y la ficha de cada producto (`?p=ID`): fotos,
+  pestañas de descripción, características y domicilio, y parecidos. El inicio
+  muestra los productos por categoría en pestañas («Productos de la bodega») y
+  las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
+  distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
+- Datos: `functions/api/catalogo.js` le pide al CRM el mismo catálogo de la
+  tienda (con `PORTAL_CLAVE`) y deja pasar solo nombre, categoría, si hay o no,
+  «más pedido», fotos, contenido, descripción y detalles: nunca precio, stock
+  ni costo. Guarda la última lista buena en la caché de Cloudflare 14 días, así
+  que con el Mac apagado la página sigue mostrando productos. Si no hay ni
+  copia, la página lo dice y ofrece WhatsApp; el inicio simplemente no muestra
+  las pestañas. `functions/api/foto/[archivo].js` sirve las fotos del CRM (solo
+  PNG, JPG, GIF o WebP) con caché de un mes.
+- Solo salen los productos marcados «en tienda» en el CRM (activos y con
+  precio). Un producto sin foto propia lleva la foto de referencia de su tipo
+  (`img/productos/`, Pexels) con el sello «Foto de referencia»; nunca una
+  escena hecha con IA.
+- Interruptor `PRECIOS_PUBLICOS` (variable de Cloudflare Pages): solo con el
+  valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
+  página tampoco lo pintaría sin cambiar `js/catalogo.js`.
+- `/terminos/` y `/privacidad/`: las políticas públicas (las de la tienda viven
+  detrás de la contraseña y lo público no enlaza a `/tienda`). El pie de todas
+  las páginas públicas trae enlaces rápidos, políticas y contacto.
+
 ## Tienda en línea (`/tienda`, en pruebas y con contraseña)
 
 - Vive en `tienda/` y se abre en `plasticosespinal.com/tienda`. Mientras está
@@ -188,7 +220,8 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   mostrador, descarga el recibo PDF y edita nombre, barrio, dirección e
   indicaciones (celular y documento NO: son la llave).
   Los datos vienen del CRM a través de `functions/tienda/mi-cuenta/api/[[ruta]].js`,
-  el ÚNICO que habla con el CRM: le pone la clave `PORTAL_CLAVE` (secreto de
+  el único de la tienda que habla con el CRM (lo público solo lee el catálogo y
+  las fotos, ver «Catálogo público»): le pone la clave `PORTAL_CLAVE` (secreto de
   Cloudflare Pages, el mismo valor del `.env` del CRM) y guarda la sesión del
   cliente en una galleta HttpOnly. Sin ese secreto el portal dice que no pudo
   traer los datos (el secreto va en Production y solo se carga en la siguiente
