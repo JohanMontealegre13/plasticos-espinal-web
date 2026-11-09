@@ -487,3 +487,15 @@ html.con-ficha{overflow:hidden}
 .datos #ubicado:not(:empty){margin-top:6px}
 .datos #ubicado[data-estado="ok"]{color:var(--verde)}
 .datos #ubicado[data-estado="fuera"],.datos #ubicado[data-estado="error"]{color:#8f1a10}
+
+/* tarjeta: cuándo llega, en verde, como la promesa de entrega de las tiendas grandes (solo lo que hay) */
+.prod .llega{font-size:13px;font-weight:700;color:var(--verde)}
+/* buscando o en una categoría: cuántos productos hay y el filtro puesto, que se quita con su ✕ */
+.filtro-linea{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-4px 0 12px;font-size:14px;color:var(--texto2)}
+.filtro-puesto{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 8px 0 16px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--azul);font-weight:800;text-decoration:none;max-width:100%}
+.filtro-puesto #limpiarTexto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filtro-puesto .x{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--suave);font-size:14px}
+.filtro-puesto:hover .x{background:var(--azul);color:#fff}
+/* ficha: preguntar por WhatsApp, junto a favoritos y compartir */
+.preguntar{text-decoration:none;border-color:var(--verde);color:var(--verde)}
+.preguntar:hover{border-color:var(--verde);color:#fff;background:var(--verde)}

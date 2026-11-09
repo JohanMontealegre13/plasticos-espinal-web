@@ -345,3 +345,18 @@ test('la ficha y la canasta dicen cómo se paga y dónde están los cambios y el
   await expect(page.locator('#resumen .confianza-linea')).toHaveText('Paga al recibir o con Bre-B · Cambios y retracto');
   await expect(page.locator('#resumen .confianza-linea').getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
 });
+
+test('«Preguntar por WhatsApp» abre el chat con el nombre y el código del producto', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141' });
+  const wa = page.locator('#preguntarWa');
+  await expect(wa).toBeVisible();
+  await expect(wa).toHaveAttribute('href', 'https://wa.me/573183555246?text=' + encodeURIComponent('Hola, tengo una pregunta sobre Contenedor icopor J1 x25 und (código 141).'));
+  await expect(wa).toHaveAttribute('target', '_blank');
+  expect((await wa.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
+test('sin número de WhatsApp en catalogo.json no sale «Preguntar por WhatsApp»', async ({ page }) => {
+  await abrirTienda(page, { ruta: '/tienda/#p=141', sitio: (sitio) => { delete sitio.whatsapp; } });
+  await expect(page.locator('#fichaNombre')).toHaveText('Contenedor icopor J1 x25 und');
+  await expect(page.locator('#preguntarWa')).toBeHidden();
+});

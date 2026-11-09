@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=19">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=20">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/tienda/buscar.js?v=1" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=19" defer></script>
+  <script src="/tienda/tienda.js?v=20" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
   <script src="/tienda/mi-cuenta/menu.js?v=2" defer></script>
 </head>
@@ -77,7 +77,7 @@
   </section>
 
   <section class="sec" id="vitrina">
-    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2><a href="#" id="limpiar" hidden>Ver todo</a>
+    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2>
       <label class="orden" for="orden">Ordenar por <select id="orden">
         <option value="pedidos">Más pedidos</option>
         <option value="menor">Menor precio</option>
@@ -85,6 +85,8 @@
         <option value="nombre">Nombre A-Z</option>
       </select></label>
     </div>
+    <!-- Buscando o en una categoría: cuántos productos hay y el filtro puesto, que se quita con su ✕ -->
+    <p class="filtro-linea" id="filtroLinea" hidden><span id="conteo"></span><a href="#" class="filtro-puesto" id="limpiar" hidden><span id="limpiarTexto"></span><span class="x" aria-hidden="true">✕</span></a></p>
     <p class="estado" id="estado" role="status">Cargando productos…</p>
     <a class="pedir-wa" id="pedirloWa" href="https://wa.me/" target="_blank" rel="noopener" hidden>¿No lo encuentra? Pídalo por WhatsApp</a>
     <ul class="grilla" id="grilla"></ul>
@@ -147,6 +149,7 @@
         </ul>
         <div class="ficha-acciones">
           <button class="fav fav-ficha" id="fichaFav" type="button" aria-pressed="false" hidden><span class="fav-txt">Guardar en favoritos</span></button>
+          <a class="compartir preguntar" id="preguntarWa" href="https://wa.me/" target="_blank" rel="noopener" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg>Preguntar por WhatsApp</a>
           <button class="compartir" id="compartir" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/></svg>Compartir</button>
         </div>
       </div>
