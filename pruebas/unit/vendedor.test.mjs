@@ -176,7 +176,7 @@ test('lo que hoy no se sabe (nombre, documento, correo) nace escondido y vacío'
 });
 test('la dirección y el teléfono traen texto de respaldo a la vista: la sección 1 nunca queda vacía sin catalogo.json ni JavaScript', () => {
   /* Es el mismo texto de la política de datos; vendedor.js lo reemplaza (en el mismo nodo, sin duplicar) con lo de catalogo.json */
-  const direccion = 'Calle 7 #5-35, Centro, El Espinal, Tolima';
+  const direccion = 'Calle 7 #5-25, Centro, El Espinal, Tolima';
   assert.match(PRIVACIDAD, new RegExp(`${direccion}; WhatsApp 318 355 5246`));
   for (const campo of ['direccion', 'telefono']) {
     const nodos = nodosDe(TERMINOS, campo);

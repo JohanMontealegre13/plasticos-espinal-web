@@ -54,12 +54,26 @@ async function api(page, o = {}) {
 /** @param {import('@playwright/test').Page} page */
 const marco = (page) => page.frameLocator('iframe.vc-marco');
 
+/**
+ * Las páginas que abrió la pestaña misma (no el marco de la ventana), en orden.
+ * Sirve para ver que no pasó por Mis pedidos suelta antes de la tienda: ese salto
+ * de más cortaba lo que la página aún bajaba.
+ * @param {import('@playwright/test').Page} page
+ */
+function paginasDeLaPestana(page) {
+  /** @type {string[]} */
+  const rutas = [];
+  page.on('framenavigated', (f) => { if (f === page.mainFrame()) rutas.push(new URL(f.url()).pathname); });
+  return rutas;
+}
+
 /** @param {import('@playwright/test').Page} page @param {string} ruta lo que va después de /tienda/mi-cuenta/ */
 const abrirEnVentana = (page, ruta) => page.goto('/tienda/#cuenta=' + encodeURIComponent('/tienda/mi-cuenta/' + ruta));
 
 test('entrar con cédula y contraseña lleva a «Mis pedidos», encima de la tienda', async ({ page }) => {
   const v = vigilar(page);
   const llamadas = await api(page);
+  const pestana = paginasDeLaPestana(page);
   await page.goto('/tienda/mi-cuenta/');
   await page.fill('#usuario', '1105678901');
   await page.fill('#clave', 'otra-clave');
@@ -71,11 +85,33 @@ test('entrar con cédula y contraseña lleva a «Mis pedidos», encima de la tie
   await expect(marco(page).locator('#lista')).toContainText('FE-0012');
   await expect(marco(page).locator('#lista')).toContainText('$61.000');
   expect(llamadas.filter((l) => l === 'POST entrar')).toHaveLength(2);
+  expect(pestana, 'va directo a la tienda, sin abrir Mis pedidos suelta').not.toContain('/tienda/mi-cuenta/pedidos/');
   v.sinProblemas();
+});
+
+test('desde la página de entrar, «Mis pedidos» del pie va directo a la ventana sobre la tienda', async ({ page }) => {
+  const v = vigilar(page);
+  await api(page);
+  const pestana = paginasDeLaPestana(page);
+  await page.goto('/tienda/mi-cuenta/');
+  await page.locator('footer').getByRole('link', { name: 'Mis pedidos' }).click();
+  await expect(page).toHaveURL(/\/tienda\/#cuenta=%2Ftienda%2Fmi-cuenta%2Fpedidos%2F$/);
+  await expect(marco(page).getByRole('heading', { name: 'Entre a su cuenta' })).toBeVisible();
+  expect(pestana).not.toContain('/tienda/mi-cuenta/pedidos/');
+  v.sinProblemas();
+});
+
+test('un enlace guardado a Mis pedidos se va a la tienda sin pedir nada desde la página que se va', async ({ page }) => {
+  const llamadas = await api(page, { sesion: true });
+  await page.goto('/tienda/mi-cuenta/pedidos/');
+  await expect(page).toHaveURL(/\/tienda\/#cuenta=%2Ftienda%2Fmi-cuenta%2Fpedidos%2F$/);
+  await expect(marco(page).locator('#lista')).toContainText('FE-0012');
+  expect(llamadas.filter((l) => l === 'GET pedidos'), 'solo los pide la ventana').toHaveLength(1);
 });
 
 test('crear cuenta: nombre, cédula y celular, el código del WhatsApp y la contraseña', async ({ page }) => {
   const llamadas = await api(page);
+  const pestana = paginasDeLaPestana(page);
   await page.goto('/tienda/mi-cuenta/#crear');
   await page.fill('#nombre', '  Ana   Pérez ');
   await page.fill('#documento', '1.105.678.901');
@@ -98,6 +134,7 @@ test('crear cuenta: nombre, cédula y celular, el código del WhatsApp y la cont
   await page.fill('#repetir', CLAVE_BUENA);
   await page.getByRole('button', { name: 'Guardar y entrar' }).click();
   await expect(marco(page).locator('#lista')).toContainText('FE-0012');
+  expect(pestana).not.toContain('/tienda/mi-cuenta/pedidos/');
 });
 
 test('el formulario de entrada valida antes de llamar', async ({ page }) => {

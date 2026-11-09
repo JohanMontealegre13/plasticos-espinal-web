@@ -10,7 +10,7 @@ const LINEA_ANA = 'Vende: Ana Prueba · NIT 900.000.000-1 · Calle 7 #5-35 · 31
 /** Lo que falta de llenar hoy (nombre, documento, correo), pero con otra dirección y otro teléfono: ninguna prueba depende de los valores reales de catalogo.json. */
 const A_MEDIAS = { nombre: '', documento: '', direccion: 'Carrera 9 #1-2, Barrio Prueba', telefono: '300 000 0000', correo: '' };
 /** El texto de respaldo que trae la página de términos (el mismo de la política de datos) */
-const RESPALDO_DIRECCION = 'Calle 7 #5-35, Centro, El Espinal, Tolima';
+const RESPALDO_DIRECCION = 'Calle 7 #5-25, Centro, El Espinal, Tolima';
 
 /** Pone en tienda/catalogo.json el `vendedor` de la prueba (o lo quita con `null`): para abrirTienda({ sitio }) o sitioDe. */
 const conVendedor = (/** @type {object | null} */ vendedor) => (/** @type {any} */ sitio) => {
