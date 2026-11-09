@@ -499,3 +499,7 @@ html.con-ficha{overflow:hidden}
 /* ficha: preguntar por WhatsApp, junto a favoritos y compartir */
 .preguntar{text-decoration:none;border-color:var(--verde);color:var(--verde)}
 .preguntar:hover{border-color:var(--verde);color:#fff;background:var(--verde)}
+
+/* precio por unidad junto al del paquete (como lo pide la SIC): «$392 c/u» en la tarjeta, «Precio por unidad: $392» en la ficha */
+.prod .por-unidad{font-size:13px;color:var(--texto2)}
+.ficha-por-unidad{font-size:14px;color:var(--texto2)}
