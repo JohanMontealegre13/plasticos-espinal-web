@@ -2,7 +2,7 @@
    Todo se guarda solo en este celular (localStorage) y nada de eso puede llenar la canasta
    con algo que ya no está o se agotó, ni romper la página. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, vigilar } from './ayudas.js';
+import { abrirTienda, vigilar, abrirCanasta } from './ayudas.js';
 
 /** Deja un valor guardado ANTES de que cargue la página (solo la primera vez: un reload no lo pisa). */
 async function sembrar(/** @type {import('@playwright/test').Page} */ page, /** @type {Record<string, unknown>} */ claves) {
@@ -299,7 +299,7 @@ test('el aviso de lo que no está se quita al abrir la canasta otra vez', async 
   await page.locator('#ultimaVez').click();
   await expect(page.locator('#noEstan')).toHaveText('No están hoy: Plato 23 cm hondo Darnel x20 und, Código 777');
   await page.locator('#cerrar').click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await expect(page.locator('#panel')).toBeVisible();
   await expect(page.locator('#noEstan')).toBeHidden();
 });
@@ -336,7 +336,7 @@ test('lo de la última vez respeta el tope de 999 por línea', async ({ page }) 
 async function hastaElEnvio(/** @type {import('@playwright/test').Page} */ page) {
   await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await page.getByRole('button', { name: 'Agregar uno más de Contenedor icopor J1 x25 und' }).click();
-  await page.locator('.btn-canasta').click();
+  await abrirCanasta(page);
   await page.locator('#seguir').click();
   await page.locator('#d-nombre').fill('Restaurante La Plaza');
   await page.locator('#d-doc').fill('1105678901');
