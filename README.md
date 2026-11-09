@@ -1,6 +1,6 @@
 # Sitio web público — Plásticos Espinal
 
-Página de presentación del negocio (una sola página, HTML/CSS/JS puro, sin
+Página de presentación del negocio con su catálogo sin precios (HTML/CSS/JS puro, sin
 dependencias externas). Diseño 4: **«hermana del CRM, más sobria»** (oct 2026).
 
 ## Diseño
@@ -92,11 +92,13 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 
 ## ✏️ Datos pendientes de mejorar
 
-1. **Reseñas reales** — la sección «Por qué nos eligen» (`#resenas`) no
-   muestra testimonios: solo invita a dejar reseña en Google. Cuando haya
-   reseñas reales (con permiso) o ficha de Google Business Profile, pueden
-   sumarse ahí.
-2. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
+1. **Reseñas reales** — «Nosotros» solo invita a dejar reseña en Google.
+   Cuando haya reseñas reales (con permiso) o ficha de Google Business
+   Profile, pueden sumarse ahí.
+2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
+   hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
+   reemplaza 1:1: mismo nombre de archivo, mismo tamaño.
+3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
 
@@ -104,28 +106,31 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 
 | Archivo | Qué es |
 |---|---|
-| `index.html` | La página completa (portada, marcas, catálogo, sectores, línea ecológica, nosotros, por qué nos eligen, preguntas, contacto) |
-| `css/estilos.css` | Todos los estilos (sistema «hermana del CRM, más sobria»; colores del `:root` del CRM) |
-| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp); el sitio funciona sin JavaScript |
-| `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, fotos de producto, `ondas.svg` (relleno de la cápsula) y `og-image.jpg` |
+| `index.html` | La página completa (franja, cabecera, portada, marcas, categorías en carrusel, mosaico por negocio, banners mayorista y ecológico, confianza, nosotros, preguntas, contacto) |
+| `css/estilos.css` | Todos los estilos («vitrina de mostrador»: patrones de tienda grande con los colores del `:root` del CRM) |
+| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp, aparecer al bajar y el carrusel con flechas, puntos y pausa); el sitio funciona sin JavaScript |
+| `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, `escenas/` (fotos del inicio), `productos/` (fotos que usa la tienda), `ondas.svg` y `og-image.jpg` |
 | `favicon.ico`, `site.webmanifest` | Iconos del navegador y de "agregar a pantalla de inicio" |
 | `robots.txt`, `sitemap.xml` | Para Google |
 | `_headers` | Cabeceras de seguridad y caché que aplica Cloudflare Pages |
-| `404.html` | Página de error con la cápsula, «Volver al inicio» y pedido por WhatsApp (rutas desde la raíz) |
+| `404.html` | Página de error con la cabecera, «Volver al inicio» y pedido por WhatsApp (rutas desde la raíz) |
 | `pruebas/` | Pruebas automáticas y herramientas de revisión (no hacen parte de la página) |
 | `.github/workflows/` | Revisión automática en GitHub |
 
 ## Secciones de la página
 
-1. **Portada**: titular, doble CTA (WhatsApp + «Ver catálogo»), ficha de tres
-   datos y foto de la bodega.
-2. **Marcas** que distribuimos, en lista estática.
-3. **Catálogo** — 10 categorías; cada tarjeta abre una cotización por WhatsApp
-   con mensaje precargado propio.
-4. **Sectores** (restaurantes, panaderías, comidas rápidas…).
-5. **Línea ecológica** en verde.
-6. **Nosotros** con tres cifras.
-7. **Por qué nos eligen** (`#resenas`) y enlace para dejar reseña en Google.
+0. **Franja** noche con el domicilio gratis y **cabecera** blanca (logo,
+   dirección, teléfono, «Pida ahora») con la banda del menú debajo.
+1. **Portada** en escena: el título va en el aire de la izquierda de la foto
+   (computador), encima de la pared (celular) o arriba de la foto (tableta).
+2. **Marcas** que distribuimos.
+3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas; cada una abre una
+   cotización por WhatsApp con mensaje propio. Sin JS es una fila deslizable.
+4. **Sectores** — mosaico parejo (alta | dos | dos | alta), cada negocio con
+   su mensaje de WhatsApp.
+5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
+6. **Confianza**: cuatro tarjetas.
+7. **Nosotros** con tres cifras y enlace para dejar reseña en Google.
 8. **Preguntas** — `details` nativos + datos `FAQPage` (el texto visible debe
    seguir siendo espejo exacto del JSON-LD) y los términos del domicilio.
 9. **Contacto**: WhatsApp, dirección, horario, teléfono y enlace al mapa.
@@ -165,6 +170,38 @@ los pares principales de la paleta. Probado en escritorio y móvil.
    y los botones del CRM sin su lado festivo (morado, neón, vidrio,
    animaciones de entrada).
 
+## Catálogo público (`/productos/`) y políticas
+
+- **Sin precios** (decisión de Johan, 9-nov-2026): el precio publicado obliga
+  (art. 26, Ley 1480), así que cada producto se pide por WhatsApp con su
+  nombre y código, y el precio se confirma antes de despachar. Los precios solo
+  existen en la tienda con contraseña.
+- `/productos/`: categorías en pestañas, buscador (el mismo de la tienda,
+  `js/buscar.js`), filtros de marca y «solo lo que hay» (salen solo cuando hay
+  de dónde escoger), orden y la ficha de cada producto (`?p=ID`): fotos,
+  pestañas de descripción, características y domicilio, y parecidos. El inicio
+  muestra los productos por categoría en pestañas («Productos de la bodega») y
+  las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
+  distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
+- Datos: `functions/api/catalogo.js` le pide al CRM el mismo catálogo de la
+  tienda (con `PORTAL_CLAVE`) y deja pasar solo nombre, categoría, si hay o no,
+  «más pedido», fotos, contenido, descripción y detalles: nunca precio, stock
+  ni costo. Guarda la última lista buena en la caché de Cloudflare 14 días, así
+  que con el Mac apagado la página sigue mostrando productos. Si no hay ni
+  copia, la página lo dice y ofrece WhatsApp; el inicio simplemente no muestra
+  las pestañas. `functions/api/foto/[archivo].js` sirve las fotos del CRM (solo
+  PNG, JPG, GIF o WebP) con caché de un mes.
+- Solo salen los productos marcados «en tienda» en el CRM (activos y con
+  precio). Un producto sin foto propia lleva la foto de referencia de su tipo
+  (`img/productos/`, Pexels) con el sello «Foto de referencia»; nunca una
+  escena hecha con IA.
+- Interruptor `PRECIOS_PUBLICOS` (variable de Cloudflare Pages): solo con el
+  valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
+  página tampoco lo pintaría sin cambiar `js/catalogo.js`.
+- `/terminos/` y `/privacidad/`: las políticas públicas (las de la tienda viven
+  detrás de la contraseña y lo público no enlaza a `/tienda`). El pie de todas
+  las páginas públicas trae enlaces rápidos, políticas y contacto.
+
 ## Tienda en línea (`/tienda`, en pruebas y con contraseña)
 
 - Vive en `tienda/` y se abre en `plasticosespinal.com/tienda`. Mientras está
@@ -183,7 +220,8 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   mostrador, descarga el recibo PDF y edita nombre, barrio, dirección e
   indicaciones (celular y documento NO: son la llave).
   Los datos vienen del CRM a través de `functions/tienda/mi-cuenta/api/[[ruta]].js`,
-  el ÚNICO que habla con el CRM: le pone la clave `PORTAL_CLAVE` (secreto de
+  el único de la tienda que habla con el CRM (lo público solo lee el catálogo y
+  las fotos, ver «Catálogo público»): le pone la clave `PORTAL_CLAVE` (secreto de
   Cloudflare Pages, el mismo valor del `.env` del CRM) y guarda la sesión del
   cliente en una galleta HttpOnly. Sin ese secreto el portal dice que no pudo
   traer los datos (el secreto va en Production y solo se carga en la siguiente

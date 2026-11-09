@@ -161,7 +161,7 @@ test('una medida que no existe no muestra la de al lado: ofrece pedirla', async 
 });
 
 test('si buscar.js no carga, la tienda sigue con la búsqueda simple de antes', async ({ page }) => {
-  await page.route('**/tienda/buscar.js*', (r) => r.fulfill({ status: 404, body: '' }));
+  await page.route('**/js/buscar.js*', (r) => r.fulfill({ status: 404, body: '' }));
   await abrirTienda(page);
   await expect(page.locator('#estado')).toHaveText('');
   await page.locator('#q').fill('icopor');

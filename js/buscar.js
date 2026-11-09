@@ -1,6 +1,7 @@
-/* Plásticos Espinal · tienda en línea: buscar y ordenar productos.
-   Módulo puro (no toca la página): lo usa tienda.js para la vitrina y se prueba
-   en Node (pruebas/unit/buscar.test.mjs).
+/* Plásticos Espinal · buscar y ordenar productos.
+   Módulo puro (no toca la página): lo usan la vitrina de la tienda (tienda/tienda.js) y el
+   catálogo público (js/catalogo.js), y se prueba en Node (pruebas/unit/buscar.test.mjs).
+   Vive en /js/ y no en /tienda/ porque /tienda/ va detrás de la contraseña.
 
    Qué entiende el buscador:
    · mayúsculas, tildes y signos no importan («Contenedores», «CONTENEDÓR»);
@@ -132,8 +133,8 @@
       });
     });
     hallados.sort(function (a, b) {
-      return (b.codigo - a.codigo) || (b.empieza - a.empieza) || (b.hay - a.hay) ||
-        (!!b.p.destacado - !!a.p.destacado) || comparar(a.p.nombre, b.p.nombre) || (a.orden - b.orden);
+      return (Number(b.codigo) - Number(a.codigo)) || (Number(b.empieza) - Number(a.empieza)) || (Number(b.hay) - Number(a.hay)) ||
+        (Number(!!b.p.destacado) - Number(!!a.p.destacado)) || comparar(a.p.nombre, b.p.nombre) || (a.orden - b.orden);
     });
     return hallados.map(function (h) { return h.p; });
   }
@@ -143,11 +144,11 @@
   function ordenar(lista, modo) {
     var precio = function (p) { return Number(p.precio) || 0; };
     return lista.map(function (p, orden) { return { p: p, orden: orden }; }).sort(function (a, b) {
-      var x = a.p, y = b.p, d = !x.disponible - !y.disponible;
+      var x = a.p, y = b.p, d = Number(!x.disponible) - Number(!y.disponible);
       if (d) return d;
       if (modo === 'menor') d = precio(x) - precio(y);
       else if (modo === 'mayor') d = precio(y) - precio(x);
-      else if (modo !== 'nombre') d = !!y.destacado - !!x.destacado;
+      else if (modo !== 'nombre') d = Number(!!y.destacado) - Number(!!x.destacado);
       return d || comparar(x.nombre, y.nombre) || (a.orden - b.orden);
     }).map(function (h) { return h.p; });
   }

@@ -54,3 +54,91 @@ test('en celular el inicio no tiene desplazamiento horizontal', async ({ page })
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(ancho).toBeLessThanOrEqual(0);
 });
+
+/* ---------- Inicio nuevo (patrones de tienda grande, 9-nov-2026) ---------- */
+
+test('el carrusel de categorías: flechas y puntos mueven la fila y la pausa se puede quitar y poner', async ({ page }) => {
+  const v = vigilar(page);
+  await page.goto('/');
+  const carrusel = page.locator('[data-carrusel]');
+  const pista = carrusel.locator('.carrusel__pista');
+  await carrusel.scrollIntoViewIfNeeded();
+  await expect(carrusel).toHaveAttribute('aria-roledescription', 'carrusel');
+  await expect(pista.locator('> li')).toHaveCount(10);
+  const anterior = carrusel.getByRole('button', { name: 'Anteriores' });
+  const siguientes = carrusel.getByRole('button', { name: 'Siguientes' });
+  await expect(anterior).toBeDisabled();
+  await siguientes.click();
+  await expect.poll(() => pista.evaluate((e) => e.scrollLeft)).toBeGreaterThan(0);
+  await expect(carrusel.locator('.carrusel__punto[aria-current="true"]')).toHaveAttribute('aria-label', /^Ir al grupo 2 de/);
+  await carrusel.getByRole('button', { name: /^Ir al grupo 1 de/ }).click();
+  await expect.poll(() => pista.evaluate((e) => e.scrollLeft)).toBe(0);
+  /* Tocar el carrusel apaga el avance solo; la pausa lo vuelve a prender */
+  await expect(carrusel.getByRole('button', { name: 'Seguir moviendo el carrusel' })).toBeVisible();
+  await carrusel.getByRole('button', { name: 'Seguir moviendo el carrusel' }).click();
+  await expect(carrusel.getByRole('button', { name: 'Pausar el carrusel' })).toBeVisible();
+  v.sinProblemas();
+});
+
+test('el carrusel avanza solo cada 5 s mientras nadie lo toca', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  const pista = page.locator('.carrusel__pista');
+  await pista.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await page.clock.runFor(5200);
+  await expect.poll(() => pista.evaluate((e) => e.scrollLeft)).toBeGreaterThan(0);
+});
+
+test('con «menos movimiento» el carrusel no avanza solo y nada queda escondido', async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.clock.install();
+  await page.goto('/');
+  await expect(page.locator('html')).not.toHaveClass(/revela-listo/);
+  await expect(page.locator('.carrusel__pausa')).toHaveCount(0);
+  await page.clock.runFor(11000);
+  expect(await page.locator('.carrusel__pista').evaluate((e) => e.scrollLeft)).toBe(0);
+  for (const op of await page.locator('[data-revela]').evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity))) expect(op).toBe('1');
+  await ctx.close();
+});
+
+test('sin JS todo el contenido se ve (aparecer al bajar no esconde nada por su cuenta)', async ({ browser }) => {
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  for (const op of await page.locator('[data-revela]').evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity))) expect(op).toBe('1');
+  /* La fila de categorías se puede deslizar igual */
+  expect(await page.locator('.carrusel__pista').evaluate((e) => getComputedStyle(e).overflowX)).toBe('auto');
+  await ctx.close();
+});
+
+test('al bajar, cada bloque aparece y queda visible', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/revela-listo/);
+  const bloques = page.locator('[data-revela]');
+  const n = await bloques.count();
+  for (let i = 0; i < n; i++) {
+    await bloques.nth(i).scrollIntoViewIfNeeded();
+    await expect(bloques.nth(i)).toHaveClass(/visto/);
+  }
+  await expect.poll(() => page.locator('[data-revela]:not(.visto)').count()).toBe(0);
+});
+
+test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan filas cojas', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });   /* se mide quieto, sin la animación de aparecer */
+  await page.goto('/');
+  await page.locator('.mosaico').scrollIntoViewIfNeeded();
+  const cajas = await page.locator('.mosaico > li').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ izq: Math.round(r.left), arriba: Math.round(r.top), abajo: Math.round(r.bottom) })));
+  expect(cajas).toHaveLength(6);
+  /* Todas las columnas empiezan y terminan a la misma altura */
+  const columnas = new Map();
+  for (const c of cajas) columnas.set(c.izq, [...(columnas.get(c.izq) || []), c]);
+  const arriba = new Set([...columnas.values()].map((cs) => Math.min(...cs.map((c) => c.arriba))));
+  const abajo = new Set([...columnas.values()].map((cs) => Math.max(...cs.map((c) => c.abajo))));
+  expect(arriba.size).toBe(1);
+  expect(abajo.size).toBe(1);
+  /* Las tarjetas de categoría que se ven miden lo mismo de alto */
+  const altos = await page.locator('.cat').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+  expect(new Set(altos).size).toBe(1);
+});

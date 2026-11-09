@@ -37,7 +37,7 @@ const MUTACIONES = [
   { parte: 'Pedido', nombre: 'el combo agrega solo dos productos', archivo: 'tienda/index.html', buscar: 'data-combo="141,131,191"', poner: 'data-combo="141,131"', pruebas: ['e2e'] },
   { parte: 'Pedido', nombre: 'número de WhatsApp equivocado', archivo: 'tienda/catalogo.json', buscar: '"whatsapp": "573183555246"', poner: '"whatsapp": "573183555245"', pruebas: ['unit'] },
   /* Vitrina */
-  { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'tienda/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
+  { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'js/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
   { parte: 'Vitrina', nombre: 'nombres pintados como HTML (XSS)', archivo: 'tienda/tienda.js', buscar: 'n.textContent = x', poner: 'n.innerHTML = x', pruebas: ['e2e'] },
   /* tienda/catalogo.json (lo que Johan cambia a mano) */
   { parte: 'Catálogo', nombre: 'radio del GPS entre comillas', archivo: 'tienda/catalogo.json', buscar: '"radio_km": 8', poner: '"radio_km": "8"', pruebas: ['unit'] },
@@ -64,13 +64,13 @@ const MUTACIONES = [
   { parte: 'CSP', nombre: '_headers y .htaccess distintos', archivo: '_headers', buscar: "object-src 'none'", poner: "object-src 'self'", pruebas: ['unit'] },
   { parte: 'Caché', nombre: 'CSS cambiado sin subir ?v=', archivo: 'css/estilos.css', buscar: /$/, poner: '\n.x{color:red}\n', pruebas: ['versiones'] },
   /* Página pública */
-  { parte: 'Inicio', nombre: 'imagen con nombre equivocado', archivo: 'index.html', buscar: 'img/productos/vasos.webp', poner: 'img/productos/vaso.webp', pruebas: ['unit', 'e2e'] },
+  { parte: 'Inicio', nombre: 'imagen con nombre equivocado', archivo: 'index.html', buscar: 'img/escenas/cat-vasos-720.webp', poner: 'img/escenas/cat-vaso-720.webp', pruebas: ['unit', 'e2e'] },
   { parte: 'Inicio', nombre: '404 con rutas relativas', archivo: '404.html', buscar: 'href="/css/estilos.css', poner: 'href="css/estilos.css', pruebas: ['unit', 'e2e'] },
   { parte: 'Inicio', nombre: 'vuelve el enlace al portal del CRM', archivo: 'index.html', buscar: '<a href="#contacto">', poner: '<a href="https://portal.plasticosespinal.com">Portal</a><a href="#contacto">', pruebas: ['unit'] },
   { parte: 'Inicio', nombre: 'WhatsApp a otro número', archivo: 'index.html', buscar: 'wa.me/573183555246?text=Hola%2C%20quiero%20cotizar%20pitillos', poner: 'wa.me/573183555264?text=Hola%2C%20quiero%20cotizar%20pitillos', pruebas: ['unit', 'e2e'] },
   { parte: 'Inicio', nombre: 'error de JS (variable mal escrita)', archivo: 'js/principal.js', buscar: 'anio.textContent', poner: 'anioo.textContent', pruebas: ['js', 'e2e'] },
   { parte: 'Inicio', nombre: 'HTML mal cerrado', archivo: 'index.html', buscar: '    </section>', poner: '    </div>', pruebas: ['html'] },
-  { parte: 'Inicio', nombre: 'CSS roto (llave de más)', archivo: 'css/estilos.css', buscar: '.porque__rejilla { display: grid; gap: 32px; }', poner: '.porque__rejilla { display: grid; gap: 32px; }}', pruebas: ['css'] },
+  { parte: 'Inicio', nombre: 'CSS roto (llave de más)', archivo: 'css/estilos.css', buscar: '.banners { display: grid; gap: var(--hueco); }', poner: '.banners { display: grid; gap: var(--hueco); }}', pruebas: ['css'] },
 ];
 
 const filtro = (process.argv[2] || '').toLowerCase();

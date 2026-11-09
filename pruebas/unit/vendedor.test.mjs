@@ -227,7 +227,8 @@ test('«Seguir al pago» lleva al lado la aceptación de los términos (en otra 
   assert.match(cierre[0], /Al pedir acepta los <a href="\/tienda\/terminos\/" target="_blank" rel="noopener">términos de la tienda<\/a>\./);
 });
 test('vendedor.js se carga con defer, después de ubicacion.js y antes de tienda.js', () => {
-  const orden = [...TIENDA.matchAll(/<script src="\/tienda\/([\w-]+)\.js\?v=\d+" defer>/g)].map((m) => m[1]);
+  /* buscar.js vive en /js/: lo comparten la tienda y el catálogo público */
+  const orden = [...TIENDA.matchAll(/<script src="\/(?:tienda|js)\/([\w-]+)\.js\?v=\d+" defer>/g)].map((m) => m[1]);
   assert.deepEqual(orden.slice(0, 6), ['llegada', 'buscar', 'guardados', 'ubicacion', 'vendedor', 'tienda']);
   assert.match(PRIVACIDAD, /<script src="\/tienda\/vendedor\.js\?v=\d+" defer><\/script>/);
 });

@@ -1,8 +1,9 @@
 /* Intermediario del portal del cliente (Cloudflare Pages Functions).
 
    Las páginas de /tienda/mi-cuenta/ le piden datos a /tienda/mi-cuenta/api/*
-   y ESTE archivo es el único que habla con el CRM. El navegador del cliente
-   nunca ve la dirección del CRM ni su sesión:
+   y ESTE archivo es el único que habla con el CRM por ellas (la página pública
+   solo lee el catálogo y las fotos, sin sesión: functions/api/). El navegador
+   del cliente nunca ve la dirección del CRM ni su sesión:
 
    - Le añade al CRM la clave del portal (secreto PORTAL_CLAVE de Cloudflare
      Pages, el mismo valor que PORTAL_CLAVE del .env del CRM) y la IP real

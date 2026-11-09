@@ -1,0 +1,20 @@
+Escenas del inicio — imágenes de REFERENCIA hechas con IA.
+
+Modelo: FLUX.2 klein (Black Forest Labs) en Cloudflare Workers AI, plan gratis.
+Fecha: 9 de noviembre de 2026. Las instrucciones de cada una están en
+/mnt/project-files/web-nueva/escenas/escenas.json del proyecto (fuera del repo).
+
+Reglas con que se hicieron:
+- Solo productos GENÉRICOS de categorías que la tienda sí vende. Ninguna marca,
+  logo ni empaque de un proveedor (Darnel, Carvajal, Ajover u otro).
+- El logo de Plásticos Espinal nunca sale de la IA.
+- Misma mesa, mismo mantel claro y misma luz de ventana en todas.
+- La ficha de cada producto en la tienda usa la foto REAL del producto, nunca una escena.
+
+Reemplazo: cuando llegue una foto real del local, se guarda con el MISMO nombre
+y el MISMO tamaño (ej. cat-vasos-720.webp de 720 x 540 y cat-vasos-360.webp de
+360 x 270) y queda puesta sin tocar el HTML. Como /img/* se guarda 30 días en
+caché, si se quiere que se vea ya, mejor un nombre nuevo y cambiarlo en index.html.
+
+El pie de la página dice: «Fotos de referencia: los productos pueden variar en
+marca y presentación».
