@@ -221,10 +221,25 @@ test('Regresión (d9a07ee): la tienda en pruebas sigue escondida (sin enlaces de
   assert.match(leer('tienda/index.html'), /<meta name="robots" content="noindex, nofollow">/);
 });
 
-test('la tienda tiene candado: el middleware existe y exporta onRequest', () => {
-  /* Cuando la tienda salga al público se borra functions/tienda y esta prueba, a propósito */
-  assert.ok(existe('functions/tienda/_middleware.js'));
-  assert.match(leer('functions/tienda/_middleware.js'), /export async function onRequest/);
+test('la tienda tiene candado: el middleware de la raíz existe y exporta onRequest', () => {
+  /* El candado y el subdominio viven en functions/_middleware.js (10-nov-2026); el de /tienda se fue */
+  assert.ok(existe('functions/_middleware.js'));
+  assert.match(leer('functions/_middleware.js'), /export async function onRequest/);
+  assert.ok(!existe('functions/tienda/_middleware.js'), 'dos candados: el de functions/tienda ya no se usa');
+});
+
+test('cada página de la tienda (tienda/<algo>/) tiene sus rutas en _routes.json para verse en el subdominio', () => {
+  const rutas = JSON.parse(leer('_routes.json')).include;
+  const carpetas = readdirSync(join(RAIZ, 'tienda'), { withFileTypes: true })
+    .filter((d) => d.isDirectory() && existe(`tienda/${d.name}/index.html`)).map((d) => d.name);
+  assert.ok(carpetas.includes('mi-cuenta'));
+  for (const c of carpetas) assert.ok(rutas.includes(`/${c}/*`), `falta /${c}/* en _routes.json`);
+});
+
+test('la tienda no enlaza a la página con «/» suelto (en el subdominio «/» es la tienda)', () => {
+  for (const p of paginas().filter((x) => x.startsWith('tienda/'))) {
+    assert.doesNotMatch(leer(p), /href="\/"/, `${p}: un href="/" lleva al inicio de la tienda, no a la página`);
+  }
 });
 
 test('todos los enlaces de WhatsApp y teléfono van al número del negocio', () => {

@@ -148,7 +148,7 @@ test('«Seguir al pago» avisa que pedir es aceptar los términos, y el enlace s
   await expect(nota).toContainText('Al pedir acepta los términos de la tienda.');
   await expect(page.locator('#enviar')).toHaveText('Seguir al pago');
   const enlace = nota.getByRole('link', { name: 'términos de la tienda' });
-  await expect(enlace).toHaveAttribute('href', '/tienda/terminos/');
+  await expect(enlace).toHaveJSProperty('href', new URL('/tienda/terminos/', page.url()).href);
   const [aparte] = await Promise.all([page.waitForEvent('popup'), enlace.click()]);
   await expect(aparte).toHaveURL(/\/tienda\/terminos\/$/);
   await aparte.close();

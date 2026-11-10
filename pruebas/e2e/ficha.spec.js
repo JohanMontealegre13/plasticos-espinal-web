@@ -338,12 +338,12 @@ test('la ficha y la canasta dicen cómo se paga y dónde están los cambios y el
   await abrirTienda(page, { ruta: '/tienda/#p=141' });
   const confianza = page.locator('#ficha .confianza');
   await expect(confianza.locator('li')).toHaveText(['Paga al recibir o con Bre-B', 'Lo lleva el equipo de la tienda', 'Cambios y retracto']);
-  await expect(confianza.getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+  await expect(confianza.getByRole('link', { name: 'Cambios y retracto' })).toHaveJSProperty('href', new URL('/tienda/terminos/', page.url()).href);
   await page.locator('#ficha .ficha-pie').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await page.locator('#fichaCerrar').click();
   await abrirCanasta(page);
   await expect(page.locator('#resumen .confianza-linea')).toHaveText('Paga al recibir o con Bre-B · Cambios y retracto');
-  await expect(page.locator('#resumen .confianza-linea').getByRole('link', { name: 'Cambios y retracto' })).toHaveAttribute('href', '/tienda/terminos/');
+  await expect(page.locator('#resumen .confianza-linea').getByRole('link', { name: 'Cambios y retracto' })).toHaveJSProperty('href', new URL('/tienda/terminos/', page.url()).href);
 });
 
 test('«Preguntar por WhatsApp» abre el chat con el nombre y el código del producto', async ({ page }) => {
