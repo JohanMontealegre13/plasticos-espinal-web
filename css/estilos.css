@@ -353,27 +353,53 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 /* ---------- 10. Marcas ---------- */
-.marcas { background: var(--blanco); padding-block: 22px; border-block: 1px solid var(--linea); }
-.marcas__rejilla { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 28px; }
-.marcas__titulo { font-family: var(--font); font-size: var(--fs-chico); font-weight: 600; line-height: 1.35; color: var(--texto-2); }
-/* Cada nombre lleva su punto delante; la lista se corre 34 px y se recorta: el punto del inicio de cada renglón queda oculto */
-.marcas__lista {
-  list-style: none; margin: 0 0 0 -34px; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; row-gap: 4px;
-  clip-path: inset(0 0 0 34px);
+/* Cinta de marcas: cada logo en su tarjeta, con sus colores, avanzando sin parar. Los emblemas van
+   más altos (.es-alta) y los letreros largos más bajos (.es-baja) para que pesen parecido; El Sol y
+   Wau llevan la tarjeta del color de su fondo. La pista
+   lleva la lista cuatro veces y corre un cuarto de su ancho: al terminar, la vuelta no se nota.
+   Se detiene con el mouse encima, con el foco adentro o con el botón de pausa (principal.js). */
+.marcas { background: linear-gradient(180deg, var(--blanco), var(--tint)); padding-block: 26px 30px; border-block: 1px solid var(--linea); overflow: hidden; }
+.marcas__cabeza { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+.marcas__titulo { font-family: var(--font); font-size: .9375rem; font-weight: 700; line-height: 1.35; letter-spacing: .06em; text-transform: uppercase; color: var(--azul-osc); text-align: center; }
+.marcas__pausa {
+  display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0; border-radius: 50%;
+  border: 1.5px solid var(--linea-2); background: #fff; color: var(--texto-2); cursor: pointer;
+  transition: background-color var(--t) var(--curva), border-color var(--t) var(--curva), transform var(--t-mover) var(--salida);
 }
+.marcas__pausa .icono { width: 16px; height: 16px; }
+@media (hover: hover) and (pointer: fine) { .marcas__pausa:hover { background: var(--tinte-azul); border-color: var(--azul); } }
+.marcas__pausa:active { transform: scale(.94); }
+.marcas__ventana {
+  overflow: hidden; padding-block: 4px 8px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 100s linear infinite; }
+.marcas__ventana:hover .marcas__pista, .marcas__ventana:focus-within .marcas__pista, .marcas.esta-pausada .marcas__pista { animation-play-state: paused; }
+@keyframes marcas-rodar { to { transform: translateX(-25%); } }
+.marcas__lista { list-style: none; margin: 0; padding: 0 20px 0 0; display: flex; gap: 20px; flex: none; }
 .marcas__lista li {
-  display: inline-flex; align-items: center;
-  font-size: clamp(1.0625rem, 1rem + .5vw, 1.375rem); font-weight: 700; line-height: 1.3; color: var(--azul-osc); white-space: nowrap;
+  display: grid; place-items: center; height: 84px; padding: 0 30px;
+  background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg); box-shadow: var(--dura-sm);
 }
-.marcas__lista li::before {
-  content: ""; width: 6px; height: 6px; margin-inline: 14px; border-radius: 50%; background: var(--amarillo-osc); flex: none;
+.marcas__lista img { display: block; height: 52px; width: auto; max-width: none; }
+.marcas__lista img.es-alta { height: 64px; }
+.marcas__lista img.es-baja { height: 42px; }
+.marcas__lista .marca--sol { background: #feec04; border-color: #feec04; }
+.marcas__lista .marca--wau { background: #662c90; border-color: #662c90; }
+@media (max-width: 599px) {
+  .marcas__lista { gap: 14px; padding-right: 14px; }
+  .marcas__lista li { height: 68px; padding: 0 20px; }
+  .marcas__lista img { height: 40px; }
+  .marcas__lista img.es-alta { height: 50px; }
+  .marcas__lista img.es-baja { height: 34px; }
 }
-/* En pantallas angostas los renglones van centrados y el recorte no esconde el punto: pastillas */
-@media (max-width: 899px) {
-  .marcas__lista { margin: 0; clip-path: none; gap: 8px; }
-  .marcas__lista li { min-height: 36px; padding: 0 14px; border-radius: var(--pill); background: var(--tinte-azul); font-size: 1.0625rem; }
-  .marcas__lista li::before { display: none; }
+/* Con «menos movimiento» la cinta no corre: una sola vez cada logo, centrados y en renglones */
+@media (prefers-reduced-motion: reduce) {
+  .marcas__pista { width: auto; justify-content: center; }
+  .marcas__lista { flex: 0 1 auto; min-width: 0; flex-wrap: wrap; justify-content: center; padding: 0 var(--gutter); }
+  .marcas__lista[aria-hidden="true"] { display: none; }
+  .marcas__ventana { -webkit-mask-image: none; mask-image: none; }
 }
 
 /* ---------- 11. Carrusel (categorías) ---------- */
@@ -664,7 +690,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .pie__logo { display: inline-flex; padding: 8px 14px; background: #fff; border-radius: var(--radio-logo); }
 .pie__logo img { height: 52px; width: auto; }
 .pie__lema { margin-top: 16px; max-width: 22rem; }
-.pie__wa { margin-top: 18px; min-height: 48px; padding: 0 20px; font-size: var(--fs-chico); }
 .menu--pie ul, .pie__lista { list-style: none; margin: 0; padding: 0; display: grid; }
 .menu--pie ul { grid-template-columns: repeat(2, max-content); column-gap: 32px; }
 @media (min-width: 1040px) { .menu--pie ul { grid-template-columns: 1fr; } }
@@ -681,21 +706,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .pie__datos a { padding-block: 4px; }
 .pie__legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.14); color: var(--sobre-noche-2); }
 
-/* Burbuja de WhatsApp */
-.wa-flotante {
-  position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 60;
-  display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%;
-  background: var(--verde); color: #fff; border: 3px solid #fff; box-shadow: var(--elevada);
-  transition: transform var(--t-mover) var(--salida), background-color var(--t) var(--curva), box-shadow var(--t) var(--curva);
-}
-.wa-flotante .icono { width: 30px; height: 30px; }
-@media (hover: hover) and (pointer: fine) { .wa-flotante:hover { background: var(--verde-osc); transform: translateY(-2px); box-shadow: var(--elevada), var(--halo-verde); } }
-.wa-flotante:active { transform: translateY(1px) scale(.98); box-shadow: none; }
-/* Foco de dos tonos: anillo blanco (se ve sobre el pie noche) entre dos azules (se ven sobre claro) */
-.wa-flotante:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: var(--elevada), 0 0 0 9px var(--azul); }
-/* Mientras se ven los botones de la portada, la burbuja sobra (la oculta principal.js) */
-.wa-flotante.is-oculta { display: none; }
-
 /* ---------- 19. Aparecer al bajar ---------- */
 /* principal.js pone .revela-listo en <html> solo si hay IntersectionObserver y no se pidió
    menos movimiento; lo que ya se ve al cargar queda marcado .visto antes, sin parpadeo.
@@ -710,20 +720,20 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; }
   html { scroll-behavior: auto; }
-  .boton:hover, .boton:active, .cat:hover, .cat:active, .sector:hover, .sector:active, .wa-flotante:hover, .wa-flotante:active, .logo:hover, .logo:active { transform: none; }
+  .boton:hover, .boton:active, .cat:hover, .cat:active, .sector:hover, .sector:active, .logo:hover, .logo:active { transform: none; }
   .cat:hover .cat__foto img, .sector:hover img, .enlace-terciario:hover .icono, .sector:hover .sector__mas .icono { transform: none; }
   .faq[open] .chev { transform: rotate(180deg); }
   .faq:has(> summary:active) { transform: none; }
 }
 
 @media (forced-colors: active) {
-  .cat, .sector, .banner, .boton, .wa-flotante, .carrusel__punto::before { border: 2px solid CanvasText; }
+  .cat, .sector, .banner, .boton, .carrusel__punto::before { border: 2px solid CanvasText; }
   .menu--banda a[aria-current="true"] { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
   .carrusel__punto[aria-current="true"]::before { background: CanvasText; }
 }
 
 @media print {
-  .anuncio, .cabecera, .wa-flotante, .boton, .carrusel__controles { display: none; }
+  .anuncio, .cabecera, .boton, .carrusel__controles { display: none; }
   body { background: #fff; color: #000; }
   [data-revela] { opacity: 1 !important; transform: none !important; }
 }
@@ -800,23 +810,25 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .tarjeta-prod__cat { font-size: .8125rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--azul-osc); }
 .tarjeta-prod h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
 .tarjeta-prod__nombre { color: var(--texto); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-/* El nombre estira su toque a toda la tarjeta; el botón de WhatsApp queda encima */
+/* El nombre estira su toque a toda la tarjeta: tocar cualquier parte abre la ficha */
 .tarjeta-prod__nombre::after { content: ""; position: absolute; inset: 0; z-index: 1; }
 .tarjeta-prod__nombre:focus-visible { outline: none; }
 .tarjeta-prod:has(.tarjeta-prod__nombre:focus-visible) { outline: 3px solid var(--azul); outline-offset: 2px; }
 .tarjeta-prod__codigo { font-size: .875rem; color: var(--texto-2); }
-.tarjeta-prod__pedir { position: relative; z-index: 2; margin-top: auto; min-height: 44px; padding: 0 14px; font-size: .9375rem; }
-.tarjeta-prod__cuerpo > .tarjeta-prod__pedir { margin-top: 10px; }
+/* «Ver detalles»: solo la pista de que la tarjeta se abre (el enlace es el nombre, que la cubre toda) */
+.tarjeta-prod__ver { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: .9375rem; font-weight: 700; color: var(--azul-osc); }
+.tarjeta-prod__ver .icono { width: 18px; height: 18px; transition: transform var(--t-2) var(--curva); }
 .tarjeta-prod h3 + .tarjeta-prod__codigo { margin-bottom: auto; }
 @media (hover: hover) and (pointer: fine) {
   .tarjeta-prod:hover { transform: translateY(-3px); box-shadow: var(--elevada); border-color: var(--linea-2); }
   .tarjeta-prod:hover .tarjeta-prod__foto img { transform: scale(1.04); }
   .tarjeta-prod:hover .tarjeta-prod__nombre { text-decoration: underline; text-underline-offset: 3px; }
+  .tarjeta-prod:hover .tarjeta-prod__ver .icono { transform: translateX(4px); }
 }
 @media (max-width: 599px) {
   .tarjeta-prod__cuerpo { padding: 10px 10px 12px; }
   .tarjeta-prod h3 { font-size: .9375rem; }
-  .tarjeta-prod__pedir { font-size: .875rem; padding: 0 10px; }
+  .tarjeta-prod__ver { font-size: .875rem; }
 }
 
 /* Pestañas (inicio y ficha): píldoras; la abierta, azul */
@@ -928,8 +940,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .catalogo__vacio { margin-top: 8px; }
 
 /* Ficha */
-.ficha-pub { display: grid; gap: clamp(28px, 4vw, 48px); }
-.ficha-pub__arriba { display: grid; gap: 24px; }
+/* minmax(0, 1fr): sin él, las tres pestañas en un renglón ensanchaban la ficha en celular (se salía 76 px) */
+.ficha-pub { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(28px, 4vw, 48px); }
+.ficha-pub__arriba { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
 @media (min-width: 900px) { .ficha-pub__arriba { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; } }
 .ficha-pub__galeria { display: grid; gap: 12px; }
 .ficha-pub__foto { position: relative; aspect-ratio: 1; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-xl); overflow: hidden; }
