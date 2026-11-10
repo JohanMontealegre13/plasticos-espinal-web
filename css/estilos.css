@@ -30,7 +30,7 @@
   --verde-vivo: #16a34a;                             /* solo el punto «en línea» de la portada, nunca texto */
   --fondo: #eef2fc;  --blanco: #ffffff;  --tint: #f5f8ff;
   --tinte-azul: #e4e9f6;  --tinte-azul-2: #d7def2;
-  --tinte-verde: #e7f2ec; --tinte-rojo: #fcebe9;
+  --tinte-verde: #e7f2ec; --tinte-rojo: #fcebe9; --tinte-amarillo: #fff4d1;
   --texto: #131a33;  --texto-2: #4a5470;
   --linea: #dde3f5;  --linea-2: #c3cdeb;
   --sobre-noche: #c7d1f0; --sobre-noche-2: #b7c2e6;
@@ -127,7 +127,7 @@ b, strong { font-weight: 700; color: var(--texto); }
 .icono-tile { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radio-icono); background: var(--tinte-azul); color: var(--azul); flex: none; }
 .icono-tile--verde { background: var(--tinte-verde); color: var(--verde); }
 .icono-tile--rojo { background: var(--tinte-rojo); color: var(--rojo-osc); }
-.icono-tile--amarillo { background: #fff4d1; color: var(--noche); }
+.icono-tile--amarillo { background: var(--tinte-amarillo); color: var(--noche); }
 
 /* ---------- 4. Foco y salto ---------- */
 :focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
@@ -154,10 +154,12 @@ b, strong { font-weight: 700; color: var(--texto); }
 /* ---------- 6. Cabecera ---------- */
 /* Blanca, con el logo a la izquierda y lo de pedir a la derecha; debajo, la banda del menú.
    Desde 900 px queda fija arriba al bajar. */
-.cabecera { position: relative; z-index: 30; background: #fff; transition: box-shadow var(--t-2) var(--curva); }
+.cabecera { position: relative; z-index: 30; background: #fff; border-top: 4px solid transparent; transition: box-shadow var(--t-2) var(--curva); }
+/* La cinta de la marca, la misma que abre el pie. Va sobre el borde de arriba, que le guarda el sitio. */
+.cabecera::before { content: ""; position: absolute; inset: -4px 0 auto 0; height: 4px; background: var(--cinta); }
 @media (min-width: 900px) {
   .cabecera { position: sticky; top: 0; }
-  html { scroll-padding-top: 148px; }
+  html { scroll-padding-top: 152px; }
 }
 .cabecera.is-scrolled { box-shadow: 0 6px 18px -8px rgba(14,26,71,.22); }
 /* Sin banda de menú (404): una raya separa la cabecera del fondo */
@@ -496,7 +498,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .cat__pie { padding: 12px 12px 14px; }
   .cat h3 { font-size: 1.0625rem; }
   .cat p { display: none; }
-  .cat__boton { align-self: stretch; justify-content: center; }
+  /* En celular la tarjeta mide media pantalla: sin la flecha y con menos borde, «Ver productos» cabe en un renglón */
+  .cat__boton { align-self: stretch; justify-content: center; padding-inline: 8px; font-size: .9375rem; }
+  .cat__boton .icono { display: none; }
 }
 /* 320 px: los títulos no se parten a media palabra (el de la portada ya se achica solo, arriba) */
 @media (max-width: 359px) {
@@ -584,9 +588,14 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .confianza { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 900px) { .confianza { grid-template-columns: repeat(4, 1fr); } }
 .confianza li {
+  --c: var(--azul);
   display: grid; grid-template-columns: 48px 1fr; column-gap: 14px; row-gap: 2px; align-content: start;
-  padding: 18px; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg);
+  padding: 18px; background: #fff; border: 1px solid var(--linea); border-top: 4px solid var(--c); border-radius: var(--radio-lg);
 }
+/* El filo de arriba sale del color del ícono de la tarjeta */
+.confianza li:has(.icono-tile--amarillo) { --c: var(--amarillo); }
+.confianza li:has(.icono-tile--verde) { --c: var(--verde); }
+.confianza li:has(.icono-tile--rojo) { --c: var(--rojo-osc); }
 .confianza .icono-tile { grid-row: 1 / span 3; width: 48px; height: 48px; border-radius: 50%; }
 .confianza b { font-size: 1.0625rem; line-height: 1.3; }
 .confianza span:not(.icono-tile) { font-size: var(--fs-chico); line-height: 1.4; color: var(--texto-2); }
@@ -666,6 +675,16 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (min-width: 940px) { .contacto__rejilla { grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; } }
 .contacto__texto { display: grid; gap: 12px; }
 .contacto__acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 12px; }
+/* Los tres pasos para pedir: número en un círculo amarillo y una raya que los une */
+.pasos { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 16px; counter-reset: paso; }
+.pasos li { position: relative; display: grid; grid-template-columns: 40px 1fr; column-gap: 14px; align-items: start; counter-increment: paso; }
+.pasos li::before {
+  content: counter(paso); grid-row: span 2; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--amarillo); color: var(--noche); font-family: var(--display); font-size: 1.125rem; line-height: 1;
+}
+.pasos li:not(:last-child)::after { content: ""; position: absolute; left: 19px; top: 40px; bottom: -16px; width: 2px; background: var(--linea-2); }
+.pasos b { font-size: var(--fs-cuerpo); line-height: 1.3; align-self: end; }
+.pasos span { font-size: var(--fs-chico); line-height: 1.45; color: var(--texto-2); }
 @media (max-width: 599px) { .contacto__acciones .boton { width: 100%; } }
 
 .contacto-datos { margin: 0; display: grid; gap: 12px; }
@@ -739,7 +758,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 @media (forced-colors: active) {
-  .cat, .sector, .banner, .boton, .carrusel__punto::before { border: 2px solid CanvasText; }
+  .cat, .sector, .banner, .boton, .carrusel__punto::before, .pasos li::before { border: 2px solid CanvasText; }
   .menu--banda a[aria-current="true"] { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
   .carrusel__punto[aria-current="true"]::before { background: CanvasText; }
 }
@@ -807,8 +826,10 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   transition: transform var(--t-2) var(--salida), box-shadow var(--t-2) var(--curva), border-color var(--t-2) var(--curva);
 }
 .tarjeta-prod__foto { position: relative; display: block; aspect-ratio: 1; background: #fff; border-bottom: 1px solid var(--linea); overflow: hidden; }
-.tarjeta-prod__foto img { width: 100%; height: 100%; object-fit: contain; padding: 8%; transition: transform .6s var(--salida); }
-.tarjeta-prod__foto.es-referencia img { object-fit: cover; padding: 0; }
+/* Las fotos del CRM son cuadradas y traen su propio fondo (la escena en uso o el color de su
+   categoría): llenan el recuadro, sin marco blanco. Una que no sea cuadrada se ve entera, sin recortar. */
+.tarjeta-prod__foto img { width: 100%; height: 100%; object-fit: contain; transition: transform .6s var(--salida); }
+.tarjeta-prod__foto.es-referencia img { object-fit: cover; }
 .sello-prod {
   position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: var(--pill);
   background: var(--amarillo); color: var(--noche); font-size: .8125rem; font-weight: 800; line-height: 1.2;
@@ -966,8 +987,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (min-width: 900px) { .ficha-pub__arriba { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; } }
 .ficha-pub__galeria { display: grid; gap: 12px; }
 .ficha-pub__foto { position: relative; aspect-ratio: 1; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-xl); overflow: hidden; }
-.ficha-pub__foto img { width: 100%; height: 100%; object-fit: contain; padding: 6%; }
-.ficha-pub__foto:has(#fichaRef:not([hidden])) img { object-fit: cover; padding: 0; }
+.ficha-pub__foto img { width: 100%; height: 100%; object-fit: contain; }
+.ficha-pub__foto:has(#fichaRef:not([hidden])) img { object-fit: cover; }
 .ficha-pub__minis { display: flex; gap: 10px; overflow-x: auto; padding: 2px; }
 .ficha-pub__mini { flex: none; width: 72px; height: 72px; padding: 0; border: 2px solid var(--linea); border-radius: var(--radio); background: #fff; overflow: hidden; cursor: pointer; }
 .ficha-pub__mini img { width: 100%; height: 100%; object-fit: contain; }

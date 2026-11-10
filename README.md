@@ -21,8 +21,8 @@ dependencias externas). Diseño 4: **«hermana del CRM, más sobria»** (oct 202
     ecológica;
   - amarillo `#ffc933`: solo acción o cifra («Pida ahora», el número de
     WhatsApp en Contacto y «Saltar al contenido»), nunca decoración;
-  - rojo `#e63927`: solo en la cinta (cápsula y filo del pie); el texto rojo
-    usa `#c42b1c`.
+  - rojo `#e63927`: solo en la cinta (arriba de la cabecera y del pie); el
+    texto rojo y los filos rojos usan `#c42b1c`.
 - Todo el texto va en **usted** («Pida», «Pregunte», «Conozca»).
 
 ## Dónde vive
@@ -97,8 +97,14 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    Cuando haya reseñas reales (con permiso) o ficha de Google Business
    Profile, pueden sumarse ahí.
 2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
-   hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
-   reemplaza 1:1: mismo nombre de archivo, mismo tamaño.
+   hechas con IA (ver su `CREDITS.txt`). Seis ya muestran productos de verdad
+   (repostería, heladería y salsas en el mosaico por negocio; portacomidas,
+   bolsas de papel y moldes de aluminio en las categorías): se hicieron con la
+   foto real de cada producto como referencia. Las demás son genéricas. Del
+   local solo hay capturas de videos y maquetas con gente inventada, y esas no
+   se muestran como el local. Una foto real entra con nombre nuevo, cambiado
+   en `index.html`. Lo visual del catálogo lo ponen las fotos en uso de cada
+   producto (ver «Catálogo público»).
 3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
@@ -121,7 +127,9 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 ## Secciones de la página
 
 0. **Franja** noche con el domicilio gratis y **cabecera** blanca (logo,
-   dirección, teléfono, «Pida ahora») con la banda del menú debajo.
+   dirección, teléfono, «Pida ahora») con la banda del menú debajo. Entre las
+   dos va la cinta roja y azul de la marca, la misma que abre el pie; sale en
+   todas las páginas y se queda arriba cuando la cabecera queda fija.
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
    Dice qué vendemos y para quién, nunca el precio (ver «Cómo hablamos» en
@@ -149,11 +157,14 @@ contacto. Sin burbuja flotante ni WhatsApp en el pie, sectores o banners. En el
 catálogo, las tarjetas no llevan botón: el único «Pedir por WhatsApp» está en la
 ficha de cada producto.
 5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
-6. **Confianza**: cuatro tarjetas.
+6. **Confianza**: cuatro tarjetas, cada una con el filo de arriba del color
+   de su ícono.
 7. **Nosotros** con tres cifras y enlace para dejar reseña en Google.
 8. **Preguntas** — `details` nativos + datos `FAQPage` (el texto visible debe
    seguir siendo espejo exacto del JSON-LD) y los términos del domicilio.
-9. **Contacto**: WhatsApp, dirección, horario, teléfono y enlace al mapa.
+9. **Contacto**: cómo se pide en tres pasos numerados (buscar en el
+   catálogo, escribir por WhatsApp, recibir), el botón de WhatsApp, dirección,
+   horario, teléfono y enlace al mapa. Los pasos no llevan botones.
 
 ## Seguridad
 
@@ -223,7 +234,19 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - Solo salen los productos marcados «en tienda» en el CRM (activos y con
   precio). Un producto sin foto propia lleva la foto de referencia de su tipo
   (`img/productos/`, Pexels) con el sello «Foto de referencia»; nunca una
-  escena hecha con IA.
+  escena hecha con IA prestada de otro producto.
+- **La foto en uso va de primera** (Johan, 10-nov-2026: la página «tiene que
+  ser muy visual» y «que incite a comprar»). El CRM manda las fotos de cada
+  producto en orden: la principal (el producto con su medida, sobre el color de
+  su categoría), la segunda (el producto en uso: una escena hecha con IA a
+  partir del producto) y las demás. La tarjeta (inicio, catálogo y parecidos) y
+  la ficha abren con la segunda; la principal queda de segunda miniatura. Con
+  una sola foto se muestra esa. Las fotos del CRM llenan el recuadro, sin marco
+  blanco: son cuadradas y traen su propio fondo. Los códigos de
+  `SIN_FOTO_EN_USO` (`js/catalogo.js`) tienen de segunda otra cara del paquete,
+  no una escena, y siguen con la principal de primera: se saca el código de esa
+  lista cuando el producto tenga su foto en uso en el CRM. La página no achica
+  las fotos: salen con el peso con que se subieron al CRM.
 - Interruptor `PRECIOS_PUBLICOS` (variable de Cloudflare Pages): solo con el
   valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
   página tampoco lo pintaría sin cambiar `js/catalogo.js`.

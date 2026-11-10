@@ -226,3 +226,59 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
   const altos = await page.locator('.cat').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
   expect(new Set(altos).size).toBe(1);
 });
+
+test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en celular, y cada foto carga', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  await page.locator('.carrusel').scrollIntoViewIfNeeded();
+  const botones = await page.locator('.cat__boton').evaluateAll((els) => els.map((e) => ({
+    alto: Math.round(e.getBoundingClientRect().height), minimo: parseFloat(getComputedStyle(e).minHeight),
+  })));
+  expect(botones.length).toBeGreaterThan(0);
+  /* Partido en dos renglones mide más que su alto mínimo */
+  for (const b of botones) expect(b.alto).toBeLessThanOrEqual(b.minimo + 4);
+  /* Las escenas con productos de verdad (Higgsfield, 10-nov-2026) están puestas y existen */
+  for (const nombre of ['cat-portacomidas', 'cat-bolsas-papel', 'cat-aluminio', 'sec-reposteria', 'sec-salsas', 'sec-heladeria']) {
+    const img = page.locator(`img[src*="img/escenas/${nombre}-"]`);
+    await expect(img).toHaveCount(1);
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
+  }
+});
+
+/* ---------- Ronda de color y detalles (10-nov-2026) ---------- */
+
+test('contacto explica cómo se pide en tres pasos numerados, sin sumar botones', async ({ page }) => {
+  await page.goto('/');
+  const pasos = page.locator('#contacto .pasos li');
+  await expect(pasos).toHaveCount(3);
+  await expect(pasos.nth(0)).toContainText('Busque en el catálogo');
+  await expect(pasos.nth(1)).toContainText('Escríbanos por WhatsApp');
+  await expect(pasos.nth(2)).toContainText('Reciba su pedido');
+  /* El número lo pone el CSS, en un círculo amarillo con letra azul noche */
+  const numeros = await pasos.evaluateAll((els) => els.map((e) => { const s = getComputedStyle(e, '::before'); return { n: s.content, fondo: s.backgroundColor, letra: s.color }; }));
+  expect(numeros.map((n) => n.fondo)).toEqual(Array(3).fill('rgb(255, 201, 51)'));
+  expect(numeros.map((n) => n.letra)).toEqual(Array(3).fill('rgb(14, 26, 71)'));
+  /* Los pasos no traen enlaces ni botones: el único WhatsApp de la sección sigue siendo el de abajo */
+  await expect(page.locator('#contacto .pasos a')).toHaveCount(0);
+});
+
+test('la cinta de la marca abre la cabecera igual que abre el pie, y cada tarjeta de confianza lleva el filo de su ícono', async ({ page }) => {
+  await page.goto('/');
+  const cinta = (/** @type {string} */ sel) => page.locator(sel).evaluate((e) => { const s = getComputedStyle(e, '::before'); return { alto: s.height, fondo: s.backgroundImage }; });
+  const arriba = await cinta('.cabecera'), abajo = await cinta('.pie');
+  expect(arriba.alto).toBe('4px');
+  expect(arriba.fondo).toContain('repeating-linear-gradient');
+  expect(arriba.fondo).toBe(abajo.fondo);
+  /* La cinta no tapa el logo ni empuja la página a los lados */
+  const logo = await page.locator('.cabecera .logo').boundingBox(), cab = await page.locator('.cabecera').boundingBox();
+  expect(logo && cab && logo.y >= cab.y + 4).toBe(true);
+  /* Filos: amarillo, verde, azul y rojo oscuro (el rojo de la cinta no sale de la cinta) */
+  const filos = await page.locator('.confianza > li').evaluateAll((els) => els.map((e) => getComputedStyle(e).borderTopColor));
+  expect(filos).toEqual(['rgb(255, 201, 51)', 'rgb(15, 122, 67)', 'rgb(30, 73, 184)', 'rgb(196, 43, 28)']);
+});
+
+test('la bajada de los productos no promete lo que la ficha no trae', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#destacados .titulo-bajada')).toHaveText('Toque uno para ver sus fotos, su medida y en qué viene.');
+});

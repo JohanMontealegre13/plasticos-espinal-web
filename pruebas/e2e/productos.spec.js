@@ -359,6 +359,103 @@ test('los botones del catálogo miden al menos 44 px para el dedo', async ({ pag
   expect(chicos).toEqual([]);
 });
 
+/* ---------------- La foto en uso va de primera (Johan, 10-nov-2026) ---------------- */
+
+/* Nombres como los del CRM (32 letras y números). De cada producto: la principal (el producto con su
+   medida), la segunda (la foto en uso, hecha con IA) y la tabla de medidas */
+const F = (/** @type {string} */ letra) => letra.repeat(32) + '.jpg';
+const URL_FOTO = (/** @type {string} */ letra) => '/api/foto/' + F(letra);
+const PUNTO = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+const base = { categoria: 'c98', disponible: true, destacado: false };
+const CON_FOTOS = {
+  ...PUBLICO,
+  categorias: [...PUBLICO.categorias, { id: 'c98', nombre: 'Platos' }],
+  productos: [
+    ...PUBLICO.productos,
+    { ...base, id: 901, nombre: 'Plato 26 cm Wau x20 und', foto: F('a'), fotos: [F('a'), F('b'), F('c')] },
+    { ...base, id: 902, nombre: 'Plato 23 cm Wau x20 und', foto: F('d'), fotos: [F('d')] },
+    /* 118: su segunda foto es otra cara del paquete, no una escena */
+    { ...base, id: 118, nombre: 'Plato 18 cm Wau x20 und', foto: F('e'), fotos: [F('e'), F('f')] },
+    { ...base, id: 903, nombre: 'Plato 15,5 cm Wau x20 und', foto: '', fotos: [] },
+  ],
+};
+
+/** @param {import('@playwright/test').Page} page */
+async function simularConFotos(page) {
+  await simularCatalogo(page, { catalogo: CON_FOTOS });
+  await page.route('**/api/foto/**', (r) => r.fulfill({ contentType: 'image/png', body: PUNTO }));
+}
+
+test('la tarjeta de un producto muestra su foto en uso; sin ella, la principal; sin fotos, la de referencia', async ({ page }) => {
+  const v = vigilar(page);
+  await simularConFotos(page);
+  await page.goto('/productos/?categoria=platos');
+  const fotoDe = (/** @type {string} */ nombre) => page.locator('#catRejilla .tarjeta-prod').filter({ hasText: nombre }).locator('.tarjeta-prod__foto');
+  await expect(fotoDe('Plato 26 cm').locator('img')).toHaveAttribute('src', URL_FOTO('b'));
+  await expect(fotoDe('Plato 23 cm').locator('img')).toHaveAttribute('src', URL_FOTO('d'));
+  /* la segunda de este código no es una escena: sigue la principal */
+  await expect(fotoDe('Plato 18 cm').locator('img')).toHaveAttribute('src', URL_FOTO('e'));
+  await expect(fotoDe('Plato 15,5 cm')).toHaveClass(/es-referencia/);
+  await expect(fotoDe('Plato 15,5 cm').locator('.sello-ref')).toHaveText('Foto de referencia');
+  /* una foto propia nunca lleva el sello de referencia */
+  await expect(fotoDe('Plato 26 cm').locator('.sello-ref')).toHaveCount(0);
+  /* y llena el recuadro: sin marco blanco alrededor */
+  const hueco = await fotoDe('Plato 26 cm').evaluate((a) => {
+    const c = a.getBoundingClientRect(), i = /** @type {HTMLImageElement} */ (a.querySelector('img')).getBoundingClientRect();
+    return { ancho: c.width - i.width, alto: c.height - i.height, relleno: getComputedStyle(/** @type {HTMLImageElement} */ (a.querySelector('img'))).padding };
+  });
+  expect(hueco.relleno).toBe('0px');
+  expect(hueco.ancho, 'la foto llega a los dos lados').toBeLessThanOrEqual(1);
+  expect(hueco.alto, 'la foto llega arriba y abajo (menos la raya de abajo)').toBeLessThanOrEqual(2);
+  await sinDesborde(page);
+  v.sinProblemas();
+});
+
+test('la ficha abre con la foto en uso, la principal queda de segunda y cada miniatura cambia la grande', async ({ page }) => {
+  const v = vigilar(page);
+  await simularConFotos(page);
+  await page.goto('/productos/?p=901');
+  const grande = page.locator('#fichaFoto'), minis = page.locator('#fichaMinis .ficha-pub__mini');
+  await expect(grande).toHaveAttribute('src', URL_FOTO('b'));
+  await expect(grande).toHaveAttribute('alt', 'Plato 26 cm Wau x20 und, en uso');
+  await expect(page.locator('#fichaRef')).toBeHidden();
+  await expect(minis).toHaveCount(3);
+  for (const [i, letra] of ['b', 'a', 'c'].entries()) await expect(minis.nth(i).locator('img')).toHaveAttribute('src', URL_FOTO(letra));
+  await expect(minis.nth(0)).toHaveAttribute('aria-pressed', 'true');
+  await minis.nth(1).click();
+  await expect(grande).toHaveAttribute('src', URL_FOTO('a'));
+  await expect(grande).toHaveAttribute('alt', 'Plato 26 cm Wau x20 und');
+  await expect(minis.nth(1)).toHaveAttribute('aria-pressed', 'true');
+  await expect(minis.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  expect(await grande.evaluate((i) => getComputedStyle(i).padding)).toBe('0px');
+  /* los parecidos también salen con su foto en uso */
+  await expect(page.locator('#fichaParecidos .tarjeta-prod').filter({ hasText: 'Plato 23 cm' }).locator('img')).toHaveAttribute('src', URL_FOTO('d'));
+  /* con una sola foto no hay miniaturas, y el código sin escena abre con su principal */
+  await page.goto('/productos/?p=902');
+  await expect(grande).toHaveAttribute('src', URL_FOTO('d'));
+  await expect(grande).toHaveAttribute('alt', 'Plato 23 cm Wau x20 und');
+  await expect(page.locator('#fichaMinis')).toBeHidden();
+  await page.goto('/productos/?p=118');
+  await expect(grande).toHaveAttribute('src', URL_FOTO('e'));
+  await expect(grande).toHaveAttribute('alt', 'Plato 18 cm Wau x20 und');
+  await expect(minis).toHaveCount(2);
+  await sinDesborde(page);
+  v.sinProblemas();
+});
+
+test('inicio: las pestañas de productos muestran la foto en uso de cada uno', async ({ page }) => {
+  const v = vigilar(page);
+  await simularConFotos(page);
+  await page.goto('/');
+  const bloque = page.locator('#destacados');
+  await bloque.getByRole('tab', { name: 'Platos', exact: true }).click();
+  const panel = bloque.locator('[role="tabpanel"]:visible');
+  await expect(panel.locator('.tarjeta-prod').filter({ hasText: 'Plato 26 cm' }).locator('.tarjeta-prod__foto img')).toHaveAttribute('src', URL_FOTO('b'));
+  await expect(panel.locator('.tarjeta-prod').filter({ hasText: 'Plato 18 cm' }).locator('.tarjeta-prod__foto img')).toHaveAttribute('src', URL_FOTO('e'));
+  await sinDesborde(page);
+  v.sinProblemas();
+});
+
 /* ---------------- Inicio ---------------- */
 
 test('el inicio muestra los productos de la bodega en pestañas por categoría', async ({ page }) => {
