@@ -1,20 +1,46 @@
 Escenas del inicio — imágenes de REFERENCIA hechas con IA.
 
-Modelo: FLUX.2 klein (Black Forest Labs) en Cloudflare Workers AI, plan gratis.
-Fecha: 9 de noviembre de 2026. Las instrucciones de cada una están en
-/mnt/project-files/web-nueva/escenas/escenas.json del proyecto (fuera del repo).
+Hay dos tandas.
 
-Reglas con que se hicieron:
-- Solo productos GENÉRICOS de categorías que la tienda sí vende. Ninguna marca,
-  logo ni empaque de un proveedor (Darnel, Carvajal, Ajover u otro).
+1. Escenas genéricas (9 de noviembre de 2026)
+   Modelo: FLUX.2 klein (Black Forest Labs) en Cloudflare Workers AI, plan gratis.
+   Las instrucciones de cada una están en
+   /mnt/project-files/web-nueva/escenas/escenas.json del proyecto (fuera del repo).
+   Solo productos GENÉRICOS de categorías que la tienda sí vende, sin marca, logo
+   ni empaque de ningún proveedor.
+   Son: portada*, cat-vasos, cat-platos, cat-cubiertos, cat-empaques, cat-tapas,
+   cat-pitillos, cat-servilletas, cat-ecologica, sec-restaurantes, sec-eventos,
+   sec-tiendas y banner-mayorista.
+
+2. Escenas con productos de verdad (10 de noviembre de 2026, pedido de Johan)
+   Modelo: GPT Image 2.6 (OpenAI) por Higgsfield, calidad alta, 2K.
+   A cada una se le dio como referencia la foto REAL de cada producto, para que
+   salga el mismo empaque y no uno inventado:
+   - sec-reposteria: esencias, polvo para hornear, color caramelo y colorantes
+     y granulados Confeiteiro (fotos de prodia.com.co).
+   - sec-heladeria: perlas explosivas LiquiPops y siropes Geniality
+     (fotos de topping-frozen.com) y Mix Limón (recorte que mandó Johan).
+   - cat-aluminio: moldes de aluminio (fotos de prodalum-cg.com).
+   - cat-portacomidas, cat-bolsas-papel y sec-salsas: las fotos principales de
+     esos productos en el CRM.
+   Las marcas que se ven son las de los productos que la tienda vende; no son
+   patrocinio ni alianza. Cada escena se comparó con su foto real antes de subir.
+   Un retoque: en el Mix Limón la IA se inventó la letra pequeña (la foto de
+   referencia era muy chica) y esa parte quedó difuminada; lo que se lee es lo
+   que dice el empaque real.
+   Los originales a tamaño completo están en
+   /mnt/project-files/web/2026-11-10-fotos-ia/ del proyecto (fuera del repo).
+   Aquí van achicados para que la letra pequeña de las etiquetas no se alcance
+   a leer: la IA la aproxima y no debe tomarse como la del empaque.
+
+Reglas de las dos tandas:
 - El logo de Plásticos Espinal nunca sale de la IA.
-- Misma mesa, mismo mantel claro y misma luz de ventana en todas.
-- La ficha de cada producto en la tienda usa la foto REAL del producto, nunca una escena.
+- Nada de gente ni de fachada: no se muestran como el local ni el equipo.
+- La ficha de cada producto usa las fotos que manda el CRM, nunca una de estas.
 
-Reemplazo: cuando llegue una foto real del local, se guarda con el MISMO nombre
-y el MISMO tamaño (ej. cat-vasos-720.webp de 720 x 540 y cat-vasos-360.webp de
-360 x 270) y queda puesta sin tocar el HTML. Como /img/* se guarda 30 días en
-caché, si se quiere que se vea ya, mejor un nombre nuevo y cambiarlo en index.html.
+Reemplazo: cuando llegue una foto real, se guarda con un nombre NUEVO y se
+cambia en index.html (como /img/* se guarda 30 días en caché, con el mismo
+nombre tardaría en verse).
 
 El pie de la página dice: «Fotos de referencia: los productos pueden variar en
 marca y presentación».

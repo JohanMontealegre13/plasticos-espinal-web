@@ -227,6 +227,25 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
   expect(new Set(altos).size).toBe(1);
 });
 
+test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en celular, y cada foto carga', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  await page.locator('.carrusel').scrollIntoViewIfNeeded();
+  const botones = await page.locator('.cat__boton').evaluateAll((els) => els.map((e) => ({
+    alto: Math.round(e.getBoundingClientRect().height), minimo: parseFloat(getComputedStyle(e).minHeight),
+  })));
+  expect(botones.length).toBeGreaterThan(0);
+  /* Partido en dos renglones mide más que su alto mínimo */
+  for (const b of botones) expect(b.alto).toBeLessThanOrEqual(b.minimo + 4);
+  /* Las escenas con productos de verdad (Higgsfield, 10-nov-2026) están puestas y existen */
+  for (const nombre of ['cat-portacomidas', 'cat-bolsas-papel', 'cat-aluminio', 'sec-reposteria', 'sec-salsas', 'sec-heladeria']) {
+    const img = page.locator(`img[src*="img/escenas/${nombre}-"]`);
+    await expect(img).toHaveCount(1);
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
+  }
+});
+
 /* ---------- Ronda de color y detalles (10-nov-2026) ---------- */
 
 test('contacto explica cómo se pide en tres pasos numerados, sin sumar botones', async ({ page }) => {

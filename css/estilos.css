@@ -498,7 +498,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .cat__pie { padding: 12px 12px 14px; }
   .cat h3 { font-size: 1.0625rem; }
   .cat p { display: none; }
-  .cat__boton { align-self: stretch; justify-content: center; }
+  /* En celular la tarjeta mide media pantalla: sin la flecha y con menos borde, «Ver productos» cabe en un renglón */
+  .cat__boton { align-self: stretch; justify-content: center; padding-inline: 8px; font-size: .9375rem; }
+  .cat__boton .icono { display: none; }
 }
 /* 320 px: los títulos no se parten a media palabra (el de la portada ya se achica solo, arriba) */
 @media (max-width: 359px) {

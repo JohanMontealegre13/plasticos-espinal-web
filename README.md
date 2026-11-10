@@ -96,10 +96,13 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    Cuando haya reseñas reales (con permiso) o ficha de Google Business
    Profile, pueden sumarse ahí.
 2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
-   hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
-   reemplaza 1:1: mismo nombre de archivo, mismo tamaño. Del local solo hay
-   capturas de videos y maquetas con gente inventada, y esas no se muestran
-   como el local. Lo visual de la página lo ponen las fotos en uso de cada
+   hechas con IA (ver su `CREDITS.txt`). Seis ya muestran productos de verdad
+   (repostería, heladería y salsas en el mosaico por negocio; portacomidas,
+   bolsas de papel y moldes de aluminio en las categorías): se hicieron con la
+   foto real de cada producto como referencia. Las demás son genéricas. Del
+   local solo hay capturas de videos y maquetas con gente inventada, y esas no
+   se muestran como el local. Una foto real entra con nombre nuevo, cambiado
+   en `index.html`. Lo visual del catálogo lo ponen las fotos en uso de cada
    producto (ver «Catálogo público»).
 3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
