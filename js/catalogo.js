@@ -34,13 +34,13 @@
   function raiz(s) { return s.replace(/(es|s)$/, ''); }
   var menosMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /** @typedef {{ id: number, nombre: string, categoria: string, disponible: boolean, destacado: boolean, foto: string,
+  /** @typedef {{ id: number, nombre: string, categoria: string, sub?: string, disponible: boolean, destacado: boolean, foto: string,
    *   fotos: string[], contenido?: { cantidad: number, unidad: string }, descripcion?: string,
    *   detalles?: { nombre: string, valor: string }[] }} Producto */
   /** @typedef {{ id: string, nombre: string, slug: string, n: number }} Categoria */
 
-  /** @type {{ categorias: Categoria[], productos: Producto[], por: Record<string, Producto>, cats: Record<string, Categoria> }} */
-  var cat = { categorias: [], productos: [], por: {}, cats: {} };
+  /** @type {{ categorias: Categoria[], productos: Producto[], por: Record<string, Producto>, cats: Record<string, Categoria>, alias: Record<string, Categoria> }} */
+  var cat = { categorias: [], productos: [], por: {}, cats: {}, alias: {} };
 
   /* ---------- Datos ---------- */
   function cargar() {
@@ -50,12 +50,53 @@
         if (!d || !d.ok || !Array.isArray(d.productos) || !d.productos.length) throw new Error('vacío');
         cat.productos = d.productos.filter(function (/** @type {any} */ p) { return p && p.id && p.nombre; });
         cat.productos.forEach(function (p) { cat.por[String(p.id)] = p; });
-        cat.categorias = (Array.isArray(d.categorias) ? d.categorias : []).map(function (/** @type {any} */ c) {
-          var n = cat.productos.filter(function (p) { return p.categoria === c.id; }).length;
-          return { id: String(c.id), nombre: String(c.nombre), slug: slug(c.nombre), n: n };
-        }).filter(function (/** @type {Categoria} */ c) { return c.n > 0; });
-        cat.categorias.forEach(function (c) { cat.cats[c.id] = c; });
+        agrupar(Array.isArray(d.categorias) ? d.categorias : []);
       });
+  }
+
+  /* Familias de categorías: el CRM a veces parte una en varias («Aluminio» y «Papel Aluminio»,
+     «Vasos» y «Vasos Gold», «Bolsas», «Bolsas Manija» y «Bolsas de Papel»). La que tiene todas
+     sus palabras dentro de otra se la lleva: el cliente ve una sola pestaña con todos sus productos.
+     Cada producto queda con la categoría de su familia; la del CRM se guarda en «sub». La que junta
+     varias cosas con «y» o comas («Vasos y platos») no entra en otra. */
+  var VACIAS = ['de', 'del', 'la', 'las', 'el', 'los', 'y', 'e', 'para', 'con', 'en', 'por', 'a'];
+  /** @param {string} nombre */
+  function palabrasDe(nombre) {
+    return slug(nombre).split('-').filter(function (w) { return w && VACIAS.indexOf(w) < 0; }).map(raiz);
+  }
+  /** @param {any[]} crudas */
+  function agrupar(crudas) {
+    var lista = crudas.map(function (/** @type {any} */ c) {
+      var id = String(c.id);
+      return { id: id, nombre: String(c.nombre), palabras: palabrasDe(String(c.nombre)),
+        n: cat.productos.filter(function (p) { return p.categoria === id; }).length };
+    });
+    /** @type {Record<string, string>} */
+    var familiaDe = {};
+    lista.forEach(function (c) {
+      /* Una que junta varias cosas («Vasos y platos») es su propia familia: no se la lleva ninguna */
+      if (/\s(y|e)\s|,/i.test(c.nombre)) { familiaDe[c.id] = c.id; return; }
+      /* Las que caben en esta (ella incluida): manda la más corta; empate, la de más productos */
+      var dentro = lista.filter(function (o) {
+        return o.palabras.length > 0 && o.palabras.every(function (w) { return c.palabras.indexOf(w) >= 0; });
+      }).sort(function (a, b) {
+        return (a.palabras.length - b.palabras.length) || (b.n - a.n) || a.nombre.localeCompare(b.nombre, 'es');
+      });
+      familiaDe[c.id] = (dentro[0] || c).id;
+    });
+    cat.alias = {};
+    cat.productos.forEach(function (p) {
+      if (!familiaDe[p.categoria]) return;
+      p.sub = p.categoria;
+      p.categoria = familiaDe[p.categoria];
+    });
+    cat.categorias = lista.filter(function (c) { return familiaDe[c.id] === c.id; }).map(function (c) {
+      var n = cat.productos.filter(function (p) { return p.categoria === c.id; }).length;
+      return { id: c.id, nombre: c.nombre, slug: slug(c.nombre), n: n };
+    }).filter(function (c) { return c.n > 0; });
+    cat.categorias.forEach(function (c) { cat.cats[c.id] = c; });
+    /* Los enlaces viejos a una parte (?categoria=papel-aluminio) abren su familia */
+    lista.forEach(function (c) { var f = cat.cats[familiaDe[c.id]]; if (f) cat.alias[slug(c.nombre)] = f; });
   }
 
   /** @param {Producto} p */
@@ -122,10 +163,12 @@
     nombre.href = urlFicha(p.id);
     h3.appendChild(nombre);
     cuerpo.append(h3, el('p', 'tarjeta-prod__codigo', 'Código ' + p.id));
-    var pedir = /** @type {HTMLAnchorElement} */ (el('a', 'boton boton-wa tarjeta-prod__pedir'));
-    pedir.href = enlaceWa(p); pedir.target = '_blank'; pedir.rel = 'noopener';
-    pedir.append(icono('i-wa', 'icono icono-wa'), document.createTextNode(p.disponible ? 'Pedir' : 'Preguntar'), el('span', 'sr-only', ' ' + p.nombre + ' por WhatsApp'));
-    cuerpo.appendChild(pedir);
+    /* Sin botón de WhatsApp en cada tarjeta (Johan, 10-nov-2026: «le estamos vendiendo demasiado»): toda
+       la tarjeta abre la ficha, que explica el producto y tiene el único «Pedir por WhatsApp» */
+    var ver = el('span', 'tarjeta-prod__ver', 'Ver detalles');
+    ver.setAttribute('aria-hidden', 'true');
+    ver.appendChild(icono('i-flecha', 'icono'));
+    cuerpo.appendChild(ver);
     if (op.alAbrir) {
       [foto, nombre].forEach(function (x) {
         x.addEventListener('click', function (e) {
@@ -262,7 +305,7 @@
   function categoriaDe(pedido) {
     var s = slug(pedido);
     if (!s) return null;
-    var exacta = cat.categorias.filter(function (c) { return c.slug === s; })[0];
+    var exacta = cat.categorias.filter(function (c) { return c.slug === s; })[0] || cat.alias[s];
     if (exacta) return exacta;
     var r = raiz(s.split('-')[0]);
     return cat.categorias.filter(function (c) { return r && c.slug.split('-').some(function (w) { return raiz(w) === r; }); })[0] || null;

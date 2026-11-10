@@ -108,7 +108,7 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 |---|---|
 | `index.html` | La página completa (franja, cabecera, portada, marcas, categorías en carrusel, mosaico por negocio, banners mayorista y ecológico, confianza, nosotros, preguntas, contacto) |
 | `css/estilos.css` | Todos los estilos («vitrina de mostrador»: patrones de tienda grande con los colores del `:root` del CRM) |
-| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, burbuja de WhatsApp, aparecer al bajar y el carrusel con flechas, puntos y pausa); el sitio funciona sin JavaScript |
+| `js/principal.js` | JS mínimo con `defer` (año del pie, sombra de la cabecera, menú activo, aparecer al bajar, el carrusel con flechas, puntos y pausa, y la pausa de la cinta de marcas); el sitio funciona sin JavaScript |
 | `img/` | Logo restaurado en SVG (`logo-color.svg`, el mismo del manual de marca), favicons, `escenas/` (fotos del inicio), `productos/` (fotos que usa la tienda), `ondas.svg` y `og-image.jpg` |
 | `favicon.ico`, `site.webmanifest` | Iconos del navegador y de "agregar a pantalla de inicio" |
 | `robots.txt`, `sitemap.xml` | Para Google |
@@ -123,11 +123,19 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    dirección, teléfono, «Pida ahora») con la banda del menú debajo.
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
-2. **Marcas** que distribuimos.
-3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas; cada una abre una
-   cotización por WhatsApp con mensaje propio. Sin JS es una fila deslizable.
-4. **Sectores** — mosaico parejo (alta | dos | dos | alta), cada negocio con
-   su mensaje de WhatsApp.
+2. **Marcas** que distribuimos: cinta con los logos oficiales (`img/marcas/`,
+   bajados de la página de cada marca) que avanza sola, con botón de pausa; con
+   «menos movimiento» queda quieta. Solo marcas que de verdad se venden.
+3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
+   catálogo. Sin JS es una fila deslizable.
+4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva
+   a los productos que más se lleva en el catálogo.
+
+**Solo tres botones de WhatsApp en el inicio** (Johan, 10-nov-2026: «le estamos
+vendiendo demasiado»): «Pida ahora» de la cabecera, el de la portada y el de
+contacto. Sin burbuja flotante ni WhatsApp en el pie, sectores o banners. En el
+catálogo, las tarjetas no llevan botón: el único «Pedir por WhatsApp» está en la
+ficha de cada producto.
 5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
 6. **Confianza**: cuatro tarjetas.
 7. **Nosotros** con tres cifras y enlace para dejar reseña en Google.
@@ -186,6 +194,11 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   que deslizar de lado: 8 en computador, 6 en celular) y
   las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
   distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
+- **Familias de categorías**: el CRM a veces parte una en varias («Aluminio» y
+  «Papel Aluminio», «Vasos» y «Vasos Gold», «Bolsas Manija»…). La que tiene
+  todas sus palabras dentro de otra se la lleva, así la pestaña muestra todos
+  sus productos; un enlace viejo a una parte abre la familia. La que junta varias
+  cosas con «y» («Vasos y platos») queda sola.
 - Datos: `functions/api/catalogo.js` le pide al CRM el mismo catálogo de la
   tienda (con `PORTAL_CLAVE`) y deja pasar solo nombre, categoría, si hay o no,
   «más pedido», fotos, contenido, descripción y detalles: nunca precio, stock

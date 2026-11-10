@@ -40,9 +40,9 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=13">
-  <script src="js/principal.js?v=12" defer></script>
-  <script src="js/catalogo.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=14">
+  <script src="js/principal.js?v=13" defer></script>
+  <script src="js/catalogo.js?v=3" defer></script>
 
   <script type="application/ld+json">
   {
@@ -177,17 +177,40 @@
       </div>
     </section>
 
-    <!-- Marcas -->
-    <section class="marcas" aria-label="Marcas que distribuimos">
-      <div class="contenedor marcas__rejilla">
-        <h2 class="marcas__titulo">Distribuimos las marcas que su negocio ya conoce:</h2>
-        <ul class="marcas__lista">
-          <li>Darnel</li>
-          <li>Carvajal Empaques</li>
-          <li>Ajover</li>
-          <li>Darnel BIO®</li>
-          <li>Darnel Naturals</li>
-        </ul>
+    <!-- Marcas: los logos reales de lo que vendemos, en una cinta que avanza sola. La lista va cuatro
+         veces (la primera es la que se lee; las otras tres, solo para que la vuelta no se note) -->
+    <section class="marcas" aria-labelledby="titulo-marcas" data-marcas>
+      <div class="contenedor marcas__cabeza">
+        <h2 class="marcas__titulo" id="titulo-marcas">Distribuimos las marcas que su negocio ya conoce</h2>
+        <button class="marcas__pausa" type="button" id="marcasPausa" aria-label="Pausar las marcas" hidden><svg class="icono" aria-hidden="true"><use href="#i-pausa"/></svg></button>
+      </div>
+      <div class="marcas__ventana">
+        <div class="marcas__pista">
+          <ul class="marcas__lista">
+            <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="Darnel" decoding="async"></li>
+            <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="Ajover" decoding="async"></li>
+            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="Wau" decoding="async"></li>
+            <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="Acme León" decoding="async"></li>
+          </ul>
+          <ul class="marcas__lista" aria-hidden="true">
+            <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
+            <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
+          </ul>
+          <ul class="marcas__lista" aria-hidden="true">
+            <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
+            <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
+          </ul>
+          <ul class="marcas__lista" aria-hidden="true">
+            <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
+            <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -315,7 +338,7 @@
           <div class="titulo-fila destacados__cabeza">
             <div>
               <h3 class="destacados__titulo" id="titulo-destacados">Productos de la bodega</h3>
-              <p class="titulo-bajada">Toque uno para ver sus fotos y detalles, o pídalo de una vez por WhatsApp.</p>
+              <p class="titulo-bajada">Toque uno para ver sus fotos, para qué sirve y en qué viene.</p>
             </div>
           </div>
           <div class="pestanas__lista" role="tablist" id="pestanasLista" aria-labelledby="titulo-destacados"></div>
@@ -330,62 +353,56 @@
         <div class="titulo-fila" data-revela>
           <div>
             <h2 class="titulo" id="titulo-sectores">Pensado para su tipo de negocio</h2>
-            <p class="titulo-bajada">Atendemos por igual al que arma un cumpleaños en casa y al negocio que surte su cocina cada semana.</p>
+            <p class="titulo-bajada">Atendemos por igual al que arma un cumpleaños en casa y al negocio que surte su cocina cada semana. Toque su negocio y vea lo que más se lleva.</p>
           </div>
         </div>
         <ul class="mosaico">
           <li class="mosaico__alto" data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20un%20restaurante%20y%20quiero%20cotizar%20desechables." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/?categoria=portacomidas">
               <img src="img/escenas/sec-restaurantes-480.webp" srcset="img/escenas/sec-restaurantes-480.webp 480w, img/escenas/sec-restaurantes-720.webp 720w" sizes="(min-width: 900px) 300px, 50vw" width="720" height="960" loading="lazy" decoding="async" alt="">
               <h3>Restaurantes y asaderos</h3>
               <p>Contenedores, domos y cubiertos que aguantan el almuerzo caliente.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
           <li data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20panader%C3%ADa%20y%20quiero%20cotizar%20empaques." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/?categoria=bolsas">
               <img src="img/escenas/sec-panaderias-480.webp" srcset="img/escenas/sec-panaderias-480.webp 480w, img/escenas/sec-panaderias-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
               <h3>Panaderías y reposterías</h3>
               <p>Bandejas, bolsas y domos para lucir tortas y pan.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
           <li data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20un%20negocio%20de%20comidas%20r%C3%A1pidas%20y%20quiero%20cotizar%20empaques." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/?categoria=salsas">
               <img src="img/escenas/sec-rapidas-480.webp" srcset="img/escenas/sec-rapidas-480.webp 480w, img/escenas/sec-rapidas-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
               <h3>Comidas rápidas</h3>
               <p>Empaques que aguantan la grasa, la salsa y el domicilio.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
           <li data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20helader%C3%ADa%20y%20quiero%20cotizar%20vasos%20y%20tapas." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/?categoria=vasos">
               <img src="img/escenas/sec-heladerias-480.webp" srcset="img/escenas/sec-heladerias-480.webp 480w, img/escenas/sec-heladerias-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
               <h3>Heladerías y fruterías</h3>
               <p>Vasos, cucharas y tapas para helados y granizados.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
           <li data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20estoy%20organizando%20un%20evento%20y%20quiero%20cotizar%20desechables." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/?categoria=platos">
               <img src="img/escenas/sec-eventos-480.webp" srcset="img/escenas/sec-eventos-480.webp 480w, img/escenas/sec-eventos-800.webp 800w" sizes="(min-width: 900px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="">
               <h3>Eventos y catering</h3>
               <p>Del grado a la fiesta, sin que falte un solo plato.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
           <li class="mosaico__alto" data-revela>
-            <a class="sector" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20tienda%20y%20quiero%20precio%20mayorista%20para%20surtir." target="_blank" rel="noopener">
+            <a class="sector" href="/productos/">
               <img src="img/escenas/sec-tiendas-480.webp" srcset="img/escenas/sec-tiendas-480.webp 480w, img/escenas/sec-tiendas-720.webp 720w" sizes="(min-width: 900px) 300px, 50vw" width="720" height="960" loading="lazy" decoding="async" alt="">
               <h3>Tiendas y minimercados</h3>
               <p>Surta por bulto y revenda con margen: lo que más rota, siempre en stock.</p>
-              <span class="sector__mas">Cotizar<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
-              <span class="sr-only"> (abre WhatsApp)</span>
+              <span class="sector__mas">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
             </a>
           </li>
         </ul>
@@ -399,10 +416,9 @@
           <div class="banner__texto">
             <p class="banner__eyebrow">Para negocios</p>
             <h2>Surta su negocio con precio mayorista</h2>
-            <p>Restaurantes, panaderías y tiendas que compran seguido reciben precio especial. Pida la lista y compare.</p>
-            <a class="boton boton-amarillo" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20la%20lista%20de%20precios%20al%20por%20mayor%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
-              <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-              Pida la lista de precios<span class="sr-only"> (abre WhatsApp)</span>
+            <p>Restaurantes, panaderías y tiendas que compran seguido reciben precio especial. Mire lo que manejamos y pregunte por el precio mayorista cuando haga su pedido.</p>
+            <a class="boton boton-amarillo" href="/productos/">
+              Ver el catálogo<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
             </a>
           </div>
           <div class="banner__foto">
@@ -414,9 +430,8 @@
             <p class="banner__eyebrow">Línea ecológica</p>
             <h2>Desechables que cuidan el planeta</h2>
             <p>Manejamos <b>Darnel BIO®</b> y <b>Darnel Naturals</b>: pulpa de papel, cartón y materiales de fuentes renovables.</p>
-            <a class="boton boton-wa" href="https://wa.me/573183555246?text=Hola%2C%20quiero%20conocer%20la%20l%C3%ADnea%20ecol%C3%B3gica%20de%20Pl%C3%A1sticos%20Espinal." target="_blank" rel="noopener">
-              <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-              Conozca la línea verde<span class="sr-only"> (abre WhatsApp)</span>
+            <a class="boton boton-fantasma" href="/productos/?q=biodegradable">
+              Ver los biodegradables<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg>
             </a>
           </div>
           <div class="banner__foto">
@@ -501,11 +516,7 @@
       <div class="contenedor preguntas__rejilla">
         <div class="preguntas__lado" data-revela>
           <h2 class="titulo" id="titulo-preguntas">Resolvemos sus dudas</h2>
-          <p class="titulo-bajada">Lo que más nos preguntan, respondido aquí. Si le queda alguna, escríbanos: contestamos en horario de tienda.</p>
-          <a class="boton boton-fantasma" href="https://wa.me/573183555246?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20sus%20productos." target="_blank" rel="noopener">
-            <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-            Pregunte por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-          </a>
+          <p class="titulo-bajada">Lo que más nos preguntan, respondido aquí. Si le queda alguna, pregúntenos al hacer su pedido: contestamos en horario de tienda.</p>
         </div>
         <div class="preguntas__lista" data-revela>
           <details class="faq">
@@ -577,10 +588,6 @@
             <img src="img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal, ir arriba" loading="lazy">
           </a>
           <p class="pie__lema">Desechables y plásticos al por mayor y al detal. 24 años surtiendo negocios en El Espinal, Tolima.</p>
-          <a class="boton boton-wa pie__wa" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
-            <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-            Escríbanos por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-          </a>
         </div>
         <nav class="menu menu--pie" aria-labelledby="titulo-pie-menu">
           <h2 id="titulo-pie-menu">Enlaces rápidos</h2>
@@ -608,7 +615,7 @@
           <ul class="pie__datos">
             <li><svg class="icono" aria-hidden="true"><use href="#i-ubicacion"/></svg><a href="https://www.google.com/maps/search/?api=1&amp;query=Calle%207%20%235-25%2C%20Barrio%20Centro%2C%20Espinal%2C%20Tolima" target="_blank" rel="noopener">Calle 7 #5-25, Barrio Centro, El Espinal, Tolima</a></li>
             <li><svg class="icono" aria-hidden="true"><use href="#i-tel"/></svg><a href="tel:+573183555246">+57 318 355 5246</a></li>
-            <li><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg><a href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">WhatsApp 318 355 5246<span class="sr-only"> (abre WhatsApp)</span></a></li>
+            <li><svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg><span>WhatsApp 318 355 5246</span></li>
             <li><svg class="icono" aria-hidden="true"><use href="#i-reloj"/></svg><a href="#contacto">Abierto los 7 días · ver horario</a></li>
             <li><svg class="icono" aria-hidden="true"><use href="#i-camion"/></svg><span>Domicilios en el casco urbano de El Espinal</span></li>
           </ul>
@@ -621,8 +628,5 @@
     </div>
   </footer>
 
-  <a class="wa-flotante" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
-    <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-  </a>
 </body>
 </html>

@@ -56,7 +56,7 @@ async function sinDesborde(/** @type {import('@playwright/test').Page} */ page) 
   expect(ancho, 'la página se desborda de lado').toBeLessThanOrEqual(0);
 }
 
-test('el catálogo no muestra precios y cada tarjeta se pide por WhatsApp con su código', async ({ page }) => {
+test('el catálogo no muestra precios ni WhatsApp en cada tarjeta: la tarjeta abre la ficha, que sí lo tiene', async ({ page }) => {
   const v = vigilar(page);
   await simularCatalogo(page);
   await page.goto('/productos/');
@@ -64,16 +64,21 @@ test('el catálogo no muestra precios y cada tarjeta se pide por WhatsApp con su
   await expect(page.locator('#catTitulo')).toHaveText('Todos los productos');
   await expect(page.locator('#catConteo')).toHaveText('8 productos');
   await expect(page.locator('#catRejilla')).not.toContainText('$');
-  const pedir = page.locator('#catRejilla .tarjeta-prod').filter({ hasText: 'Contenedor icopor J1' }).locator('.tarjeta-prod__pedir');
-  const href = decodeURIComponent(String(await pedir.getAttribute('href')));
-  expect(href).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
-  expect(href).toContain('Contenedor icopor J1 x25 und (código 141)');
+  /* Johan, 10-nov-2026: un solo «Pedir por WhatsApp», el de la ficha; la tarjeta solo invita a verla */
+  await expect(page.locator('#catRejilla a[href^="https://wa.me/"]')).toHaveCount(0);
+  const tarjeta = page.locator('#catRejilla .tarjeta-prod').filter({ hasText: 'Contenedor icopor J1' });
+  await expect(tarjeta.locator('.tarjeta-prod__ver')).toHaveText('Ver detalles');
   /* sin foto propia: la de referencia, con su sello (nunca una escena de IA) */
   await expect(page.locator('#catRejilla .tarjeta-prod__foto.es-referencia').first()).toBeVisible();
   await expect(page.locator('#catRejilla .sello-ref').first()).toHaveText('Foto de referencia');
-  /* el agotado va de último y dice «Preguntar» */
+  /* el agotado va de último */
   await expect(page.locator('#catRejilla > li').last()).toContainText('Agotado');
-  await expect(page.locator('#catRejilla > li').last().locator('.tarjeta-prod__pedir')).toContainText('Preguntar');
+  /* tocar la tarjeta (no solo el nombre) abre la ficha, con su WhatsApp y el código */
+  await tarjeta.click();
+  await expect(page).toHaveURL(/\/productos\/\?p=141$/);
+  const href = decodeURIComponent(String(await page.locator('#fichaPedir').getAttribute('href')));
+  expect(href).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
+  expect(href).toContain('Contenedor icopor J1 x25 und (código 141)');
   await sinDesborde(page);
   v.sinProblemas();
 });
@@ -209,6 +214,52 @@ test('el enlace del inicio con una categoría que el CRM llama distinto cae en l
   await expect(page.locator('#catRejilla')).toContainText('Pitillo flexible');
 });
 
+/* Regresión (Johan, 10-nov-2026): el CRM parte una categoría en varias («Aluminio» con 1 y «Papel Aluminio»
+   con 4). La pestaña «Aluminio 1» escondía los otros cuatro: ahora la que cabe en otra se la lleva. */
+const PARTIDAS = {
+  ...PUBLICO,
+  categorias: [...PUBLICO.categorias,
+    { id: 'c12', nombre: 'Aluminio' }, { id: 'c31', nombre: 'Papel Aluminio' },
+    { id: 'c3b', nombre: 'Bolsas' }, { id: 'c26', nombre: 'Bolsas Manija' }, { id: 'c27', nombre: 'Bolsas de Papel' },
+    { id: 'c98', nombre: 'Platos' }],
+  productos: [...PUBLICO.productos,
+    ...['100', '7', '16', '40', '300'].map((m, i) => ({ id: 960 + i, nombre: `Aluminio *${m} Mts x1 und`, categoria: i ? 'c31' : 'c12', disponible: true, destacado: false, foto: '', fotos: [] })),
+    ...['c3b', 'c26', 'c26', 'c27'].map((c, i) => ({ id: 970 + i, nombre: `Bolsa ${i + 2}K ${c === 'c27' ? 'Papel' : 'Manija'} x100 und`, categoria: c, disponible: true, destacado: false, foto: '', fotos: [] })),
+    { id: 980, nombre: 'Plato 26 cm Wau x20 und', categoria: 'c98', disponible: true, destacado: false, foto: '', fotos: [] }],
+};
+
+test('una categoría partida en el CRM sale entera: «Aluminio» trae también los de «Papel Aluminio»', async ({ page }) => {
+  const v = vigilar(page);
+  await simularCatalogo(page, { catalogo: PARTIDAS });
+  await page.goto('/productos/');
+  const banda = page.locator('#catPestanas');
+  /* Una sola pestaña por familia, con todos sus productos; las partes no salen sueltas */
+  await expect(banda.locator('.pestana-cat').filter({ hasText: /^Aluminio/ })).toHaveText(/Aluminio\s*5/);
+  await expect(banda.locator('.pestana-cat').filter({ hasText: /^Bolsas/ })).toHaveText(/Bolsas\s*4/);
+  await expect(banda.locator('.pestana-cat').filter({ hasText: /Papel|Manija/ })).toHaveCount(0);
+  /* «Vasos y platos» junta dos cosas: sigue siendo suya, no se la lleva «Platos» */
+  await expect(banda.locator('.pestana-cat').filter({ hasText: /^Vasos y platos/ })).toHaveText(/Vasos y platos\s*3/);
+  await expect(banda.locator('.pestana-cat').filter({ hasText: /^Platos/ })).toHaveText(/Platos\s*1/);
+  await banda.locator('.pestana-cat').filter({ hasText: /^Aluminio/ }).click();
+  await expect(page.locator('#catTitulo')).toHaveText('Aluminio');
+  await expect(page.locator('#catConteo')).toHaveText('5 productos');
+  await expect(page.locator('#catRejilla > li')).toHaveCount(5);
+  await expect(page).toHaveURL(/\?categoria=aluminio$/);
+  /* La búsqueda y la pestaña dicen lo mismo */
+  await page.goto('/productos/?q=aluminio');
+  await expect(page.locator('#catConteo')).toHaveText('5 productos');
+  /* Un enlace viejo a una parte abre la familia entera */
+  await page.goto('/productos/?categoria=papel-aluminio');
+  await expect(page.locator('#catTitulo')).toHaveText('Aluminio');
+  await expect(page.locator('#catRejilla > li')).toHaveCount(5);
+  /* La ficha nombra la familia y su «volver» lleva a ella */
+  await page.goto('/productos/?p=962');
+  await expect(page.locator('#fichaCat')).toHaveText('Aluminio');
+  await expect(page.locator('#fichaParecidos > li')).toHaveCount(4);
+  await expect(page.locator('#fichaVolver')).toHaveAttribute('href', '/productos/?categoria=aluminio');
+  v.sinProblemas();
+});
+
 test('la ficha: nombre, código, pestañas, pedir por WhatsApp, parecidos y volver', async ({ page }) => {
   const v = vigilar(page);
   await simularCatalogo(page);
@@ -276,7 +327,7 @@ test('los botones del catálogo miden al menos 44 px para el dedo', async ({ pag
   await simularCatalogo(page);
   await page.goto('/productos/?categoria=contenedores');
   await expect(page.locator('#catRejilla > li')).toHaveCount(3);
-  const chicos = await page.locator('.pestana-cat, .tarjeta-prod__pedir, #catOrden, .catalogo__buscar-ir, .casilla').evaluateAll(
+  const chicos = await page.locator('.pestana-cat, #catOrden, .catalogo__buscar-ir, .casilla').evaluateAll(
     (els) => els.filter((e) => e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().height < 44)
       .map((e) => `${e.className || e.id}: ${Math.round(e.getBoundingClientRect().height)}px`));
   expect(chicos).toEqual([]);
