@@ -41,17 +41,22 @@ test('solo tres botones de WhatsApp (cabecera, portada y contacto), al número d
   for (const h of sectores) expect(h).toMatch(/^\/productos\/(\?(categoria|q)=[a-z-]+)?$/);
 });
 
-test('la cinta de marcas muestra las diez marcas (logo oficial o nombre), se puede pausar y vuelve a correr', async ({ page }) => {
+/* Las marcas de la cinta, en su orden (confirmadas por Johan, 10-nov-2026) */
+const MARCAS = ['Darnel', 'El Sol', 'Ajover', 'Prodía', 'Wau', 'Acme León', 'Frutaroma', 'Carvajal', 'Casa Best', 'House', 'Surtiplast', 'Darnel BIO', 'Vacán', 'Prodalum'];
+
+test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede pausar y vuelve a correr', async ({ page }) => {
   const v = vigilar(page);
   await page.goto('/');
   const cinta = page.locator('[data-marcas]');
   await cinta.scrollIntoViewIfNeeded();
-  /* La primera lista se lee; las copias de la vuelta no */
-  expect(await cinta.getByRole('img').evaluateAll((is) => is.map((i) => i.getAttribute('alt')))).toEqual(['Darnel', 'Ajover', 'Wau', 'Acme León', 'Carvajal']);
-  /* Las que aún no tienen logo oficial van con su nombre, intercaladas con las de logo */
+  /* La primera lista se lee; las copias de la vuelta no. Todas con logo: ninguna con solo el nombre */
+  expect(await cinta.getByRole('img').evaluateAll((is) => is.map((i) => i.getAttribute('alt')))).toEqual(MARCAS);
   const leida = cinta.locator('.marcas__lista:not([aria-hidden])');
-  await expect(leida.locator('.marcas__nombre')).toHaveText(['El Sol', 'Superplast', 'Prodalum', 'Surtiplast', 'Casa Best']);
-  await expect(leida.locator('li')).toHaveCount(10);
+  await expect(leida.locator('li')).toHaveCount(MARCAS.length);
+  await expect(leida.locator('li:not(:has(img))')).toHaveCount(0);
+  /* El Sol y Wau llevan la tarjeta del color de su propio fondo */
+  await expect(leida.locator('li.marca--sol')).toHaveCSS('background-color', 'rgb(254, 236, 4)');
+  await expect(leida.locator('li.marca--wau')).toHaveCSS('background-color', 'rgb(102, 44, 144)');
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]')).toHaveCount(3);
   for (const img of await cinta.locator('img').all()) expect(await img.evaluate((i) => /** @type {HTMLImageElement} */ (i).naturalWidth)).toBeGreaterThan(0);
   /* Corre sola y el botón la detiene y la vuelve a mover */
@@ -73,11 +78,10 @@ test('con «menos movimiento» la cinta de marcas no corre: cada marca una vez y
   const cinta = page.locator('[data-marcas]');
   await expect(cinta.locator('#marcasPausa')).toBeHidden();
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]').first()).toBeHidden();
-  await expect(cinta.locator('img:visible')).toHaveCount(5);
-  await expect(cinta.locator('.marcas__nombre:visible')).toHaveCount(5);
+  await expect(cinta.locator('img:visible')).toHaveCount(MARCAS.length);
   /* Ninguna queda cortada por los lados: bajan a otro renglón */
   const lados = await cinta.locator('.marcas__lista:not([aria-hidden]) li').evaluateAll((ls) => ls.map((l) => { const r = l.getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth; }));
-  expect(lados).toHaveLength(10);
+  expect(lados).toHaveLength(MARCAS.length);
   expect(lados.every(Boolean)).toBe(true);
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(ancho).toBeLessThanOrEqual(0);

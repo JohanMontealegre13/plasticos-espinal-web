@@ -353,8 +353,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 /* ---------- 10. Marcas ---------- */
-/* Cinta de marcas: cada una en su tarjeta blanca, avanzando sin parar. Con logo las que lo publican
-   en su página oficial; las demás, con su nombre en nuestra letra (.marcas__nombre). La pista
+/* Cinta de marcas: cada logo en su tarjeta, con sus colores, avanzando sin parar. Los emblemas van
+   más altos (.es-alta) y los letreros largos más bajos (.es-baja) para que pesen parecido; El Sol y
+   Wau llevan la tarjeta del color de su fondo. La pista
    lleva la lista cuatro veces y corre un cuarto de su ancho: al terminar, la vuelta no se nota.
    Se detiene con el mouse encima, con el foco adentro o con el botón de pausa (principal.js). */
 .marcas { background: linear-gradient(180deg, var(--blanco), var(--tint)); padding-block: 26px 30px; border-block: 1px solid var(--linea); overflow: hidden; }
@@ -373,7 +374,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 70s linear infinite; }
+.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 100s linear infinite; }
 .marcas__ventana:hover .marcas__pista, .marcas__ventana:focus-within .marcas__pista, .marcas.esta-pausada .marcas__pista { animation-play-state: paused; }
 @keyframes marcas-rodar { to { transform: translateX(-25%); } }
 .marcas__lista { list-style: none; margin: 0; padding: 0 20px 0 0; display: flex; gap: 20px; flex: none; }
@@ -382,12 +383,16 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg); box-shadow: var(--dura-sm);
 }
 .marcas__lista img { display: block; height: 52px; width: auto; max-width: none; }
-.marcas__nombre { font-family: var(--display); font-weight: 400; font-size: 1.375rem; line-height: 1; letter-spacing: .01em; color: var(--azul-osc); white-space: nowrap; }
+.marcas__lista img.es-alta { height: 64px; }
+.marcas__lista img.es-baja { height: 42px; }
+.marcas__lista .marca--sol { background: #feec04; border-color: #feec04; }
+.marcas__lista .marca--wau { background: #662c90; border-color: #662c90; }
 @media (max-width: 599px) {
   .marcas__lista { gap: 14px; padding-right: 14px; }
   .marcas__lista li { height: 68px; padding: 0 20px; }
   .marcas__lista img { height: 40px; }
-  .marcas__nombre { font-size: 1.125rem; }
+  .marcas__lista img.es-alta { height: 50px; }
+  .marcas__lista img.es-baja { height: 34px; }
 }
 /* Con «menos movimiento» la cinta no corre: una sola vez cada logo, centrados y en renglones */
 @media (prefers-reduced-motion: reduce) {

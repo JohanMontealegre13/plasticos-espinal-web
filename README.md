@@ -124,10 +124,14 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
 2. **Marcas** que distribuimos: cinta que avanza sola, con botón de pausa; con
-   «menos movimiento» queda quieta. Solo marcas que de verdad se venden. Con
-   logo, las que lo publican en su página oficial (`img/marcas/`); las demás,
-   con su nombre en nuestra letra (`.marcas__nombre`) hasta tener el archivo
-   del proveedor. Nunca un logo sacado de otro lado.
+   «menos movimiento» queda quieta. Solo marcas que de verdad se venden, cada
+   una con su logo y sus colores (`img/marcas/`): el de su página oficial o el
+   archivo que mandó el negocio, nunca uno sacado de otro lado ni dibujado. El
+   logo que trae fondo de color lleva la casilla de ese color (`.marca--sol`,
+   `.marca--wau`); `es-alta` y `es-baja` emparejan el tamaño de los que son
+   muy cuadrados o muy alargados. Sumar o quitar una marca es cambiar las
+   cuatro listas iguales de `index.html` y la lista `MARCAS` de
+   `pruebas/e2e/inicio.spec.js`.
 3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
    catálogo. Sin JS es una fila deslizable.
 4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva

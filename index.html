@@ -40,7 +40,7 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=15">
+  <link rel="stylesheet" href="css/estilos.css?v=16">
   <script src="js/principal.js?v=13" defer></script>
   <script src="js/catalogo.js?v=3" defer></script>
 
@@ -177,10 +177,10 @@
       </div>
     </section>
 
-    <!-- Marcas: lo que vendemos, en una cinta que avanza sola. Con logo, las que lo tienen publicado en
-         su página oficial; las demás, con su nombre en nuestra letra hasta tener el archivo del proveedor
-         (nunca un logo sacado de otro lado). La lista va cuatro veces (la primera es la que se lee; las
-         otras tres, solo para que la vuelta no se note) -->
+    <!-- Marcas: lo que vendemos, en una cinta que avanza sola. Cada logo con sus colores: los bajados de
+         la página oficial de la marca y los que mandó Johan (10-nov-2026). Nunca uno sacado de otro lado
+         ni dibujado. La lista va cuatro veces (la primera es la que se lee; las otras tres, solo para
+         que la vuelta no se note) -->
     <section class="marcas" aria-labelledby="titulo-marcas" data-marcas>
       <div class="contenedor marcas__cabeza">
         <h2 class="marcas__titulo" id="titulo-marcas">Distribuimos las marcas que su negocio ya conoce</h2>
@@ -190,51 +190,67 @@
         <div class="marcas__pista">
           <ul class="marcas__lista">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="Darnel" decoding="async"></li>
-            <li><span class="marcas__nombre">El Sol</span></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="El Sol" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="Ajover" decoding="async"></li>
-            <li><span class="marcas__nombre">Superplast</span></li>
-            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="Wau" decoding="async"></li>
-            <li><span class="marcas__nombre">Prodalum</span></li>
+            <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="Prodía" decoding="async"></li>
+            <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="Wau" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="Acme León" decoding="async"></li>
-            <li><span class="marcas__nombre">Surtiplast</span></li>
-            <li><img src="img/marcas/carvajal.webp" width="437" height="156" alt="Carvajal" decoding="async"></li>
-            <li><span class="marcas__nombre">Casa Best</span></li>
+            <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="Frutaroma" decoding="async"></li>
+            <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="Carvajal" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="Casa Best" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="House" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="Surtiplast" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="Darnel BIO" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="Vacán" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="Prodalum" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">El Sol</span></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Superplast</span></li>
-            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Prodalum</span></li>
+            <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
+            <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Surtiplast</span></li>
-            <li><img src="img/marcas/carvajal.webp" width="437" height="156" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Casa Best</span></li>
+            <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">El Sol</span></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Superplast</span></li>
-            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Prodalum</span></li>
+            <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
+            <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Surtiplast</span></li>
-            <li><img src="img/marcas/carvajal.webp" width="437" height="156" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Casa Best</span></li>
+            <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">El Sol</span></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Superplast</span></li>
-            <li><img src="img/marcas/wau.webp" width="192" height="192" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Prodalum</span></li>
+            <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
+            <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Surtiplast</span></li>
-            <li><img src="img/marcas/carvajal.webp" width="437" height="156" alt="" decoding="async"></li>
-            <li><span class="marcas__nombre">Casa Best</span></li>
+            <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
+            <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
+            <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
         </div>
       </div>
