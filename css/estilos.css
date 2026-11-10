@@ -524,8 +524,10 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .guia__tarjeta h3 { font-size: var(--fs-h3); line-height: 1.25; text-wrap: balance; }
 .guia__medidas, .guia__enlace { grid-column: 1 / -1; }
 .guia__medidas { margin: 0; display: grid; }
-.guia__medidas > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 2px 12px; align-items: baseline; padding-block: 9px; border-top: 1px solid var(--linea); }
-.guia__medidas dt { font-size: 1.0625rem; font-weight: 700; line-height: 1.3; color: var(--c-osc); font-variant-numeric: tabular-nums; }
+/* La medida nunca se parte en dos renglones: si la letra de respaldo (mientras llega Archivo) es más
+   ancha, su columna crece en vez de cortar «Portacomidas» por la mitad. */
+.guia__medidas > div { display: grid; grid-template-columns: minmax(7.5rem, max-content) 1fr; gap: 2px 12px; align-items: baseline; padding-block: 9px; border-top: 1px solid var(--linea); }
+.guia__medidas dt { font-size: 1.0625rem; font-weight: 700; line-height: 1.3; color: var(--c-osc); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .guia__medidas dd { margin: 0; font-size: var(--fs-chico); line-height: 1.4; color: var(--texto-2); }
 .guia__enlace {
   justify-self: start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px;

@@ -243,6 +243,11 @@ test('la guía rápida enseña a leer las medidas y lleva al catálogo, nunca a 
   /* Es la única sección con color de fondo, y no es el blanco ni el azul claro de las demás */
   const fondo = await guia.evaluate((e) => getComputedStyle(e).backgroundColor);
   expect(fondo).toBe('rgb(255, 244, 209)');
+  /* Ninguna medida se parte en dos renglones, tampoco con la letra de respaldo mientras llega Archivo */
+  const altoMedidas = () => guia.locator('.guia__medidas dt').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  for (const alto of await altoMedidas()) expect(alto).toBeLessThan(30);
+  await page.evaluate(() => document.fonts.ready);
+  for (const alto of await altoMedidas()) expect(alto).toBeLessThan(30);
   /* Simetría: las tarjetas de una misma fila miden lo mismo y sus enlaces quedan a la misma altura */
   const cajas = await tarjetas.evaluateAll((els) => els.map((e) => {
     const r = e.getBoundingClientRect(), a = /** @type {HTMLElement} */ (e.querySelector('.guia__enlace')).getBoundingClientRect();
@@ -254,8 +259,6 @@ test('la guía rápida enseña a leer las medidas y lleva al catálogo, nunca a 
     expect(new Set(fila.map((c) => c.alto)).size).toBe(1);
     expect(new Set(fila.map((c) => c.enlace)).size).toBe(1);
   }
-  /* Ninguna medida se parte en dos renglones */
-  for (const alto of await guia.locator('.guia__medidas dt').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) expect(alto).toBeLessThan(30);
 });
 
 test('las medidas de la guía van como rango («3 a 3,5 oz»), con coma decimal', async ({ page }) => {
@@ -299,4 +302,18 @@ test('la cinta de la marca abre la cabecera igual que abre el pie, y cada tarjet
 test('la bajada de los productos no promete lo que la ficha no trae', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#destacados .titulo-bajada')).toHaveText('Toque uno para ver sus fotos, su medida y en qué viene.');
+});
+
+test('Regresión (e9ca681): con una letra de respaldo más ancha, las medidas de la guía no se parten', async ({ page }) => {
+  /* La revisión en GitHub midió antes de que llegara Archivo y «Portacomidas» salió en dos renglones en celular */
+  await page.route('**/css/estilos.css*', async (ruta) => {
+    const r = await ruta.fetch();
+    const css = (await r.text()).replace('--font: "Archivo", system-ui', '--font: monospace, system-ui');
+    expect(css).toContain('--font: monospace');
+    await ruta.fulfill({ response: r, body: css });
+  });
+  await page.goto('/');
+  for (const alto of await page.locator('#guia .guia__medidas dt').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) expect(alto).toBeLessThan(30);
+  const ancho = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(ancho).toBeLessThanOrEqual(0);
 });
