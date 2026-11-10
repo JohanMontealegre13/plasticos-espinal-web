@@ -23,6 +23,8 @@
   var CLAVE_VISTOS = 'pe-vistos-v1', MAX_VISTOS = 12;             /* ids de lo que se abrió en ficha, lo último primero */
   var CLAVE_ULTIMO = 'pe-ultimo-v1';   /* líneas { id, cantidad } del último pedido enviado desde este celular */
   var API = '/tienda/mi-cuenta/api/tienda/pedido';
+  /* Raíz de la tienda: «/» en tienda.plasticosespinal.com, «/tienda/» en las pruebas y vistas previas */
+  var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
@@ -563,7 +565,7 @@
 
   /* Compartir: el menú del teléfono si lo hay; si no, WhatsApp con el nombre y el enlace */
   function compartir(p) {
-    var url = location.origin + '/tienda/#p=' + p.id;
+    var url = location.origin + RAIZ + '#p=' + p.id;
     function porWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComponent(p.nombre + ' ' + url), '_blank', 'noopener'); }
     if (!navigator.share) { porWhatsApp(); return; }
     navigator.share({ title: p.nombre, text: p.nombre + ' · ' + pesos(p.precio), url: url }).catch(function (e) {

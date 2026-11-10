@@ -43,10 +43,13 @@ const MUTACIONES = [
   { parte: 'Catálogo', nombre: 'radio del GPS entre comillas', archivo: 'tienda/catalogo.json', buscar: '"radio_km": 8', poner: '"radio_km": "8"', pruebas: ['unit'] },
   { parte: 'Catálogo', nombre: 'minutos de alistar entre comillas', archivo: 'tienda/catalogo.json', buscar: '"alistar_min": 60', poner: '"alistar_min": "60"', pruebas: ['unit'] },
   /* Candado */
-  { parte: 'Candado', nombre: 'deja pasar cualquier galleta', archivo: 'functions/tienda/_middleware.js', buscar: 'iguales(await sha256(galleta), HUELLA_GALLETA)', poner: 'true', pruebas: ['unit'] },
-  { parte: 'Candado', nombre: 'galleta sin HttpOnly', archivo: 'functions/tienda/_middleware.js', buscar: 'Max-Age=${TREINTA_DIAS}; HttpOnly;', poner: 'Max-Age=${TREINTA_DIAS};', pruebas: ['unit'] },
-  { parte: 'Candado', nombre: 'toda la carpeta img sin candado', archivo: 'functions/tienda/_middleware.js', buscar: "url.pathname === '/tienda/img/logo-color.svg'", poner: "url.pathname.startsWith('/tienda/img/')", pruebas: ['unit'] },
-  { parte: 'Candado', nombre: 'sin pausa contra fuerza bruta', archivo: 'functions/tienda/_middleware.js', buscar: 'setTimeout(listo, 800)', poner: 'setTimeout(listo, 0)', pruebas: ['unit'] },
+  { parte: 'Candado', nombre: 'deja pasar cualquier galleta', archivo: 'functions/_middleware.js', buscar: 'iguales(await sha256(galleta), HUELLA_GALLETA)', poner: 'true', pruebas: ['unit'] },
+  { parte: 'Candado', nombre: 'galleta sin HttpOnly', archivo: 'functions/_middleware.js', buscar: 'Path=/; Max-Age=${TREINTA_DIAS}; HttpOnly;', poner: 'Path=/; Max-Age=${TREINTA_DIAS};', pruebas: ['unit'] },
+  { parte: 'Candado', nombre: 'toda la carpeta img sin candado', archivo: 'functions/_middleware.js', buscar: "url.pathname === LOGO_LIBRE", poner: "url.pathname.startsWith('/tienda/img/')", pruebas: ['unit'] },
+  { parte: 'Candado', nombre: 'sin pausa contra fuerza bruta', archivo: 'functions/_middleware.js', buscar: 'setTimeout(listo, 800)', poner: 'setTimeout(listo, 0)', pruebas: ['unit'] },
+  { parte: 'Subdominio', nombre: 'la página principal no manda /tienda al subdominio', archivo: 'functions/_middleware.js', buscar: 'if (DOMINIOS_WEB.includes(url.hostname) && deTienda', poner: 'if (false && deTienda', pruebas: ['unit'] },
+  { parte: 'Subdominio', nombre: 'las páginas del subdominio se sirven sin candado', archivo: 'functions/_middleware.js', buscar: "const deTienda = destino.tipo === 'tienda' || ", poner: 'const deTienda = ', pruebas: ['unit'] },
+  { parte: 'Subdominio', nombre: 'la API del portal se redirige (el POST perdería el cuerpo)', archivo: 'functions/_middleware.js', buscar: 'if (lectura && !SIEMPRE_AQUI.test(ruta) && esPagina(ruta))', poner: 'if (esPagina(ruta) || ruta.includes("/api/"))', pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'tienda sin noindex', archivo: 'tienda/index.html', buscar: '<meta name="robots" content="noindex, nofollow">', poner: '', pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'enlace a la tienda desde el inicio', archivo: 'index.html', buscar: '<a href="#contacto">', poner: '<a href="/tienda/">Tienda</a><a href="#contacto">', pruebas: ['unit'] },
   /* Portal del cliente (intermediario de Cloudflare) */

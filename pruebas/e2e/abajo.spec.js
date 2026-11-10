@@ -111,7 +111,8 @@ test('Favoritos estando en una búsqueda deja la búsqueda para mostrar la fila'
 test('Pedidos abre «Mis pedidos» del portal', async ({ page }) => {
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  await expect(page.locator('#abajo').getByRole('link', { name: 'Pedidos' })).toHaveAttribute('href', '/tienda/mi-cuenta/pedidos/');
+  /* Relativo: lleva a /tienda/mi-cuenta/pedidos/ aquí y a /mi-cuenta/pedidos/ en el subdominio */
+  await expect(page.locator('#abajo').getByRole('link', { name: 'Pedidos' })).toHaveJSProperty('href', new URL('/tienda/mi-cuenta/pedidos/', page.url()).href);
 });
 
 test('en el celular la canasta es una sola: la de abajo, amarilla y aparte de los accesos', async ({ page }) => {

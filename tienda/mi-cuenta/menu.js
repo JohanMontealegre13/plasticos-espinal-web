@@ -4,7 +4,9 @@
 (function () {
   'use strict';
   var API = '/tienda/mi-cuenta/api/';
-  var PORTAL = '/tienda/mi-cuenta/';
+  /* Raíz de la tienda: «/» en tienda.plasticosespinal.com, «/tienda/» en las pruebas y vistas previas */
+  var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
+  var PORTAL = RAIZ + 'mi-cuenta/';
   /* Mis pedidos, Mis datos y el detalle se ven SIEMPRE como ventana encima de
      la tienda (pedido del dueño): la tienda queda de fondo y una X la devuelve. */
   var EN_VENTANA = ['pedidos', 'datos', 'pedido'];
@@ -12,7 +14,7 @@
   try { enMarco = window.self !== window.top && window.top.location.origin === location.origin; } catch (e) { enMarco = false; }
   var pagina = document.body ? document.body.dataset.pagina : '';
   /* La dirección de la tienda con el portal abierto encima en esa ruta */
-  function sobreLaTienda(ruta) { return '/tienda/#cuenta=' + encodeURIComponent(ruta); }
+  function sobreLaTienda(ruta) { return RAIZ + '#cuenta=' + encodeURIComponent(ruta); }
   function esVentana(url) {
     return url.origin === location.origin && EN_VENTANA.some(function (p) { return url.pathname === PORTAL + p + '/'; });
   }
@@ -35,7 +37,7 @@
       var url = new URL(a.href, location.href);
       if (url.origin !== location.origin || url.pathname.indexOf(PORTAL) === 0) return;
       e.preventDefault();
-      window.parent.postMessage({ cuenta: 'cerrar', ir: url.pathname === '/tienda/' ? '' : url.href }, location.origin);
+      window.parent.postMessage({ cuenta: 'cerrar', ir: url.pathname === RAIZ ? '' : url.href }, location.origin);
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') window.parent.postMessage({ cuenta: 'cerrar' }, location.origin);
@@ -91,7 +93,7 @@
 
   function iniciar() {
     if (enMarco) { dentroDeLaVentana(); return; }
-    var enTienda = location.pathname === '/tienda/' || location.pathname === '/tienda/index.html';
+    var enTienda = location.pathname === RAIZ || location.pathname === RAIZ + 'index.html';
     if (enTienda) enLaTienda();
     /* Mis pedidos y Mis datos: en la tienda se abren encima; desde otra página
        se va directo a la tienda con la ventana abierta, sin pasar por la
@@ -126,8 +128,8 @@
       hola.appendChild(el('span', '', 'Hola,'));
       hola.appendChild(el('b', '', (yo.nombre || '').split(' ')[0] || 'cliente'));
       panel.appendChild(hola);
-      [['Mis pedidos', '/tienda/mi-cuenta/pedidos/', 'Compras de la tienda y del mostrador'],
-       ['Mis datos', '/tienda/mi-cuenta/datos/', 'Nombre y dirección de entrega']].forEach(function (o) {
+      [['Mis pedidos', PORTAL + 'pedidos/', 'Compras de la tienda y del mostrador'],
+       ['Mis datos', PORTAL + 'datos/', 'Nombre y dirección de entrega']].forEach(function (o) {
         var a = el('a', 'opcion');
         a.href = o[1];
         a.appendChild(el('b', '', o[0]));
@@ -138,7 +140,7 @@
       salir.type = 'button';
       salir.addEventListener('click', function () {
         fetch(API + 'salir', { method: 'POST', credentials: 'same-origin' })
-          .finally(function () { location.href = '/tienda/'; });
+          .finally(function () { location.href = RAIZ; });
       });
       panel.appendChild(salir);
       panel.hidden = false;
@@ -152,9 +154,9 @@
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (yo) {
           if (yo && yo.ok) pintar(yo);
-          else location.href = '/tienda/mi-cuenta/';
+          else location.href = PORTAL;
         })
-        .catch(function () { location.href = '/tienda/mi-cuenta/'; });
+        .catch(function () { location.href = PORTAL; });
     });
     document.addEventListener('click', function (e) { if (!caja.contains(e.target)) cerrar(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });

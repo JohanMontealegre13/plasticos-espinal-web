@@ -2,7 +2,7 @@
    cómo se pintan los datos del vendedor en la página y que el texto legal tenga lo que pide la ley. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cargarPE, leer } from '../lib.mjs';
+import { cargarPE, leer, resolver, urlDe } from '../lib.mjs';
 
 const { lineaVendedor, pintarVendedor } = cargarPE(['tienda/vendedor.js']);
 
@@ -203,11 +203,19 @@ test('los términos se cargan con la misma hoja de estilo, vendedor.js con defer
   assert.doesNotMatch(TERMINOS, /\sonclick=/i);
 });
 
-for (const [nombre, html] of [['la tienda', TIENDA], ['la política de datos', PRIVACIDAD], ['los términos', TERMINOS]]) {
+/* Los enlaces entre páginas de la tienda van relativos (sirven en /tienda/ y en el subdominio):
+   se comprueba a dónde llevan desde la página que los tiene */
+const TEXTO_TERMINOS = 'Términos, cambios y retracto';
+/** @param {string} trozo @param {string} pagina archivo de la página */
+function aDondeLleva(trozo, pagina, texto = TEXTO_TERMINOS) {
+  const m = trozo.match(new RegExp(`<a href="([^"]+)"(?: target="_blank" rel="noopener")?>${texto}</a>`));
+  return m ? resolver(m[1], urlDe(pagina)) : null;
+}
+for (const [nombre, html, pagina] of [['la tienda', TIENDA, 'tienda/index.html'], ['la política de datos', PRIVACIDAD, 'tienda/privacidad/index.html'], ['los términos', TERMINOS, 'tienda/terminos/index.html']]) {
   test(`el pie de ${nombre} lleva el enlace a los términos y la línea de quién vende (escondida hasta tener datos)`, () => {
     const pie = html.match(/<footer class="pie">[\s\S]*?<\/footer>/);
     assert.ok(pie, 'falta <footer class="pie">');
-    assert.match(pie[0], /<a href="\/tienda\/terminos\/">Términos, cambios y retracto<\/a>/);
+    assert.equal(aDondeLleva(pie[0], pagina), '/tienda/terminos/');
     assert.match(pie[0], /<p class="vendedor" data-vendedor-linea hidden><\/p>/);
   });
 }
@@ -216,7 +224,7 @@ for (const pagina of ['index', 'pedidos', 'pedido', 'datos']) {
   test(`el pie de Mi cuenta (${pagina}) también lleva el enlace a los términos, sin la línea de quién vende`, () => {
     const pie = leer(ruta).match(/<footer class="pie">[\s\S]*?<\/footer>/);
     assert.ok(pie, 'falta <footer class="pie">');
-    assert.match(pie[0], /<a href="\/tienda\/terminos\/">Términos, cambios y retracto<\/a>/);
+    assert.equal(aDondeLleva(pie[0], ruta), '/tienda/terminos/');
     assert.doesNotMatch(pie[0], /data-vendedor/);
   });
 }
@@ -224,7 +232,8 @@ test('«Seguir al pago» lleva al lado la aceptación de los términos (en otra 
   const cierre = TIENDA.match(/<div class="cierre">[\s\S]*?<\/div>\s*<\/form>/);
   assert.ok(cierre, 'falta el cierre del formulario');
   assert.match(cierre[0], /Seguir al pago/);
-  assert.match(cierre[0], /Al pedir acepta los <a href="\/tienda\/terminos\/" target="_blank" rel="noopener">términos de la tienda<\/a>\./);
+  assert.match(cierre[0], /Al pedir acepta los <a href="[^"]+" target="_blank" rel="noopener">términos de la tienda<\/a>\./);
+  assert.equal(aDondeLleva(cierre[0], 'tienda/index.html', 'términos de la tienda'), '/tienda/terminos/');
 });
 test('vendedor.js se carga con defer, después de ubicacion.js y antes de tienda.js', () => {
   /* buscar.js vive en /js/: lo comparten la tienda y el catálogo público */

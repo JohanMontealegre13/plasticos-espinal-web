@@ -224,15 +224,35 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   detrás de la contraseña y lo público no enlaza a `/tienda`). El pie de todas
   las páginas públicas trae enlaces rápidos, políticas y contacto.
 
-## Tienda en línea (`/tienda`, en pruebas y con contraseña)
+## Tienda en línea (`tienda.plasticosespinal.com`, en pruebas y con contraseña)
 
-- Vive en `tienda/` y se abre en `plasticosespinal.com/tienda`. Mientras está
-  en pruebas **no tiene enlaces desde el sitio** y la cuida
-  `functions/tienda/_middleware.js` (Cloudflare Pages Functions): pide la
-  contraseña de prueba, deja una galleta de 30 días y marca todo `noindex`.
-  La contraseña no está en el código, solo su huella (cómo cambiarla: ver el
-  comentario del archivo). Al abrirla al público se borra SOLO
-  `functions/tienda/_middleware.js` (no la carpeta: ahí vive el portal del cliente).
+- Vive en la carpeta `tienda/` y se abre en **tienda.plasticosespinal.com**
+  (decisión de Johan, 10-nov-2026). Es el mismo proyecto de Cloudflare Pages:
+  `functions/_middleware.js` reconoce el subdominio y sirve `/` desde `tienda/`,
+  `/terminos/` desde `tienda/terminos/` y así. Lo que la tienda pide por su ruta
+  completa (`/tienda/tienda.css`, `/tienda/mi-cuenta/api/…`) pasa tal cual, y
+  una página pedida con `/tienda/` delante se manda a su dirección limpia.
+  `plasticosespinal.com/tienda/…` (con o sin www) redirige con 301 al subdominio.
+- Los enlaces entre páginas de la tienda van **relativos** (`terminos/`,
+  `../mi-cuenta/`) y los scripts calculan su raíz (`RAIZ`: `/` en el subdominio,
+  `/tienda/` en las pruebas y vistas previas). Un enlace a la página principal
+  va completo (`https://www.plasticosespinal.com/`): en el subdominio, `/` es la tienda.
+- **`_routes.json`** dice qué rutas despiertan las funciones; lo demás (fotos,
+  letras, estilos) se sirve solo y no gasta peticiones del plan gratis. Una
+  página nueva de la tienda (`tienda/<algo>/`) necesita ahí `/<algo>` y `/<algo>/*`
+  (una prueba lo exige).
+- Para que el subdominio funcione hace falta, una sola vez, agregarlo en
+  Cloudflare: Workers & Pages → plasticos-espinal-web → Custom domains →
+  «Set up a custom domain» → `tienda.plasticosespinal.com` (Cloudflare crea el
+  registro DNS solo). Primero el dominio y después publicar este cambio: si se
+  publica antes, `/tienda` de la página redirige a un subdominio que aún no existe.
+- **Vista previa** (`*.pages.dev`): `<vista previa>/?sitio=tienda` la muestra
+  como el subdominio; `?sitio=web` vuelve a la página. En las pruebas en
+  navegador, `tienda.localhost:4173` imita el subdominio (`pruebas/servidor.mjs`).
+- Mientras está en pruebas **no tiene enlaces desde el sitio**, el middleware
+  pide la contraseña de prueba (en el subdominio y en `/tienda/` de cualquier
+  dirección), deja una galleta de 30 días y marca todo `noindex`. La contraseña
+  no está en el código, solo su huella (cómo cambiarla: ver el comentario del archivo).
 - **Portal del cliente** (`tienda/mi-cuenta/`): «Mi cuenta» en la cabecera
   despliega un panel pequeño (Mis pedidos, Mis datos, Salir). El cliente crea su
   cuenta (nombre, cédula, celular), confirma su WhatsApp escribiendo el código

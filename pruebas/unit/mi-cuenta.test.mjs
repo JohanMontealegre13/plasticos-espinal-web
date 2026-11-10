@@ -237,4 +237,5 @@ test('el recibo PDF pasa como PDF privado', async () => {
 
 test('el portal queda detrás del candado de la tienda (mismo /tienda)', () => {
   assert.ok(ARCHIVO.startsWith('functions/tienda/'), 'si el portal sale de /tienda, el candado de pruebas ya no lo cubre');
+  assert.match(leer('functions/_middleware.js'), /url\.pathname\.startsWith\('\/tienda\/'\)/, 'el candado ya no cubre /tienda/');
 });
