@@ -1,6 +1,7 @@
 /* Catálogo PÚBLICO de la página (Cloudflare Pages Functions): lo usan /productos/ y las
    pestañas del inicio. Decisión de Johan (9-nov-2026): sin precios; cada producto se pide
-   por WhatsApp. Los precios solo existen en la tienda con clave (/tienda).
+   por WhatsApp. Los precios solo existen en la tienda, para quien entró con su cuenta: desde
+   el 10-nov-2026 el CRM ni siquiera los manda a quien no trae sesión, como aquí.
 
    - Le pide al CRM el mismo catálogo de la tienda (con PORTAL_CLAVE, como el intermediario
      de Mi cuenta) y deja pasar SOLO lo que la página necesita: nunca el precio (salvo que
@@ -11,7 +12,8 @@
    Variables de Cloudflare Pages:
      PORTAL_CLAVE      (secreto, obligatorio; el mismo de Mi cuenta)
      CRM_URL           (opcional; por defecto https://portal.plasticosespinal.com)
-     PRECIOS_PUBLICOS  (opcional; "1" deja pasar el precio. Apagado por decisión de Johan) */
+     PRECIOS_PUBLICOS  (opcional; "1" deja pasar el precio si el CRM lo manda. Apagado por decisión
+                       de Johan, y sin sesión el CRM ya no lo manda: prenderlo no muestra nada) */
 
 const FRESCA_MS = 5 * 60 * 1000;          /* más vieja que esto, se vuelve a pedir al CRM */
 const GUARDAR_S = 60 * 60 * 24 * 14;      /* cuánto la guarda Cloudflare por si el CRM no responde */

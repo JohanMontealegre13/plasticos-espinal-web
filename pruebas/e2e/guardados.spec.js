@@ -339,7 +339,6 @@ async function hastaElEnvio(/** @type {import('@playwright/test').Page} */ page)
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await page.locator('#d-nombre').fill('Restaurante La Plaza');
-  await page.locator('#d-doc').fill('1105678901');
   await page.locator('#d-cel').fill('3183555246');
   await page.locator('#d-barrio').fill('El Centro');
   await page.locator('#d-dir').fill('Calle 7 número 5-35 local 2');

@@ -77,12 +77,13 @@ npm run mutaciones     # rompe a propósito partes críticas en una copia y
 |---|---|
 | Enlaces, CSP, caché, regresiones de contenido | `pruebas/unit/sitio.test.mjs` |
 | Que `tienda/catalogo.json` esté bien escrito | `pruebas/unit/catalogo.test.mjs` |
-| Candado de la tienda (contraseña, galleta, noindex) | `pruebas/unit/candado.test.mjs` |
+| La puerta de la tienda (nadie entra sin cuenta, subdominio, noindex) | `pruebas/unit/candado.test.mjs` |
 | Intermediario de Mi cuenta (clave del CRM, galletas, rutas) | `pruebas/unit/mi-cuenta.test.mjs` |
 | La lógica de cada función de la tienda (llegada, buscador, guardados, GPS, vendedor) | `pruebas/unit/*.test.mjs` con su nombre |
 | Canasta y domicilio | `pruebas/e2e/tienda.spec.js` |
 | Cada función de la tienda en Chromium | `pruebas/e2e/*.spec.js` con su nombre |
-| Mi cuenta (entrar, crear cuenta, pedidos, datos) | `pruebas/e2e/mi-cuenta.spec.js` |
+| La entrada (bienvenida, crear cuenta, entrar, olvidé) y Mi cuenta (pedidos, datos) | `pruebas/e2e/mi-cuenta.spec.js` |
+| La tienda con cuenta (precio por cantidad, datos de entrega de la cuenta) | `pruebas/e2e/con-cuenta.spec.js` |
 | Inicio y 404 en Chromium, con las cabeceras reales de `_headers` | `pruebas/e2e/inicio.spec.js` |
 
 GitHub Actions (`.github/workflows/revision.yml`) corre todo en cada PR y en
@@ -205,7 +206,7 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - **Sin precios** (decisión de Johan, 9-nov-2026): el precio publicado obliga
   (art. 26, Ley 1480), así que cada producto se pide por WhatsApp con su
   nombre y código, y el precio se confirma antes de despachar. Los precios solo
-  existen en la tienda con contraseña.
+  los ve quien entró a la tienda con su cuenta.
 - `/productos/`: categorías en pestañas, buscador en la cabecera (el mismo de
   la tienda, `js/buscar.js`; ahí se ve también en la ficha de un producto, se
   sigue buscando sin devolverse y «atrás» vuelve a la ficha), filtros plegables de marca, medida, color, contenido y «solo
@@ -250,10 +251,10 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
   página tampoco lo pintaría sin cambiar `js/catalogo.js`.
 - `/terminos/` y `/privacidad/`: las políticas públicas (las de la tienda viven
-  detrás de la contraseña y lo público no enlaza a `/tienda`). El pie de todas
+  en su subdominio y lo público no enlaza a `/tienda`). El pie de todas
   las páginas públicas trae enlaces rápidos, políticas y contacto.
 
-## Tienda en línea (`tienda.plasticosespinal.com`, en pruebas y con contraseña)
+## Tienda en línea (`tienda.plasticosespinal.com`, en pruebas: nadie entra sin cuenta)
 
 - Vive en la carpeta `tienda/` y se abre en **tienda.plasticosespinal.com**
   (decisión de Johan, 10-nov-2026). Es el mismo proyecto de Cloudflare Pages:
@@ -278,18 +279,31 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - **Vista previa** (`*.pages.dev`): `<vista previa>/?sitio=tienda` la muestra
   como el subdominio; `?sitio=web` vuelve a la página. En las pruebas en
   navegador, `tienda.localhost:4173` imita el subdominio (`pruebas/servidor.mjs`).
-- Mientras está en pruebas **no tiene enlaces desde el sitio**, el middleware
-  pide la contraseña de prueba (en el subdominio y en `/tienda/` de cualquier
-  dirección), deja una galleta de 30 días y marca todo `noindex`. La contraseña
-  no está en el código, solo su huella (cómo cambiarla: ver el comentario del archivo).
-- **Portal del cliente** (`tienda/mi-cuenta/`): «Mi cuenta» en la cabecera
-  despliega un panel pequeño (Mis pedidos, Mis datos, Salir). El cliente crea su
-  cuenta (nombre, cédula, celular), confirma su WhatsApp escribiendo el código
-  que le manda la tienda (o, si el CRM está en «cliente_escribe», mandándonos
-  el que le muestra la página) y pone su contraseña; después entra con cédula o celular + contraseña, y «Olvidé mi
-  contraseña» repite la confirmación por WhatsApp. Ve sus compras de tienda y
-  mostrador, descarga el recibo PDF y edita nombre, barrio, dirección e
-  indicaciones (celular y documento NO: son la llave).
+- **Nadie entra sin cuenta** (decisión de Johan, 10-nov-2026; antes había una
+  contraseña de prueba). Sin la galleta de la sesión (`pe_sesion`), el middleware
+  manda toda página de la tienda a la entrada (`/mi-cuenta/`, con `?volver=` para
+  regresar a lo que se pidió); sin cuenta solo se ven la entrada, los términos y
+  la política de datos. El middleware solo mira que la galleta exista: si la
+  sesión vale lo dice el CRM (catálogo con `sesion: false` y sin precios, 401 en
+  lo demás), y ahí la tienda misma manda a la entrada. Mientras está en pruebas
+  **no tiene enlaces desde el sitio** y todo va `noindex`.
+- **La entrada** (`tienda/mi-cuenta/index.html`, `entrada.css`, `cuenta.js`): una
+  sola página con sus pantallas (bienvenida, crear cuenta en tres pasos, entrar y
+  olvidé mi contraseña). El cliente crea su cuenta (nombre, cédula, celular),
+  confirma su WhatsApp escribiendo el código que le manda la tienda (o, si el CRM
+  está en «cliente_escribe», mandándonos el que le muestra la página) y pone su
+  contraseña; después entra con cédula o celular + contraseña, y «Olvidé mi
+  contraseña» repite la confirmación por WhatsApp. Al entrar vuelve a lo que
+  estaba viendo (solo direcciones de la misma tienda). En un celular donde ya
+  entró alguien, abre directo en «Entrar».
+- **Mi cuenta**: en la cabecera despliega un panel pequeño (Mis pedidos, Mis
+  datos, Salir). Ve sus compras de tienda y mostrador, descarga el recibo PDF y
+  edita nombre, barrio, dirección e indicaciones (celular y documento NO: son la
+  llave).
+- **El pedido** no pide la cédula (el CRM pone la de la cuenta) y propone los
+  datos de entrega: lo último que esa cuenta escribió en ese celular y, si no, lo
+  guardado en «Mis datos». La canasta suma con el **precio por cantidad** que
+  manda el CRM en `escalones` (`precioDe` en `tienda.js`); la ficha lo anuncia.
   Los datos vienen del CRM a través de `functions/tienda/mi-cuenta/api/[[ruta]].js`,
   el único de la tienda que habla con el CRM (lo público solo lee el catálogo y
   las fotos, ver «Catálogo público»): le pone la clave `PORTAL_CLAVE` (secreto de

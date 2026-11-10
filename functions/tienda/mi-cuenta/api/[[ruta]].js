@@ -10,6 +10,9 @@
      del cliente, para que el CRM cuente los intentos por persona.
    - La sesión del cliente (token firmado por el CRM) vive en una galleta
      HttpOnly de este sitio: el JavaScript de la página no la puede leer.
+     Es pe_sesion y vale para toda la tienda (Path=/): el middleware la mira
+     para dejar pasar a las páginas (nadie entra sin cuenta), y el CRM revisa
+     su firma en cada dato. Si el CRM dice que ya no vale, aquí se borra.
      Los pasos de crear cuenta y de cambiar la contraseña (registro u
      olvide -> verificar -> clave) también: cada uno deja su paso firmado en
      la galleta pe_cuenta_p y el siguiente lo toma de ahí.
@@ -24,9 +27,11 @@
      PORTAL_CLAVE  (secreto, obligatorio)
      CRM_URL       (opcional; por defecto https://portal.plasticosespinal.com) */
 
-const GALLETA = 'pe_cuenta';
+const GALLETA = 'pe_sesion';      /* el mismo nombre que mira functions/_middleware.js */
 const PENDIENTE = 'pe_cuenta_p';
-const RUTA_GALLETA = '/tienda';
+/* La sesión de antes de «nadie entra sin cuenta» vivía solo en /tienda: ya no se lee, solo se borra */
+const GALLETA_VIEJA = 'pe_cuenta';
+const RUTA_API = '/tienda';
 const NO_RESPONDE = 'No pudimos traer sus datos. Intente más tarde o escríbanos por WhatsApp al 318 355 5246.';
 
 /* ruta del navegador -> [método, ruta en el CRM] */
@@ -62,8 +67,12 @@ function leerGalleta(request, nombre) {
   return '';
 }
 
-function galleta(nombre, valor, segundos) {
-  return `${nombre}=${valor}; Path=${RUTA_GALLETA}; Max-Age=${segundos}; HttpOnly; Secure; SameSite=Lax`;
+function galleta(nombre, valor, segundos, ruta = RUTA_API) {
+  return `${nombre}=${valor}; Path=${ruta}; Max-Age=${segundos}; HttpOnly; Secure; SameSite=Lax`;
+}
+/** La sesión, para toda la tienda. Sin valor, la borra. */
+function galletaSesion(valor = '', segundos = 0) {
+  return galleta(GALLETA, valor, segundos, '/');
 }
 
 function json(datos, estado = 200, galletas = []) {
@@ -99,7 +108,7 @@ export async function onRequest({ request, env, params }) {
   }
 
   if (ruta === 'salir') {
-    return json({ ok: true }, 200, [galleta(GALLETA, '', 0), galleta(PENDIENTE, '', 0)]);
+    return json({ ok: true }, 200, [galletaSesion(), galleta(PENDIENTE, '', 0), galleta(GALLETA_VIEJA, '', 0)]);
   }
 
   if (!env.PORTAL_CLAVE) return json({ ok: false, error: NO_RESPONDE }, 503);
@@ -142,7 +151,7 @@ export async function onRequest({ request, env, params }) {
       status: 200,
       headers: {
         'Content-Type': tipo,
-        /* Privada mientras la tienda tenga candado; el nombre nunca se repite */
+        /* Solo la guarda el navegador de quien la vio; el nombre nunca se repite */
         'Cache-Control': 'private, max-age=2592000, immutable',
         'X-Content-Type-Options': 'nosniff',
         'X-Robots-Tag': 'noindex, nofollow',
@@ -172,11 +181,17 @@ export async function onRequest({ request, env, params }) {
   }
 
   if (respuesta.status === 401) {
-    return json(datos, 401, [galleta(GALLETA, '', 0)]);
+    return json(datos, 401, [galletaSesion()]);
+  }
+  /* El catálogo nunca corta: con una sesión que ya no vale llega sin precios y con
+     sesion: false. Ahí se borra la galleta, para que la puerta vuelva a pedir la cuenta. */
+  if (ruta === 'tienda/catalogo' && token && respuesta.ok && datos.sesion === false) {
+    return json(datos, 200, [galletaSesion()]);
   }
   const sesion = (d) => [
-    galleta(GALLETA, d.token || '', (Number(d.dias) || 30) * 86400),
+    galletaSesion(d.token || '', (Number(d.dias) || 30) * 86400),
     galleta(PENDIENTE, '', 0),
+    galleta(GALLETA_VIEJA, '', 0),
   ];
   if ((ruta === 'entrar' || ruta === 'clave') && respuesta.ok) {
     return json({ ok: true, nombre: datos.nombre || '', estado: datos.estado || '' }, 200, sesion(datos));

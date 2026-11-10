@@ -1,7 +1,7 @@
 /* Servidor local que imita a Cloudflare Pages para las pruebas en navegador:
    sirve la carpeta del sitio, aplica _headers tal cual (así una CSP mal puesta
    rompe la prueba igual que rompería producción) y responde 404.html con 404.
-   La tienda se sirve SIN el candado (el de functions/_middleware.js no corre aquí):
+   La tienda se sirve SIN la puerta de la cuenta (la de functions/_middleware.js no corre aquí):
    las pruebas llegan directo a /tienda/ y el CRM se simula desde cada prueba.
    Pedida como tienda.localhost:PUERTO, imita el subdominio tienda.plasticosespinal.com
    con las mismas reglas del middleware (rutaDe): «/» sale de tienda/ y así. */
