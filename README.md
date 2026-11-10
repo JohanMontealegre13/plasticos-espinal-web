@@ -21,8 +21,10 @@ dependencias externas). Diseño 4: **«hermana del CRM, más sobria»** (oct 202
     ecológica;
   - amarillo `#ffc933`: solo acción o cifra («Pida ahora», el número de
     WhatsApp en Contacto y «Saltar al contenido»), nunca decoración;
-  - rojo `#e63927`: solo en la cinta (cápsula y filo del pie); el texto rojo
-    usa `#c42b1c`.
+  - rojo `#e63927`: solo en la cinta (arriba de la cabecera y del pie); el
+    texto rojo y los filos rojos usan `#c42b1c`;
+  - amarillo claro `#fff4d1` (`--tinte-amarillo`): el fondo de la guía para
+    escoger, la única sección con color (ronda de color, 10-nov-2026).
 - Todo el texto va en **usted** («Pida», «Pregunte», «Conozca»).
 
 ## Dónde vive
@@ -97,7 +99,9 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    Profile, pueden sumarse ahí.
 2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
    hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
-   reemplaza 1:1: mismo nombre de archivo, mismo tamaño.
+   reemplaza 1:1: mismo nombre de archivo, mismo tamaño. La ronda de color del
+   10-nov-2026 se hizo sin fotos nuevas: del local solo había capturas de
+   videos y maquetas con gente inventada, y esas no se muestran como el local.
 3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
@@ -120,7 +124,9 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
 ## Secciones de la página
 
 0. **Franja** noche con el domicilio gratis y **cabecera** blanca (logo,
-   dirección, teléfono, «Pida ahora») con la banda del menú debajo.
+   dirección, teléfono, «Pida ahora») con la banda del menú debajo. Entre las
+   dos va la cinta roja y azul de la marca, la misma que abre el pie; sale en
+   todas las páginas y se queda arriba cuando la cabecera queda fija.
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
    Dice qué vendemos y para quién, nunca el precio (ver «Cómo hablamos» en
@@ -139,6 +145,16 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    `pruebas/e2e/inicio.spec.js`.
 3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
    catálogo. Sin JS es una fila deslizable.
+3b. **Guía rápida para escoger** (`#guia`, 10-nov-2026) — Johan: «le estamos
+   vendiendo demasiado y no le estamos enseñando nada al cliente». Cuatro
+   tarjetas sobre fondo amarillo claro: los vasos van por onzas, los platos
+   planos por centímetros, las bolsas con manija por kilos, y qué viene en
+   biodegradable. Cada una trae tres medidas con su uso y un enlace al
+   catálogo; ninguna abre WhatsApp. Las medidas van **escritas a mano** en
+   `index.html` y son las que hay en el catálogo: si entra una medida nueva
+   por fuera de un rango, se corrige ahí (y en la tarjeta de su categoría).
+   Los usos («tinto», «almuerzo completo») son una primera redacción: los
+   corrige el negocio.
 4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva
    a los productos que más se lleva en el catálogo.
 
@@ -148,11 +164,14 @@ contacto. Sin burbuja flotante ni WhatsApp en el pie, sectores o banners. En el
 catálogo, las tarjetas no llevan botón: el único «Pedir por WhatsApp» está en la
 ficha de cada producto.
 5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
-6. **Confianza**: cuatro tarjetas.
+6. **Confianza**: cuatro tarjetas, cada una con el filo de arriba del color
+   de su ícono.
 7. **Nosotros** con tres cifras y enlace para dejar reseña en Google.
 8. **Preguntas** — `details` nativos + datos `FAQPage` (el texto visible debe
    seguir siendo espejo exacto del JSON-LD) y los términos del domicilio.
-9. **Contacto**: WhatsApp, dirección, horario, teléfono y enlace al mapa.
+9. **Contacto**: cómo se pide en tres pasos numerados (buscar en el
+   catálogo, escribir por WhatsApp, recibir), el botón de WhatsApp, dirección,
+   horario, teléfono y enlace al mapa. Los pasos no llevan botones.
 
 ## Seguridad
 

@@ -226,3 +226,77 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
   const altos = await page.locator('.cat').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
   expect(new Set(altos).size).toBe(1);
 });
+
+/* ---------- Ronda de color y detalles (10-nov-2026) ---------- */
+
+test('la guía rápida enseña a leer las medidas y lleva al catálogo, nunca a WhatsApp', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const guia = page.locator('#guia');
+  await expect(guia.getByRole('heading', { level: 2 })).toHaveText('Guía rápida para escoger');
+  /* Johan, 10-nov-2026: «no le estamos enseñando nada al cliente». Cuatro tarjetas, tres medidas cada una */
+  const tarjetas = guia.locator('.guia__tarjeta');
+  await expect(tarjetas).toHaveCount(4);
+  for (let i = 0; i < 4; i++) await expect(tarjetas.nth(i).locator('.guia__medidas dt')).toHaveCount(3);
+  const enlaces = await guia.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  expect(enlaces).toEqual(['/productos/?categoria=vasos', '/productos/?categoria=platos', '/productos/?categoria=bolsas', '/productos/?q=biodegradable']);
+  /* Es la única sección con color de fondo, y no es el blanco ni el azul claro de las demás */
+  const fondo = await guia.evaluate((e) => getComputedStyle(e).backgroundColor);
+  expect(fondo).toBe('rgb(255, 244, 209)');
+  /* Simetría: las tarjetas de una misma fila miden lo mismo y sus enlaces quedan a la misma altura */
+  const cajas = await tarjetas.evaluateAll((els) => els.map((e) => {
+    const r = e.getBoundingClientRect(), a = /** @type {HTMLElement} */ (e.querySelector('.guia__enlace')).getBoundingClientRect();
+    return { arriba: Math.round(r.top), alto: Math.round(r.height), enlace: Math.round(a.top) };
+  }));
+  const filas = new Map();
+  for (const c of cajas) filas.set(c.arriba, [...(filas.get(c.arriba) || []), c]);
+  for (const fila of filas.values()) {
+    expect(new Set(fila.map((c) => c.alto)).size).toBe(1);
+    expect(new Set(fila.map((c) => c.enlace)).size).toBe(1);
+  }
+  /* Ninguna medida se parte en dos renglones */
+  for (const alto of await guia.locator('.guia__medidas dt').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) expect(alto).toBeLessThan(30);
+});
+
+test('las medidas de la guía van como rango («3 a 3,5 oz»), con coma decimal', async ({ page }) => {
+  await page.goto('/');
+  /* Van escritas a mano en el HTML: un rango con su unidad o, en los biodegradables, el nombre del producto */
+  for (const t of await page.locator('#guia .guia__medidas dt').allTextContents()) {
+    expect(t).toMatch(/^(\d+(,\d)? a \d+(,\d)? (oz|cm)|\d+K a \d+K|Platos|Portacomidas|Bolsas)$/);
+  }
+});
+
+test('contacto explica cómo se pide en tres pasos numerados, sin sumar botones', async ({ page }) => {
+  await page.goto('/');
+  const pasos = page.locator('#contacto .pasos li');
+  await expect(pasos).toHaveCount(3);
+  await expect(pasos.nth(0)).toContainText('Busque en el catálogo');
+  await expect(pasos.nth(1)).toContainText('Escríbanos por WhatsApp');
+  await expect(pasos.nth(2)).toContainText('Reciba su pedido');
+  /* El número lo pone el CSS, en un círculo amarillo con letra azul noche */
+  const numeros = await pasos.evaluateAll((els) => els.map((e) => { const s = getComputedStyle(e, '::before'); return { n: s.content, fondo: s.backgroundColor, letra: s.color }; }));
+  expect(numeros.map((n) => n.fondo)).toEqual(Array(3).fill('rgb(255, 201, 51)'));
+  expect(numeros.map((n) => n.letra)).toEqual(Array(3).fill('rgb(14, 26, 71)'));
+  /* Los pasos no traen enlaces ni botones: el único WhatsApp de la sección sigue siendo el de abajo */
+  await expect(page.locator('#contacto .pasos a')).toHaveCount(0);
+});
+
+test('la cinta de la marca abre la cabecera igual que abre el pie, y cada tarjeta de confianza lleva el filo de su ícono', async ({ page }) => {
+  await page.goto('/');
+  const cinta = (/** @type {string} */ sel) => page.locator(sel).evaluate((e) => { const s = getComputedStyle(e, '::before'); return { alto: s.height, fondo: s.backgroundImage }; });
+  const arriba = await cinta('.cabecera'), abajo = await cinta('.pie');
+  expect(arriba.alto).toBe('4px');
+  expect(arriba.fondo).toContain('repeating-linear-gradient');
+  expect(arriba.fondo).toBe(abajo.fondo);
+  /* La cinta no tapa el logo ni empuja la página a los lados */
+  const logo = await page.locator('.cabecera .logo').boundingBox(), cab = await page.locator('.cabecera').boundingBox();
+  expect(logo && cab && logo.y >= cab.y + 4).toBe(true);
+  /* Filos: amarillo, verde, azul y rojo oscuro (el rojo de la cinta no sale de la cinta) */
+  const filos = await page.locator('.confianza > li').evaluateAll((els) => els.map((e) => getComputedStyle(e).borderTopColor));
+  expect(filos).toEqual(['rgb(255, 201, 51)', 'rgb(15, 122, 67)', 'rgb(30, 73, 184)', 'rgb(196, 43, 28)']);
+});
+
+test('la bajada de los productos no promete lo que la ficha no trae', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#destacados .titulo-bajada')).toHaveText('Toque uno para ver sus fotos, su medida y en qué viene.');
+});
