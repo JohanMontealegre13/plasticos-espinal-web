@@ -42,7 +42,7 @@
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/estilos.css?v=18">
   <script src="js/principal.js?v=13" defer></script>
-  <script src="js/catalogo.js?v=4" defer></script>
+  <script src="js/catalogo.js?v=5" defer></script>
 
   <script type="application/ld+json">
   {
@@ -89,10 +89,6 @@
     <symbol id="i-tel" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
     <symbol id="i-medalla" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></symbol>
     <symbol id="i-caja" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
-    <symbol id="i-vaso" viewBox="0 0 24 24"><path d="M6.5 8h11l-1.3 12.5H7.8zM5 8h14M12 8V4l3.5-1.5"/></symbol>
-    <symbol id="i-plato" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></symbol>
-    <symbol id="i-bolsa" viewBox="0 0 24 24"><path d="M5 8.5h14l-1 12H6zM9 11V6.5a3 3 0 0 1 6 0V11"/></symbol>
-    <symbol id="i-hoja" viewBox="0 0 24 24"><path d="M5 19C5 10.5 10 5.5 19.5 5c0 9-5 14-14.5 14zM5 19l8-8"/></symbol>
     <symbol id="i-camion" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></symbol>
     <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M9 15l2 2 4-4"/></symbol>
     <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
@@ -390,61 +386,6 @@
           <div class="pestanas__lista" role="tablist" id="pestanasLista" aria-labelledby="titulo-destacados"></div>
           <div id="pestanasPaneles"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- Guía rápida: le enseña al cliente a leer las medidas. No vende: cada tarjeta lleva al catálogo
-         y ninguna abre WhatsApp. Las medidas que nombra son las que hay en el catálogo. -->
-    <section class="seccion seccion--calida" id="guia" aria-labelledby="titulo-guia">
-      <div class="contenedor">
-        <div class="titulo-fila" data-revela>
-          <div>
-            <h2 class="titulo" id="titulo-guia">Guía rápida para escoger</h2>
-            <p class="titulo-bajada">¿No sabe cuál pedir? Así se leen las medidas y para qué se usa cada una.</p>
-          </div>
-        </div>
-        <ul class="guia">
-          <li class="guia__tarjeta" data-revela>
-            <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-vaso"/></svg></span>
-            <h3>Los vasos van por onzas</h3>
-            <dl class="guia__medidas">
-              <div><dt>3 a 3,5 oz</dt><dd>tinto y degustaciones</dd></div>
-              <div><dt>5 a 9 oz</dt><dd>jugo, gaseosa y agua</dd></div>
-              <div><dt>14 a 22 oz</dt><dd>granizados y batidos</dd></div>
-            </dl>
-            <a class="guia__enlace" href="/productos/?categoria=vasos">Ver los vasos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></a>
-          </li>
-          <li class="guia__tarjeta guia__tarjeta--amarillo" data-revela>
-            <span class="icono-tile icono-tile--amarillo" aria-hidden="true"><svg class="icono"><use href="#i-plato"/></svg></span>
-            <h3>Los platos planos van por centímetros</h3>
-            <dl class="guia__medidas">
-              <div><dt>12 a 15,5 cm</dt><dd>torta y pasabocas</dd></div>
-              <div><dt>18 a 20 cm</dt><dd>comidas rápidas</dd></div>
-              <div><dt>23 a 26 cm</dt><dd>almuerzo completo</dd></div>
-            </dl>
-            <a class="guia__enlace" href="/productos/?categoria=platos">Ver los platos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></a>
-          </li>
-          <li class="guia__tarjeta guia__tarjeta--rojo" data-revela>
-            <span class="icono-tile icono-tile--rojo" aria-hidden="true"><svg class="icono"><use href="#i-bolsa"/></svg></span>
-            <h3>Las bolsas con manija van por kilos</h3>
-            <dl class="guia__medidas">
-              <div><dt>1K a 3K</dt><dd>compras pequeñas</dd></div>
-              <div><dt>5K a 10K</dt><dd>el mercado</dd></div>
-              <div><dt>15K a 30K</dt><dd>pedidos grandes</dd></div>
-            </dl>
-            <a class="guia__enlace" href="/productos/?categoria=bolsas">Ver las bolsas<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></a>
-          </li>
-          <li class="guia__tarjeta guia__tarjeta--verde" data-revela>
-            <span class="icono-tile icono-tile--verde" aria-hidden="true"><svg class="icono"><use href="#i-hoja"/></svg></span>
-            <h3>También hay biodegradables</h3>
-            <dl class="guia__medidas">
-              <div><dt>Platos</dt><dd>planos, para servir</dd></div>
-              <div><dt>Portacomidas</dt><dd>para llevar</dd></div>
-              <div><dt>Bolsas</dt><dd>con manija</dd></div>
-            </dl>
-            <a class="guia__enlace" href="/productos/?q=biodegradable">Ver los biodegradables<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></a>
-          </li>
-        </ul>
       </div>
     </section>
 

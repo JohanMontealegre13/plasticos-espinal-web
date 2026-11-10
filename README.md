@@ -22,9 +22,7 @@ dependencias externas). Diseño 4: **«hermana del CRM, más sobria»** (oct 202
   - amarillo `#ffc933`: solo acción o cifra («Pida ahora», el número de
     WhatsApp en Contacto y «Saltar al contenido»), nunca decoración;
   - rojo `#e63927`: solo en la cinta (arriba de la cabecera y del pie); el
-    texto rojo y los filos rojos usan `#c42b1c`;
-  - amarillo claro `#fff4d1` (`--tinte-amarillo`): el fondo de la guía para
-    escoger, la única sección con color (ronda de color, 10-nov-2026).
+    texto rojo y los filos rojos usan `#c42b1c`.
 - Todo el texto va en **usted** («Pida», «Pregunte», «Conozca»).
 
 ## Dónde vive
@@ -99,9 +97,10 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    Profile, pueden sumarse ahí.
 2. **Fotos del local** — las escenas de `img/escenas/` son de referencia,
    hechas con IA (ver su `CREDITS.txt`). Cada foto real del local las
-   reemplaza 1:1: mismo nombre de archivo, mismo tamaño. La ronda de color del
-   10-nov-2026 se hizo sin fotos nuevas: del local solo había capturas de
-   videos y maquetas con gente inventada, y esas no se muestran como el local.
+   reemplaza 1:1: mismo nombre de archivo, mismo tamaño. Del local solo hay
+   capturas de videos y maquetas con gente inventada, y esas no se muestran
+   como el local. Lo visual de la página lo ponen las fotos en uso de cada
+   producto (ver «Catálogo público»).
 3. **Presentaciones de venta** — cuando se definan ("paca x100", "desde 1
    caja"), añadirlas a las tarjetas del catálogo; también un bloque "Los más
    pedidos" con productos concretos.
@@ -145,16 +144,6 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    `pruebas/e2e/inicio.spec.js`.
 3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
    catálogo. Sin JS es una fila deslizable.
-3b. **Guía rápida para escoger** (`#guia`, 10-nov-2026) — Johan: «le estamos
-   vendiendo demasiado y no le estamos enseñando nada al cliente». Cuatro
-   tarjetas sobre fondo amarillo claro: los vasos van por onzas, los platos
-   planos por centímetros, las bolsas con manija por kilos, y qué viene en
-   biodegradable. Cada una trae tres medidas con su uso y un enlace al
-   catálogo; ninguna abre WhatsApp. Las medidas van **escritas a mano** en
-   `index.html` y son las que hay en el catálogo: si entra una medida nueva
-   por fuera de un rango, se corrige ahí (y en la tarjeta de su categoría).
-   Los usos («tinto», «almuerzo completo») son una primera redacción: los
-   corrige el negocio.
 4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva
    a los productos que más se lleva en el catálogo.
 
@@ -241,7 +230,19 @@ los pares principales de la paleta. Probado en escritorio y móvil.
 - Solo salen los productos marcados «en tienda» en el CRM (activos y con
   precio). Un producto sin foto propia lleva la foto de referencia de su tipo
   (`img/productos/`, Pexels) con el sello «Foto de referencia»; nunca una
-  escena hecha con IA.
+  escena hecha con IA prestada de otro producto.
+- **La foto en uso va de primera** (Johan, 10-nov-2026: la página «tiene que
+  ser muy visual» y «que incite a comprar»). El CRM manda las fotos de cada
+  producto en orden: la principal (el producto con su medida, sobre el color de
+  su categoría), la segunda (el producto en uso: una escena hecha con IA a
+  partir del producto) y las demás. La tarjeta (inicio, catálogo y parecidos) y
+  la ficha abren con la segunda; la principal queda de segunda miniatura. Con
+  una sola foto se muestra esa. Las fotos del CRM llenan el recuadro, sin marco
+  blanco: son cuadradas y traen su propio fondo. Los códigos de
+  `SIN_FOTO_EN_USO` (`js/catalogo.js`) tienen de segunda otra cara del paquete,
+  no una escena, y siguen con la principal de primera: se saca el código de esa
+  lista cuando el producto tenga su foto en uso en el CRM. La página no achica
+  las fotos: salen con el peso con que se subieron al CRM.
 - Interruptor `PRECIOS_PUBLICOS` (variable de Cloudflare Pages): solo con el
   valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
   página tampoco lo pintaría sin cambiar `js/catalogo.js`.

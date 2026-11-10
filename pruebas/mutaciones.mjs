@@ -39,6 +39,9 @@ const MUTACIONES = [
   /* Vitrina */
   { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'js/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
   { parte: 'Vitrina', nombre: 'nombres pintados como HTML (XSS)', archivo: 'tienda/tienda.js', buscar: 'n.textContent = x', poner: 'n.innerHTML = x', pruebas: ['e2e'] },
+  /* Catálogo público: la foto en uso va de primera */
+  { parte: 'Fotos', nombre: 'la tarjeta vuelve a abrir con la foto principal', archivo: 'js/catalogo.js', buscar: 'if (tieneEnUso(p)) lista.unshift(lista.splice(1, 1)[0]);', poner: '', pruebas: ['e2e'] },
+  { parte: 'Fotos', nombre: 'una segunda foto que no es escena pasa de primera', archivo: 'js/catalogo.js', buscar: 'SIN_FOTO_EN_USO.indexOf(p.id) < 0', poner: 'true', pruebas: ['e2e'] },
   /* tienda/catalogo.json (lo que Johan cambia a mano) */
   { parte: 'Catálogo', nombre: 'radio del GPS entre comillas', archivo: 'tienda/catalogo.json', buscar: '"radio_km": 8', poner: '"radio_km": "8"', pruebas: ['unit'] },
   { parte: 'Catálogo', nombre: 'minutos de alistar entre comillas', archivo: 'tienda/catalogo.json', buscar: '"alistar_min": 60', poner: '"alistar_min": "60"', pruebas: ['unit'] },

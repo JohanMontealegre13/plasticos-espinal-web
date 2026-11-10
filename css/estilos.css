@@ -110,7 +110,6 @@ b, strong { font-weight: 700; color: var(--texto); }
 .seccion { padding-block: var(--seccion); background: var(--fondo); }
 .seccion--blanca { background: var(--blanco); }
 .seccion--franja { padding-block: clamp(32px, 4vw, 48px); }
-.seccion--calida { background: var(--tinte-amarillo); }  /* la única sección con color: la guía para escoger */
 
 .sr-only {
   position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -120,7 +119,7 @@ b, strong { font-weight: 700; color: var(--texto); }
 
 /* Hijos de rejillas: que puedan encogerse */
 .cabecera__fila > *, .mosaico > *, .banners > *, .confianza > *, .nosotros__rejilla > *,
-.contacto__rejilla > *, .pie__rejilla > *, .cifras > *, .guia > * { min-width: 0; }
+.contacto__rejilla > *, .pie__rejilla > *, .cifras > * { min-width: 0; }
 
 /* ---------- 3. Íconos ---------- */
 .icono { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -507,52 +506,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .sector h3 { font-size: .9375rem; }
 }
 
-/* ---------- 11b. Guía rápida para escoger ---------- */
-/* Cuatro tarjetas parejas: ícono, título, tres medidas y un enlace al catálogo. Cada una lleva
-   arriba el filo del color de su ícono. En celular van compactas (ícono y título en un renglón,
-   medida a la izquierda y su uso a la derecha); desde 600 px, la medida encima de su uso. */
-.guia { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); }
-.guia__tarjeta {
-  --c: var(--azul); --c-osc: var(--azul-osc);
-  display: grid; grid-template-columns: 44px 1fr; gap: 8px 12px; align-items: center;
-  padding: 16px 16px 6px; background: #fff; border-top: 5px solid var(--c); border-radius: var(--radio-lg); box-shadow: var(--dura-sm);
-}
-.guia__tarjeta--amarillo { --c: var(--amarillo); --c-osc: var(--noche); }
-.guia__tarjeta--rojo { --c: var(--rojo-osc); --c-osc: var(--rojo-osc); }  /* rojo oscuro: el rojo de la cinta no sale de la cinta */
-.guia__tarjeta--verde { --c: var(--verde); --c-osc: var(--verde-osc); }
-.guia__tarjeta .icono-tile { width: 44px; height: 44px; border-radius: 50%; }
-.guia__tarjeta h3 { font-size: var(--fs-h3); line-height: 1.25; text-wrap: balance; }
-.guia__medidas, .guia__enlace { grid-column: 1 / -1; }
-.guia__medidas { margin: 0; display: grid; }
-/* La medida nunca se parte en dos renglones: si la letra de respaldo (mientras llega Archivo) es más
-   ancha, su columna crece en vez de cortar «Portacomidas» por la mitad. */
-.guia__medidas > div { display: grid; grid-template-columns: minmax(7.5rem, max-content) 1fr; gap: 2px 12px; align-items: baseline; padding-block: 9px; border-top: 1px solid var(--linea); }
-.guia__medidas dt { font-size: 1.0625rem; font-weight: 700; line-height: 1.3; color: var(--c-osc); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.guia__medidas dd { margin: 0; font-size: var(--fs-chico); line-height: 1.4; color: var(--texto-2); }
-.guia__enlace {
-  justify-self: start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
-  font-size: var(--fs-chico); font-weight: 700; color: var(--azul-osc);
-  text-decoration: underline; text-decoration-color: var(--amarillo); text-decoration-thickness: 3px; text-underline-offset: 5px;
-}
-.guia__enlace .icono { width: 18px; height: 18px; transition: transform var(--t) var(--curva); }
-@media (hover: hover) and (pointer: fine) {
-  .guia__enlace:hover { color: var(--azul); }
-  .guia__enlace:hover .icono { transform: translateX(3px); }
-}
-@media (min-width: 600px) {
-  .guia { grid-template-columns: repeat(2, 1fr); }
-  .guia__tarjeta { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; gap: 12px; align-items: start; padding: 20px 20px 12px; }
-  .guia__tarjeta .icono-tile { width: 48px; height: 48px; }
-  .guia__medidas > div { grid-template-columns: 1fr; padding-block: 10px; }
-  .guia__enlace { align-self: end; }
-  /* Las cuatro partes de cada tarjeta comparten renglón con las de al lado: un título de dos
-     líneas no descuadra las medidas de las demás. Sin subgrid cada tarjeta se acomoda sola. */
-  @supports (grid-template-rows: subgrid) {
-    .guia__tarjeta { grid-row: span 4; grid-template-rows: subgrid; }
-  }
-}
-@media (min-width: 1100px) { .guia { grid-template-columns: repeat(4, 1fr); } }
-
 /* ---------- 12. Mosaico por tipo de negocio ---------- */
 /* Celular y tableta: dos columnas en espejo (alta | dos bajas, dos bajas | alta).
    Computador: cuatro columnas (alta | dos | dos | alta). Siempre parejo, sin filas cojas. */
@@ -803,7 +756,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 @media (forced-colors: active) {
-  .cat, .sector, .banner, .boton, .carrusel__punto::before, .guia__tarjeta, .pasos li::before { border: 2px solid CanvasText; }
+  .cat, .sector, .banner, .boton, .carrusel__punto::before, .pasos li::before { border: 2px solid CanvasText; }
   .menu--banda a[aria-current="true"] { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
   .carrusel__punto[aria-current="true"]::before { background: CanvasText; }
 }
@@ -871,8 +824,10 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   transition: transform var(--t-2) var(--salida), box-shadow var(--t-2) var(--curva), border-color var(--t-2) var(--curva);
 }
 .tarjeta-prod__foto { position: relative; display: block; aspect-ratio: 1; background: #fff; border-bottom: 1px solid var(--linea); overflow: hidden; }
-.tarjeta-prod__foto img { width: 100%; height: 100%; object-fit: contain; padding: 8%; transition: transform .6s var(--salida); }
-.tarjeta-prod__foto.es-referencia img { object-fit: cover; padding: 0; }
+/* Las fotos del CRM son cuadradas y traen su propio fondo (la escena en uso o el color de su
+   categoría): llenan el recuadro, sin marco blanco. Una que no sea cuadrada se ve entera, sin recortar. */
+.tarjeta-prod__foto img { width: 100%; height: 100%; object-fit: contain; transition: transform .6s var(--salida); }
+.tarjeta-prod__foto.es-referencia img { object-fit: cover; }
 .sello-prod {
   position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: var(--pill);
   background: var(--amarillo); color: var(--noche); font-size: .8125rem; font-weight: 800; line-height: 1.2;
@@ -1030,8 +985,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (min-width: 900px) { .ficha-pub__arriba { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; } }
 .ficha-pub__galeria { display: grid; gap: 12px; }
 .ficha-pub__foto { position: relative; aspect-ratio: 1; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-xl); overflow: hidden; }
-.ficha-pub__foto img { width: 100%; height: 100%; object-fit: contain; padding: 6%; }
-.ficha-pub__foto:has(#fichaRef:not([hidden])) img { object-fit: cover; padding: 0; }
+.ficha-pub__foto img { width: 100%; height: 100%; object-fit: contain; }
+.ficha-pub__foto:has(#fichaRef:not([hidden])) img { object-fit: cover; }
 .ficha-pub__minis { display: flex; gap: 10px; overflow-x: auto; padding: 2px; }
 .ficha-pub__mini { flex: none; width: 72px; height: 72px; padding: 0; border: 2px solid var(--linea); border-radius: var(--radio); background: #fff; overflow: hidden; cursor: pointer; }
 .ficha-pub__mini img { width: 100%; height: 100%; object-fit: contain; }

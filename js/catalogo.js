@@ -99,9 +99,18 @@
     lista.forEach(function (c) { var f = cat.cats[familiaDe[c.id]]; if (f) cat.alias[slug(c.nombre)] = f; });
   }
 
+  /* La foto «en uso» de un producto es la segunda que manda el CRM: una escena hecha con IA a partir
+     del producto. Va de primera en la tarjeta y en la ficha (Johan, 10-nov-2026: la página «tiene que
+     ser muy visual» y «que incite a comprar»); la principal, el producto con su medida, queda de
+     segunda. En estos códigos la segunda es otra cara del paquete, no una escena: siguen con la
+     principal de primera hasta que tengan su foto en uso en el CRM. */
+  var SIN_FOTO_EN_USO = [118, 398, 856];
   /** @param {Producto} p */
+  function tieneEnUso(p) { return !!p.fotos && p.fotos.length > 1 && SIN_FOTO_EN_USO.indexOf(p.id) < 0; }
+  /** Las fotos del producto, en el orden en que se muestran @param {Producto} p */
   function fotosDe(p) {
-    var lista = (p.fotos && p.fotos.length ? p.fotos : (p.foto ? [p.foto] : []));
+    var lista = (p.fotos && p.fotos.length ? p.fotos.slice() : (p.foto ? [p.foto] : []));
+    if (tieneEnUso(p)) lista.unshift(lista.splice(1, 1)[0]);
     return lista.map(function (f) { return FOTOS + encodeURIComponent(f); });
   }
   /** La foto de referencia de la primera palabra que tenga una («Tapa para vaso» → tapas), o '' @param {string} texto */
@@ -519,8 +528,10 @@
 
     /* Fotos: la grande y las miniaturas */
     var fotos = fotosDe(p), grande = /** @type {HTMLImageElement} */ ($('fichaFoto')), minis = $('fichaMinis');
+    /* La primera puede ser la foto en uso: su texto lo dice, para quien no la ve */
+    var textoDe = function (/** @type {number} */ i) { return p.nombre + (i === 0 && tieneEnUso(p) ? ', en uso' : ''); };
     grande.src = fotos[0] || referencia(p);
-    grande.alt = fotos.length ? p.nombre : 'Foto de referencia de ' + (c ? c.nombre.toLowerCase() : 'el producto');
+    grande.alt = fotos.length ? textoDe(0) : 'Foto de referencia de ' + (c ? c.nombre.toLowerCase() : 'el producto');
     $('fichaRef').hidden = !!fotos.length;
     minis.textContent = '';
     minis.hidden = fotos.length < 2;
@@ -532,7 +543,7 @@
       im.src = url; im.alt = ''; im.loading = 'lazy'; im.width = 80; im.height = 80;
       b.appendChild(im);
       b.addEventListener('click', function () {
-        grande.src = url;
+        grande.src = url; grande.alt = textoDe(i);
         minis.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       });
       minis.appendChild(b);
