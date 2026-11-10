@@ -41,24 +41,7 @@
     });
   }
 
-  /* 4. La burbuja se oculta mientras se ven los botones de la portada
-        (no se monta sobre «Pida por WhatsApp»). Sin JS sigue visible. */
-  var burbuja = document.querySelector('.wa-flotante');
-  var botonesPortada = document.querySelector('.portada__botones');
-  if (burbuja && botonesPortada && hayObservador) {
-    new IntersectionObserver(function (entradas) {
-      entradas.forEach(function (e) {
-        if (e.isIntersecting) {
-          if (document.activeElement === burbuja) return; /* no quitarle el foco a quien navega con teclado */
-          burbuja.classList.add('is-oculta');
-        } else {
-          burbuja.classList.remove('is-oculta');
-        }
-      });
-    }).observe(botonesPortada);
-  }
-
-  /* 5. Aparecer al bajar: cada bloque marcado data-revela sube y aparece una sola vez.
+  /* 4. Aparecer al bajar: cada bloque marcado data-revela sube y aparece una sola vez.
         Lo que ya se ve al cargar se marca primero, para que no parpadee. Los hermanos
         salen escalonados 70 ms (máximo 5 pasos). Con «menos movimiento» no se hace nada. */
   var revelar = document.querySelectorAll('[data-revela]');
@@ -84,7 +67,7 @@
     document.documentElement.classList.add('revela-listo');
   }
 
-  /* 6. Carrusel de categorías: flechas, puntos y pausa. Avanza solo cada 5 s mientras
+  /* 5. Carrusel de categorías: flechas, puntos y pausa. Avanza solo cada 5 s mientras
         se ve en pantalla; se detiene con el mouse encima o con el foco adentro, y se
         apaga del todo cuando la persona lo toca, lo desliza o pulsa la pausa. */
   var SVG = 'http://www.w3.org/2000/svg';
@@ -245,6 +228,20 @@
   }
 
   document.querySelectorAll('[data-carrusel]').forEach(function (el) { carrusel(/** @type {HTMLElement} */ (el)); });
+
+  /* 6. Cinta de marcas: corre sola por CSS; el botón la pausa y la vuelve a mover (lo exige
+        WCAG 2.2.2 para lo que se mueve más de 5 s). Con «menos movimiento» no corre ni sale el botón. */
+  var cinta = document.querySelector('[data-marcas]');
+  var pausaCinta = document.getElementById('marcasPausa');
+  if (cinta && pausaCinta && !menosMovimiento) {
+    var botonCinta = pausaCinta;
+    botonCinta.hidden = false;
+    botonCinta.addEventListener('click', function () {
+      var quieta = /** @type {Element} */ (cinta).classList.toggle('esta-pausada');
+      botonCinta.setAttribute('aria-label', quieta ? 'Seguir moviendo las marcas' : 'Pausar las marcas');
+      botonCinta.replaceChildren(icono(quieta ? 'i-seguir' : 'i-pausa'));
+    });
+  }
 
   /* 7. Que :active funcione al tocar en iOS */
   document.addEventListener('touchstart', function () {}, { passive: true });

@@ -15,8 +15,8 @@ celular, decisión rápida, quieren cotizar y pedir sin fricción.
 ## Product Purpose
 
 Sitio público de una sola página que presenta a Plásticos Espinal como distribuidora de
-desechables y plásticos (marcas Darnel, Carvajal Empaques, Ajover y su línea
-biodegradable). El éxito es una conversión: el visitante entiende el catálogo y escribe
+desechables y plásticos (marcas Darnel, Carvajal, Ajover, Wau,
+Acme León, El Sol, entre otras, y la línea biodegradable). El éxito es una conversión: el visitante entiende el catálogo y escribe
 por WhatsApp con un pedido o cotización. No es tienda transaccional; es vitrina + puente a
 WhatsApp.
 
