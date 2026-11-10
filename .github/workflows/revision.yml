@@ -20,7 +20,8 @@ concurrency:
 jobs:
   revision:
     name: Revisión del sitio
-    runs-on: ubuntu-latest
+    # Fijo en 24.04: desde el 10-nov-2026 ubuntu-latest es 26.04 y Playwright 1.56 no instala Chromium ahí
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:
