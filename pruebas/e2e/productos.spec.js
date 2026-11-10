@@ -131,6 +131,32 @@ test('el buscador encuentra con plurales y tildes, y lo que no hay ofrece WhatsA
   v.sinProblemas();
 });
 
+test('el buscador va en la cabecera: desde la ficha de un producto se sigue buscando y «atrás» vuelve a ella', async ({ page }) => {
+  const v = vigilar(page);
+  await simularCatalogo(page);
+  await page.goto('/productos/?p=141');
+  await expect(page.locator('#ficha')).toBeVisible();
+  /* Está en la cabecera, a la vista, y no ensancha la página */
+  await expect(page.locator('.cabecera #catBuscar')).toBeVisible();
+  await sinDesborde(page);
+  /* Con la casilla vacía nadie sale del producto que está mirando */
+  await page.locator('#catBuscar').fill('  ');
+  await page.waitForTimeout(300);
+  await expect(page.locator('#ficha')).toBeVisible();
+  await page.locator('#catBuscar').fill('vasos');
+  await expect(page.locator('#listado')).toBeVisible();
+  await expect(page.locator('#ficha')).toBeHidden();
+  await expect(page.locator('#catTitulo')).toHaveText('Resultados para «vasos»');
+  await expect(page).toHaveURL(/\?q=vasos$/);
+  expect(await page.locator('#catRejilla > li').count()).toBeGreaterThan(0);
+  /* «Atrás» devuelve a la ficha, con la casilla limpia */
+  await page.goBack();
+  await expect(page.locator('#ficha')).toBeVisible();
+  await expect(page).toHaveURL(/\?p=141$/);
+  await expect(page.locator('#catBuscar')).toHaveValue('');
+  v.sinProblemas();
+});
+
 test('los filtros se pliegan como lista: marca, medida y color, con «Ver más» y «Quitar filtros»', async ({ page }) => {
   const v = vigilar(page);
   await simularCatalogo(page, { catalogo: PLATOS });

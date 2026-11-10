@@ -13,10 +13,10 @@
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/estilos.css?v=16">
+  <link rel="stylesheet" href="/css/estilos.css?v=17">
   <script src="/js/principal.js?v=13" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
-  <script src="/js/catalogo.js?v=3" defer></script>
+  <script src="/js/catalogo.js?v=4" defer></script>
 </head>
 <body>
   <svg hidden xmlns="http://www.w3.org/2000/svg">
@@ -32,11 +32,19 @@
   </svg>
 
   <a class="saltar" href="#contenido">Saltar al contenido</a>
-  <header class="cabecera">
+  <!-- El buscador va en la cabecera para que también se vea en la ficha de un producto: se sigue
+       buscando sin devolverse (pedido de Johan, 10-nov-2026) -->
+  <header class="cabecera cabecera--con-buscar">
     <div class="contenedor cabecera__fila">
       <a class="logo" href="/">
         <img src="/img/logo-color.svg" width="262" height="100" alt="Plásticos Espinal, ir al inicio">
       </a>
+      <form class="catalogo__buscar cabecera__buscar" id="catBuscarForm" role="search" action="/productos/" method="get">
+        <label class="sr-only" for="catBuscar">Buscar productos</label>
+        <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <input id="catBuscar" name="q" type="search" maxlength="80" autocomplete="off" placeholder="Buscar: vasos, bolsas, contenedores…">
+        <button class="catalogo__buscar-ir" type="submit">Buscar</button>
+      </form>
       <a class="contacto-corto contacto-corto--tel" href="tel:+573183555246">
         <span class="icono-tile" aria-hidden="true"><svg class="icono"><use href="#i-tel"/></svg></span>
         <b>318 355 5246</b>
@@ -65,19 +73,13 @@
           </ol>
         </nav>
 
-        <!-- Listado: categorías como pestañas, buscador, filtros y la rejilla -->
+        <!-- Listado: categorías como pestañas, filtros y la rejilla (el buscador está en la cabecera) -->
         <section id="listado" aria-labelledby="catTitulo">
           <header class="catalogo__cabeza">
             <div class="catalogo__titulos">
               <h1 id="catTitulo" tabindex="-1">Productos</h1>
               <p class="catalogo__bajada">Escoja lo que necesita y pídalo por WhatsApp: le confirmamos precio y existencias antes de despachar.</p>
             </div>
-            <form class="catalogo__buscar" id="catBuscarForm" role="search" action="/productos/" method="get">
-              <label class="sr-only" for="catBuscar">Buscar productos</label>
-              <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
-              <input id="catBuscar" name="q" type="search" maxlength="80" autocomplete="off" placeholder="Buscar: vasos, bolsas, contenedores…">
-              <button class="catalogo__buscar-ir" type="submit">Buscar</button>
-            </form>
           </header>
 
           <p class="catalogo__estado" id="catEstado" role="status">Cargando productos…</p>

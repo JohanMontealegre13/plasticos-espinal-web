@@ -123,6 +123,11 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    dirección, teléfono, «Pida ahora») con la banda del menú debajo.
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
+   Dice qué vendemos y para quién, nunca el precio (ver «Cómo hablamos» en
+   `PRODUCT.md`). Es largo: su letra se achica con la pantalla para que no
+   tape los productos de la foto ni saque el botón (lo vigila una prueba). El
+   punto de la etiqueta es verde y late como un «en línea»; con «menos
+   movimiento» queda quieto.
 2. **Marcas** que distribuimos: cinta que avanza sola, con botón de pausa; con
    «menos movimiento» queda quieta. Solo marcas que de verdad se venden, cada
    una con su logo y sus colores (`img/marcas/`): el de su página oficial o el
@@ -190,8 +195,9 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   (art. 26, Ley 1480), así que cada producto se pide por WhatsApp con su
   nombre y código, y el precio se confirma antes de despachar. Los precios solo
   existen en la tienda con contraseña.
-- `/productos/`: categorías en pestañas, buscador (el mismo de la tienda,
-  `js/buscar.js`), filtros plegables de marca, medida, color, contenido y «solo
+- `/productos/`: categorías en pestañas, buscador en la cabecera (el mismo de
+  la tienda, `js/buscar.js`; ahí se ve también en la ficha de un producto, se
+  sigue buscando sin devolverse y «atrás» vuelve a la ficha), filtros plegables de marca, medida, color, contenido y «solo
   lo que hay» (salen de las características del CRM, solo cuando hay de dónde
   escoger; en celular y tableta van detrás del botón «Filtros»), orden y la
   ficha de cada producto (`?p=ID`): fotos, pestañas de descripción,

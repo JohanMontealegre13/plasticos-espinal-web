@@ -599,11 +599,15 @@
       buscar.addEventListener('input', function () {
         clearTimeout(espera);
         espera = window.setTimeout(function () {
-          estado.q = buscar.value.slice(0, 80);
+          /* Buscar desde la ficha de un producto: se pasa al listado y «atrás» vuelve a esa ficha.
+             Con la casilla vacía no se saca a nadie del producto que está mirando. */
+          var q = buscar.value.slice(0, 80), desdeFicha = !$('ficha').hidden;
+          if (desdeFicha && !q.trim()) return;
+          estado.q = q;
           estado.filtros = sinFiltros();
           if (estado.q.trim()) estado.categoria = '';
-          escribirDireccion(false);
-          if (!$('ficha').hidden) verListado(); else pintarListado();
+          escribirDireccion(desdeFicha);
+          if (desdeFicha) { verListado(); window.scrollTo({ top: 0, behavior: 'auto' }); } else pintarListado();
         }, 150);
       });
       $('catBuscarForm').addEventListener('submit', function (e) { e.preventDefault(); buscar.blur(); });

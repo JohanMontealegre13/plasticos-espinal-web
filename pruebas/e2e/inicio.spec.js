@@ -17,6 +17,36 @@ test('el inicio carga sin errores de JS, de CSP ni recursos rotos', async ({ pag
   v.sinProblemas();
 });
 
+test('la portada dice qué vendemos y para quién, sin competir por precio, y el título no tapa lo de la foto', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  /* La frase de Johan (10-nov-2026): nada de «precio de bodega» en toda la página */
+  await expect(page.locator('h1')).toHaveText('Empaques plásticos, desechables y biodegradables para su negocio y hogar');
+  /* El precio mayorista se ofrece como un hecho (su banner), pero no es el lema de nada */
+  expect(await page.content()).not.toMatch(/precio de (bodega|distribuidora)/i);
+  const m = await page.evaluate(() => {
+    const caja = (/** @type {string} */ s) => /** @type {Element} */ (document.querySelector(s)).getBoundingClientRect();
+    const foto = caja('.portada__foto'), h1 = caja('.portada h1'), marco = caja('.portada__marco'), resto = caja('.portada__resto');
+    return { ancho: innerWidth, finTitulo: (h1.bottom - foto.top) / foto.height, sobra: marco.bottom - resto.bottom,
+      etiqueta: caja('.portada__etiqueta').height };
+  });
+  /* La etiqueta va en un solo renglón: si se parte, empuja el título sobre los productos */
+  expect(m.etiqueta).toBeLessThan(40);
+  if (m.ancho < 600) expect(m.finTitulo, 'el título baja hasta los productos de la foto').toBeLessThan(0.54);
+  if (m.ancho >= 1100) expect(m.sobra, 'el botón se sale de la foto').toBeGreaterThanOrEqual(0);
+});
+
+test('el punto de la etiqueta es verde y late como «en línea»; con «menos movimiento» queda quieto', async ({ page }) => {
+  await page.goto('/');
+  const punto = () => page.locator('.portada__etiqueta').evaluate((e) => {
+    const a = getComputedStyle(e, '::before'), b = getComputedStyle(e, '::after');
+    return { color: a.backgroundColor, onda: b.animationName, repite: b.animationIterationCount };
+  });
+  expect(await punto()).toEqual({ color: 'rgb(22, 163, 74)', onda: 'en-linea', repite: 'infinite' });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect((await punto()).onda).toBe('none');
+});
+
 test('Regresión (e7352f9): al recargar con un #ancla la página abre arriba y sin ancla', async ({ page }) => {
   await page.goto('/#contacto');
   await page.waitForLoadState('load');

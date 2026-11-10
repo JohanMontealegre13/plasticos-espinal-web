@@ -27,6 +27,7 @@
   --rojo: #e63927;   --rojo-osc: #c42b1c;          /* --rojo NUNCA como texto */
   --amarillo: #ffc933; --amarillo-claro: #ffd45c; --amarillo-osc: #f0b400;
   --verde: #0f7a43;  --verde-osc: #0b5c33;  --verde-eco: #12522f;
+  --verde-vivo: #16a34a;                             /* solo el punto «en línea» de la portada, nunca texto */
   --fondo: #eef2fc;  --blanco: #ffffff;  --tint: #f5f8ff;
   --tinte-azul: #e4e9f6;  --tinte-azul-2: #d7def2;
   --tinte-verde: #e7f2ec; --tinte-rojo: #fcebe9;
@@ -296,9 +297,15 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .portada__etiqueta {
   justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 12px;
   border-radius: var(--pill); background: rgba(255,255,255,.82); color: var(--azul-osc);
-  font-size: .9375rem; font-weight: 700; letter-spacing: .02em;
+  font-size: .9375rem; font-weight: 700; letter-spacing: .02em; position: relative;
 }
-.portada__etiqueta::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--rojo); flex: none; }
+/* Punto «en línea»: verde, con una onda suave que sale del punto y se apaga (solo tamaño y opacidad,
+   y no se sale de la etiqueta). Con «menos movimiento» queda el punto quieto. */
+.portada__etiqueta::before, .portada__etiqueta::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--verde-vivo); }
+.portada__etiqueta::before { flex: none; }
+.portada__etiqueta::after { position: absolute; left: 12px; top: 50%; margin-top: -4px; opacity: 0; pointer-events: none; }
+@keyframes en-linea { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(2.8); opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) { .portada__etiqueta::after { animation: en-linea 2.4s ease-out infinite; } }
 .portada h1 {
   font-family: var(--display); font-weight: 400; font-size: var(--fs-h1); line-height: 1.06;
   letter-spacing: -.01em; text-wrap: balance; color: var(--noche);
@@ -308,6 +315,11 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .portada__botones { display: flex; flex-wrap: wrap; gap: 12px; }
 @media (max-width: 599px) {
   .portada { padding-top: 16px; }
+  /* El título es largo: la letra se achica con la pantalla para que «Empaques plásticos,» quepa en un
+     renglón y el título termine antes de los productos de la foto */
+  .portada h1 { font-size: clamp(1.375rem, 8.93vw - 6.4px, 1.875rem); }
+  /* La etiqueta en un solo renglón también en pantallas angostas: si se parte, empuja el título */
+  .portada__etiqueta { font-size: clamp(.75rem, 5.917vw - 6.86px, .9375rem); }
   .portada__foto { aspect-ratio: 4 / 5; }
   .portada__botones { flex-direction: column; }
   .portada__botones .boton { width: 100%; }
@@ -333,7 +345,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   }
   .portada__cabeza { grid-area: 2 / 1; padding: 0 0 0 clamp(40px, 4vw, 56px); gap: 14px; }
   .portada__resto { grid-area: 3 / 1; padding: 20px 0 0 clamp(40px, 4vw, 56px); gap: 24px; }
-  .portada h1 { font-size: clamp(2.5rem, 3.4vw, 3rem); }
+  /* Cuatro renglones en el aire de la izquierda: el renglón azul cabe entero */
+  .portada h1 { font-size: clamp(2rem, 2.9vw, 2.25rem); }
   .portada__bajada { max-width: 25rem; }
   /* Botones de tamaño normal: los dos caben antes del producto */
   .portada__botones .boton-grande { min-height: 52px; padding: 0 22px; font-size: var(--fs-cuerpo); }
@@ -485,9 +498,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .cat p { display: none; }
   .cat__boton { align-self: stretch; justify-content: center; }
 }
-/* 320 px: los títulos no se parten a media palabra ni el de la portada pisa los productos */
+/* 320 px: los títulos no se parten a media palabra (el de la portada ya se achica solo, arriba) */
 @media (max-width: 359px) {
-  .portada h1 { font-size: 2.125rem; }
   .cat h3 { font-size: .9375rem; }
   .sector h3 { font-size: .9375rem; }
 }
@@ -856,7 +868,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 
 /* /productos/ */
 .catalogo__cabeza { display: grid; gap: 16px; margin-bottom: 20px; }
-@media (min-width: 900px) { .catalogo__cabeza { grid-template-columns: 1fr minmax(320px, 420px); align-items: end; gap: 32px; } }
 .catalogo__titulos { display: grid; gap: 8px; }
 .catalogo__titulos h1, .ficha-pub__info h1 { font-family: var(--display); font-weight: 400; font-size: var(--fs-h2); line-height: 1.12; text-wrap: balance; }
 .catalogo__titulos h1::after { content: ""; display: block; width: 64px; height: 5px; margin-top: 12px; border-radius: 5px; background: var(--amarillo); }
@@ -877,6 +888,15 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 @media (hover: hover) and (pointer: fine) { .catalogo__buscar-ir:hover { background: var(--azul-osc); } }
 .catalogo__buscar-ir:focus-visible { outline: 3px solid var(--amarillo); outline-offset: 2px; }
+/* El buscador en la cabecera del catálogo: entre el logo y el teléfono; en celular y tableta, en su
+   propio renglón debajo del logo. Así se ve en el listado y en la ficha de un producto. */
+.cabecera--con-buscar .logo { margin-right: 0; }
+.cabecera__buscar { flex: 1 1 280px; max-width: 520px; margin-inline: auto; }
+@media (max-width: 899px) {
+  .cabecera--con-buscar .cabecera__fila { flex-wrap: wrap; row-gap: 10px; padding-block: 12px; }
+  .cabecera--con-buscar .logo { margin-right: auto; }
+  .cabecera__buscar { order: 9; flex: 0 0 100%; max-width: none; }
+}
 .catalogo__estado { color: var(--texto-2); padding: 24px 0; }
 .catalogo__falla, .catalogo__vacio {
   display: grid; justify-items: start; gap: 14px; padding: 24px; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg);
