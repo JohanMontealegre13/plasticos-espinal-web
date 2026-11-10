@@ -1,5 +1,6 @@
 {
   "ok": true,
+  "sesion": true,
   "domicilio": {
     "tarifa": 4000,
     "gratis_desde": 50000

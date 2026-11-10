@@ -214,7 +214,9 @@ test.describe('canasta', () => {
     expect(enviados).toHaveLength(1);
     const { lineas, ...datos } = enviados[0];
     expect([...lineas].sort((/** @type {any} */ a, /** @type {any} */ b) => a.id - b.id)).toEqual([{ id: 131, cantidad: 1 }, { id: 141, cantidad: 2 }]);
-    expect(datos).toMatchObject({ nombre: 'Ana Prueba', documento: '1105678901', celular: '300 123 4567', barrio: 'Belén', direccion: 'Calle 1 # 2-3' });
+    expect(datos).toMatchObject({ nombre: 'Ana Prueba', celular: '300 123 4567', barrio: 'Belén', direccion: 'Calle 1 # 2-3' });
+    /* la cédula no viaja: el CRM pone la de la cuenta que hizo el pedido */
+    expect(Object.keys(datos).sort()).toEqual(['barrio', 'celular', 'direccion', 'indicaciones', 'nombre']);
     expect(JSON.stringify(enviados[0])).not.toMatch(/precio|total/i);
     await expect(page.locator('#n')).toBeHidden();                /* la canasta queda vacía para el próximo pedido */
   });

@@ -222,8 +222,9 @@ for (const [nombre, html, pagina] of [['la tienda', TIENDA, 'tienda/index.html']
 for (const pagina of ['index', 'pedidos', 'pedido', 'datos']) {
   const ruta = pagina === 'index' ? 'tienda/mi-cuenta/index.html' : `tienda/mi-cuenta/${pagina}/index.html`;
   test(`el pie de Mi cuenta (${pagina}) también lleva el enlace a los términos, sin la línea de quién vende`, () => {
-    const pie = leer(ruta).match(/<footer class="pie">[\s\S]*?<\/footer>/);
-    assert.ok(pie, 'falta <footer class="pie">');
+    /* la entrada (index) no lleva la cabecera ni el pie de la tienda: su pie es corto */
+    const pie = leer(ruta).match(/<footer class="pie(?:-entrada)?">[\s\S]*?<\/footer>/);
+    assert.ok(pie, 'falta el pie de la página');
     assert.equal(aDondeLleva(pie[0], ruta), '/tienda/terminos/');
     assert.doesNotMatch(pie[0], /data-vendedor/);
   });

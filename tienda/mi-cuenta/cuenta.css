@@ -1,5 +1,6 @@
 /* Portal del cliente (/tienda/mi-cuenta) y panel «Mi cuenta» de la cabecera.
-   Usa los tokens y la cabecera de tienda.css. */
+   Usa los tokens y la cabecera de tienda.css. La entrada (bienvenida, crear cuenta, entrar)
+   tiene además su cara propia en entrada.css. */
 
 /* panel pequeño de la cabecera */
 .mi-cuenta{position:relative;justify-self:end}
@@ -25,7 +26,6 @@
 .form input,.form textarea{font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--linea);border-radius:12px;background:#fff;color:var(--texto);width:100%}
 .form input:focus,.form textarea:focus{outline:none;border-color:var(--azul)}
 .form input[readonly]{background:var(--suave);color:var(--texto2)}
-.form .codigo{font-size:28px;letter-spacing:8px;text-align:center;font-variant-numeric:tabular-nums}
 .boton{display:inline-flex;justify-content:center;align-items:center;min-height:50px;padding:0 22px;border:0;border-radius:99px;background:var(--azul);color:#fff;font-weight:800;text-decoration:none}
 .boton.sec{background:var(--suave);color:var(--noche)}
 .boton[disabled]{opacity:.6}
@@ -51,9 +51,7 @@
 .ayuda{font-size:14px;color:var(--texto2)}
 .ayuda a{color:var(--azul);font-weight:700}
 
-/* crear cuenta y confirmar el WhatsApp */
-.enlace{color:var(--azul);font-weight:700;font-size:14px;justify-self:start}
-.invita{display:grid;gap:8px;justify-items:start}
+/* confirmar el WhatsApp cuando es el cliente quien nos manda el código */
 .codigo-grande{font-family:var(--display);font-size:clamp(34px,10vw,46px);letter-spacing:6px;text-align:center;font-variant-numeric:tabular-nums;margin:4px 0}
 .boton.wa{background:#1f8f4e}
 .esperando{text-align:center;color:var(--texto2);font-size:14px}
@@ -61,12 +59,6 @@
 @keyframes latido{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.esperando::before{animation:none}}
 
-
-/* cerrar: vuelve a la tienda desde entrar, crear cuenta o el código */
-.portal > .cerrar{position:absolute;top:18px;right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--suave);color:var(--noche);z-index:2}
-.portal > .cerrar:hover,.portal > .cerrar:focus-visible{background:var(--linea)}
-.portal > .cerrar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
-.portal > section > h1:first-child,.portal > section > .migas:first-child{padding-right:56px}
 
 /* Mis pedidos, Mis datos y el detalle: ventana encima de la tienda */
 html.con-ventana{overflow:hidden}
