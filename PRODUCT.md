@@ -29,9 +29,11 @@ sentirse cercana y de la región sin perder credibilidad de proveedor mayorista.
 ## Cómo hablamos (decisión de Johan, 10-nov-2026)
 
 No somos un «mercado rojo»: no competimos por ser los más baratos. Los títulos y
-las frases grandes dicen qué vendemos y para quién, nunca «precio de bodega» ni
-«los más baratos». Lo que nos diferencia es la tecnología con que atendemos
-(catálogo al día, pedido fácil, respuesta rápida), no el precio.
+las frases grandes dicen qué vendemos y para quién, nunca «precio de bodega»,
+«precio de distribuidora» ni «los más baratos». Sí hay precio mayorista y se
+ofrece como un hecho (el banner para negocios y su pregunta frecuente), pero no
+es el lema. Lo que nos diferencia es la tecnología, las funciones y lo fácil que
+es comprar (catálogo en línea al día, pedido fácil, respuesta rápida).
 
 ## Anti-references
 

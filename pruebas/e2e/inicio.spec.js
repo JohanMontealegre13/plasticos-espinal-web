@@ -22,7 +22,8 @@ test('la portada dice qué vendemos y para quién, sin competir por precio, y el
   await page.evaluate(() => document.fonts.ready);
   /* La frase de Johan (10-nov-2026): nada de «precio de bodega» en toda la página */
   await expect(page.locator('h1')).toHaveText('Empaques plásticos, desechables y biodegradables para su negocio y hogar');
-  expect(await page.locator('body').innerText()).not.toMatch(/precio de bodega/i);
+  /* El precio mayorista se ofrece como un hecho (su banner), pero no es el lema de nada */
+  expect(await page.content()).not.toMatch(/precio de (bodega|distribuidora)/i);
   const m = await page.evaluate(() => {
     const caja = (/** @type {string} */ s) => /** @type {Element} */ (document.querySelector(s)).getBoundingClientRect();
     const foto = caja('.portada__foto'), h1 = caja('.portada h1'), marco = caja('.portada__marco'), resto = caja('.portada__resto');
