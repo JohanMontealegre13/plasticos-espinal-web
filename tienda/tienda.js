@@ -1,5 +1,7 @@
-/* Plásticos Espinal · tienda en línea (versión de prueba, detrás de contraseña).
-   Los productos salen del CRM (precio y si hay o no; nunca cuántas quedan).
+/* Plásticos Espinal · tienda en línea. Nadie entra sin cuenta (decisión de Johan, 10-nov-2026):
+   la puerta (functions/_middleware.js) solo sirve esta página con la galleta de la sesión, y si
+   el CRM dice que esa sesión ya no vale (catálogo con sesion: false), de aquí se va a la entrada.
+   Los productos salen del CRM (precio, precio por cantidad y si hay o no; nunca cuántas quedan).
    /tienda/catalogo.json solo trae lo de la página: QR, WhatsApp, fotos, horario, sinónimos, entrega y
    quién vende. Todo eso es opcional: si falta, viene mal escrito o no carga, la tienda sigue sin ello.
    «Pedir ya» → datos de entrega → el pedido entra al CRM «Por confirmar»
@@ -26,6 +28,7 @@
   /* Raíz de la tienda: «/» en tienda.plasticosespinal.com, «/tienda/» en las pruebas y vistas previas */
   var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
+  var YO = '/tienda/mi-cuenta/api/yo';   /* quien entró: sus datos de entrega guardados */
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
   var PRECISION_MAX_M = 200;           /* un punto del GPS con más error que esto (en metros) no se adjunta: por antena o por internet
@@ -36,9 +39,10 @@
     'La Cascada', 'La Esperanza', 'Libertador', 'Nacional', 'Primero de Mayo', 'Rondón',
     'San Rafael', 'Santa Margarita María', 'Talura', 'Villa Catalina', 'Villa Ceiba',
     'Villa Laura', 'Villa Lorena', 'Villa Paz'];
-  var CAMPOS = { nombre: 'd-nombre', tipo: 'd-tipo', documento: 'd-doc', celular: 'd-cel',
-    barrio: 'd-barrio', direccion: 'd-dir', extra: 'd-extra' };   /* dato -> campo */
+  /* dato -> campo. El documento no se pide: el pedido queda con el de la cuenta (lo pone el CRM) */
+  var CAMPOS = { nombre: 'd-nombre', celular: 'd-cel', barrio: 'd-barrio', direccion: 'd-dir', extra: 'd-extra' };
   var cat = null;                 /* catálogo */
+  var cuenta = null;              /* quien entró (lo que responde «yo»); null si no se pudo leer */
   var por = {};                   /* id -> producto */
   var cats = {};                  /* id -> categoría */
   var canasta = leer();           /* { id: cantidad } */
@@ -161,9 +165,19 @@
   }
 
   /* ---------- Cuentas ---------- */
+  /* A cuánto sale cada uno llevando `n`: el precio de uno y, desde cada «desde», el de ese precio por
+     cantidad. Los manda el CRM (`escalones`, los mismos del POS) y con esa misma tabla cobra el pedido:
+     lo que suma la canasta es lo que llega a cobrarse. Un escalón mal formado no cuenta. */
+  function precioDe(p, n) {
+    var precio = p.precio;
+    (Array.isArray(p.escalones) ? p.escalones : []).forEach(function (e) {
+      if (e && typeof e.desde === 'number' && typeof e.precio === 'number' && e.precio > 0 && n >= e.desde) precio = e.precio;
+    });
+    return precio;
+  }
   function cuentas() {
     var n = 0, s = 0;
-    Object.keys(canasta).forEach(function (id) { n += canasta[id]; s += canasta[id] * por[id].precio; });
+    Object.keys(canasta).forEach(function (id) { n += canasta[id]; s += canasta[id] * precioDe(por[id], canasta[id]); });
     var d = s === 0 || s >= cat.domicilio.gratis_desde ? 0 : cat.domicilio.tarifa;
     return { n: n, s: s, d: d, t: s + d };
   }
@@ -423,6 +437,20 @@
     $('fichaDetalle').hidden = !dets.length && !desc;
   }
 
+  /* Precio por cantidad: «Desde 12: $900». Solo los que bajan el precio de uno */
+  function pintarEscalones(p) {
+    var ul = $('fichaEscalones'), lista = (Array.isArray(p.escalones) ? p.escalones : []).filter(function (e) {
+      return e && typeof e.desde === 'number' && e.desde > 1 && typeof e.precio === 'number' && e.precio > 0 && e.precio < p.precio;
+    });
+    ul.textContent = '';
+    lista.forEach(function (e) {
+      var li = el('li');
+      li.append(el('span', null, 'Desde ' + formato.format(e.desde)), el('b', null, pesos(e.precio)));
+      ul.appendChild(li);
+    });
+    $('escalonesCaja').hidden = !lista.length;
+  }
+
   function pintarFicha(p) {
     var f = $('fichaFotos'), direcciones = fotosDe(p);
     f.textContent = '';
@@ -442,6 +470,7 @@
     var cu = intentar(function () { return precioPorUnidad(p); });
     $('fichaUnidad').textContent = cu ? 'Precio por ' + cu.largo + ': ' + cu.valor : '';
     $('fichaUnidad').hidden = !cu;
+    intentar(function () { pintarEscalones(p); });
     var disp = $('fichaDisp');
     disp.textContent = p.disponible ? 'Disponible' : 'Agotado';
     disp.className = 'ficha-disp ' + (p.disponible ? 'hay' : 'no-hay');
@@ -742,14 +771,12 @@
     var malos = [];
     function mal(id, texto) { malos.push([id, texto]); }
     if (d.nombre.length < 3) mal('d-nombre', 'Escriba el nombre de quien recibe.');
-    var doc = soloDigitos(d.documento.split('-')[0]);
-    if (doc.length < 5 || doc.length > 15) mal('d-doc', 'El número de documento no parece completo.');
     var cel = celular10(d.celular);
     if (!/^3\d{9}$/.test(cel)) mal('d-cel', 'El celular debe tener 10 dígitos y empezar por 3.');
     if (d.barrio.length < 3) mal('d-barrio', 'Elija o escriba su barrio.');
     if (d.direccion.length < 5) mal('d-dir', 'Escriba la dirección con el detalle.');
     if (!$('d-acepto').checked) mal('d-acepto', 'Falta autorizar el uso de sus datos.');
-    ['d-nombre', 'd-doc', 'd-cel', 'd-barrio', 'd-dir', 'd-acepto'].forEach(function (id) { $(id).removeAttribute('aria-invalid'); });
+    ['d-nombre', 'd-cel', 'd-barrio', 'd-dir', 'd-acepto'].forEach(function (id) { $(id).removeAttribute('aria-invalid'); });
     malos.forEach(function (m) { $(m[0]).setAttribute('aria-invalid', 'true'); });
     var e = $('errores');
     e.textContent = malos.map(function (m) { return m[1]; }).join(' ');
@@ -758,17 +785,22 @@
     if (!malos.length) d.celular = cel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
     return !malos.length;
   }
+  /* Lo último que esta cuenta escribió en este celular; si no hay, lo guardado en su cuenta («Mis datos»).
+     Lo que dejó otra cuenta en este mismo celular no se le muestra a nadie más. */
   function pasoDatos() {
-    var d = leerDatos();
-    $('d-nombre').value = d.nombre || ''; $('d-tipo').value = d.tipo || 'CC';
-    $('d-doc').value = d.documento || ''; $('d-cel').value = d.celular || '';
-    $('d-barrio').value = d.barrio || '';
-    $('d-dir').value = d.direccion || ''; $('d-extra').value = d.extra || '';
+    var c = cuenta || {}, d = leerDatos();
+    if (!c.documento || d.cuenta !== c.documento) d = {};
+    $('d-nombre').value = d.nombre || c.nombre || '';
+    $('d-cel').value = d.celular || c.celular || '';
+    $('d-barrio').value = d.barrio || c.barrio || '';
+    $('d-dir').value = d.direccion || c.direccion || '';
+    $('d-extra').value = d.extra || c.indicaciones || '';
     $('d-acepto').checked = !!d.acepto;
     $('errores').hidden = true;
     vista('datos');
-    /* Con los datos ya guardados, el botón queda a la vista para pedir en un toque */
-    if (d.nombre) $('enviar').focus(); else $('d-nombre').focus();
+    /* Con todo ya puesto, el botón queda a la vista para pedir en un toque; si no, el primer dato que falta */
+    var falta = ['d-nombre', 'd-cel', 'd-barrio', 'd-dir'].filter(function (id) { return !$(id).value; })[0];
+    $(falta || 'enviar').focus();
   }
 
   /* ---------- Ubicación de entrega (PE.dentroDeEntrega, tienda/ubicacion.js) ---------- */
@@ -851,7 +883,7 @@
     if (typeof indicaciones !== 'string') indicaciones = d.extra;
     ocupado($('enviar'), true, 'Enviando su pedido…');
     llamar('', 'POST', {
-      nombre: d.nombre, tipo: d.tipo, documento: d.documento, celular: d.celular,
+      nombre: d.nombre, celular: d.celular,
       barrio: d.barrio, direccion: d.direccion, indicaciones: indicaciones,
       lineas: lineas
     }).then(function (r) {
@@ -867,6 +899,8 @@
       intentar(pintar);
       intentar(pintarCanasta);
     }).catch(function (e) {
+      /* La sesión se venció con la canasta armada: a entrar. La canasta queda guardada en este celular */
+      if (e.estado === 401) { aLaEntrada(); return; }
       $('errores').textContent = e.message; $('errores').hidden = false;
     }).then(function () { ocupado($('enviar'), false); });
   }
@@ -1047,8 +1081,11 @@
     Object.keys(canasta).forEach(function (id) {
       var p = por[id], li = el('li'), i = el('img', p.foto ? 'propia' : null), mid = el('div');
       i.src = foto(p); i.alt = '';
+      var cadaUno = precioDe(p, canasta[id]);
       mid.append(el('div', 'nm', p.nombre), control(p).firstChild);
-      li.append(i, mid, el('span', 'v', pesos(p.precio * canasta[id])));
+      /* Con precio por cantidad, la línea dice a cuánto quedó cada uno */
+      if (cadaUno !== p.precio) mid.appendChild(el('small', 'cada-uno', pesos(cadaUno) + ' cada uno por llevar ' + formato.format(canasta[id])));
+      li.append(i, mid, el('span', 'v', pesos(cadaUno * canasta[id])));
       ul.appendChild(li);
     });
     var vacia = c.n === 0;
@@ -1141,6 +1178,7 @@
       var d = leerFormulario();
       if (!cuentas().n || !validar(d)) return;
       d.acepto = true;
+      d.cuenta = cuenta ? cuenta.documento : '';   /* de quién es lo guardado en este celular */
       guardarDatos(d);
       enviarPedido(d);
     });
@@ -1176,14 +1214,23 @@
     return hallada;
   }
   function json(url) {
-    return fetch(url, { cache: 'no-cache', headers: { Accept: 'application/json' } })
+    return fetch(url, { cache: 'no-cache', credentials: 'same-origin', headers: { Accept: 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
-  /* Lo de catalogo.json es opcional: si no carga o el JSON está roto, la tienda sigue con {} */
-  Promise.all([json('/tienda/catalogo.json').catch(function () { return {}; }), json(CATALOGO)])
+  /* Sin sesión no hay tienda: a la entrada, que vuelve a esta misma dirección (con su #p=… si lo trae) */
+  function aLaEntrada() {
+    var pedida = location.pathname + location.search;
+    location.replace(RAIZ + 'mi-cuenta/' + (pedida === RAIZ ? '' : '?volver=' + encodeURIComponent(pedida)) + location.hash);
+  }
+  /* Lo de catalogo.json es opcional: si no carga o el JSON está roto, la tienda sigue con {}. Los datos de
+     quien entró también: sin ellos, los de entrega se escriben a mano. */
+  Promise.all([json('/tienda/catalogo.json').catch(function () { return {}; }), json(CATALOGO), json(YO).catch(function () { return null; })])
     .then(function (r) {
       var sitio = r[0] && typeof r[0] === 'object' && !Array.isArray(r[0]) ? r[0] : {}, crm = r[1];
       if (!crm.ok) throw new Error('crm');
+      /* El CRM dice que esa sesión no vale (galleta vencida o inventada): nadie ve la tienda sin cuenta */
+      if (crm.sesion === false) { aLaEntrada(); return; }
+      cuenta = r[2] && r[2].ok ? r[2] : null;
       if (!crm.productos || !crm.productos.length) { var v = new Error('vacío'); v.vacio = true; throw v; }
       cat = {
         domicilio: crm.domicilio, pago: sitio.pago, whatsapp: sitio.whatsapp, horario: sitio.horario,
@@ -1229,6 +1276,6 @@
       document.querySelectorAll('.combo').forEach(function (c) { c.hidden = true; });
       $('estado').textContent = e && e.vacio
         ? 'Estamos subiendo los productos a la tienda. Mientras tanto, escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.'
-        : 'No pudimos cargar los productos. Escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.';
+        : 'La tienda está en pausa por un momento. Escríbanos por WhatsApp al 318 355 5246 y le tomamos el pedido.';
     });
 })();

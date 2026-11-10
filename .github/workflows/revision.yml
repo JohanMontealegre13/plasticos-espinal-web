@@ -46,7 +46,7 @@ jobs:
       - name: Tipos
         run: npm run typecheck
 
-      - name: Pruebas rápidas (sitio, candado, Mi cuenta y la lógica de la tienda)
+      - name: Pruebas rápidas (sitio, la puerta de la tienda, Mi cuenta y la lógica de la tienda)
         run: npm run test:unit
 
       - name: Caché (?v=N) al día frente a la rama base

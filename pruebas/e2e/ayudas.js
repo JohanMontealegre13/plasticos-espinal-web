@@ -2,8 +2,17 @@
 import { readFileSync } from 'node:fs';
 import { expect } from '@playwright/test';
 
-/** Catálogo con la forma que devuelve el CRM (tienda_pedido.catalogo()): ocho productos, uno agotado. */
-const CATALOGO_CRM = JSON.parse(readFileSync(new URL('./catalogo-crm.json', import.meta.url), 'utf8'));
+/** Catálogo con la forma que devuelve el CRM a quien entró con su cuenta (`sesion: true`, con precios): ocho productos, uno agotado. */
+export const CATALOGO_CRM = JSON.parse(readFileSync(new URL('./catalogo-crm.json', import.meta.url), 'utf8'));
+
+/**
+ * La cuenta con la que se abre la tienda en las pruebas (lo que responde `yo`): recién creada,
+ * con nombre, cédula y celular, y todavía sin dirección guardada.
+ */
+export const CUENTA = Object.freeze({
+  ok: true, estado: 'activa', nombre: 'Ana Prueba', tipo_documento: 'CC', documento: '1105678901',
+  celular: '3001234567', correo: '', municipio: 'El Espinal', barrio: '', direccion: '', indicaciones: '',
+});
 
 const fijo = (/** @type {string} */ nombre) => JSON.parse(readFileSync(new URL(`../unit/fixtures/${nombre}`, import.meta.url), 'utf8'));
 /**
@@ -37,6 +46,15 @@ export async function sitioDe(page, cambiar) {
     const otra = cambiar ? cambiar(sitio) : undefined;
     return r.fulfill(otra === undefined ? { json: sitio } : otra);
   });
+}
+
+/**
+ * El catálogo como lo da el CRM a quien NO entró con su cuenta: los mismos productos,
+ * sin precio ni precios por cantidad, y `sesion: false`.
+ * @param {any} [catalogo]
+ */
+export function sinSesion(catalogo = CATALOGO_CRM) {
+  return { ...catalogo, sesion: false, productos: catalogo.productos.map((/** @type {any} */ { precio, escalones, ...p }) => p) };   // eslint-disable-line no-unused-vars
 }
 
 /** Direcciones del servidor de pruebas: la normal y la que imita el subdominio de la tienda */
@@ -73,13 +91,15 @@ export function vigilar(page) {
 }
 
 /**
- * Abre la tienda como la vería alguien que llega sin cuenta: el CRM se simula
- * (catálogo de prueba, sin sesión, sin fotos), tienda/catalogo.json lleva los valores
- * congelados de SITIO_FIJO y la canasta empieza vacía porque cada prueba trae su
- * propio navegador limpio.
+ * Abre la tienda como la ve quien ya entró con su cuenta (sin cuenta nadie la ve: la puerta
+ * de functions/_middleware.js manda a la entrada, y eso se prueba en unit/candado.test.mjs
+ * y en mi-cuenta.spec.js). El CRM se simula (catálogo de prueba con precios, la cuenta
+ * CUENTA, sin fotos), tienda/catalogo.json lleva los valores congelados de SITIO_FIJO y la
+ * canasta empieza vacía porque cada prueba trae su propio navegador limpio.
  * @param {import('@playwright/test').Page} page
- * @param {{ catalogo?: object, hora?: string, ruta?: string, sitio?: (sitio: any) => any }} [op]
+ * @param {{ catalogo?: object, cuenta?: object, hora?: string, ruta?: string, sitio?: (sitio: any) => any }} [op]
  *   catalogo: lo que responde el CRM (por omisión catalogo-crm.json);
+ *   cuenta: lo que responde `yo` (por omisión CUENTA);
  *   hora: instante fijo con zona, p. ej. '2026-10-22T10:00:00-05:00';
  *   ruta: por omisión '/tienda/';
  *   sitio: cambia tienda/catalogo.json para esta prueba (ver sitioDe).
@@ -87,7 +107,7 @@ export function vigilar(page) {
 export async function abrirTienda(page, op = {}) {
   await sitioDe(page, op.sitio);
   await page.route('**/tienda/mi-cuenta/api/tienda/catalogo', (r) => r.fulfill({ json: op.catalogo || CATALOGO_CRM }));
-  await page.route('**/tienda/mi-cuenta/api/yo', (r) => r.fulfill({ status: 401, json: { ok: false } }));
+  await page.route('**/tienda/mi-cuenta/api/yo', (r) => r.fulfill({ json: op.cuenta || CUENTA }));
   await page.route('**/tienda/mi-cuenta/api/tienda/foto/**', (r) => r.fulfill({ status: 404 }));
   if (op.hora) await page.clock.setFixedTime(op.hora);
   await page.goto(op.ruta || '/tienda/');
@@ -96,13 +116,12 @@ export async function abrirTienda(page, op = {}) {
 
 /**
  * Llena los datos de entrega de la canasta (el formulario ya tiene que estar a la vista):
- * Ana Prueba, CC 1105678901, celular 3001234567, barrio Belén, «Calle 1 # 2-3» y la autorización marcada.
- * No toca «Indicaciones», para que cada prueba escriba las suyas.
+ * Ana Prueba, celular 3001234567, barrio Belén, «Calle 1 # 2-3» y la autorización marcada.
+ * La cédula no se pide: es la de la cuenta. No toca «Indicaciones», para que cada prueba escriba las suyas.
  * @param {import('@playwright/test').Page} page
  */
 export async function llenarDatos(page) {
   await page.locator('#d-nombre').fill('Ana Prueba');
-  await page.locator('#d-doc').fill('1105678901');
   await page.locator('#d-cel').fill('3001234567');
   await page.locator('#d-barrio').fill('Belén');
   await page.locator('#d-dir').fill('Calle 1 # 2-3');

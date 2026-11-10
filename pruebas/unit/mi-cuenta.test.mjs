@@ -97,7 +97,7 @@ test('sin la clave configurada en Cloudflare no se llama al CRM y se avisa', asy
 
 test('al CRM le llegan la clave, la IP del cliente y su token; al navegador nada de eso', async () => {
   respuestaCrm = async () => Response.json({ ok: true, nombre: 'Ana' });
-  const res = await pedir('pedidos', { galleta: 'otra=1; pe_cuenta=tok-123' });
+  const res = await pedir('pedidos', { galleta: 'otra=1; pe_sesion=tok-123' });
   assert.equal(llamadas.length, 1);
   const { url, init } = llamadas[0];
   assert.equal(url, `${CRM}/cuenta/api/pedidos`);
@@ -126,9 +126,12 @@ for (const ruta of ['entrar', 'clave']) {
     respuestaCrm = async () => Response.json({ ok: true, token: SESION, nombre: 'Ana', estado: 'activa', dias: 30 });
     const res = await pedir(ruta, { metodo: 'POST', cuerpo: { usuario: '1105678901', clave: 'una-clave-larga' }, galleta: 'pe_cuenta_p=paso-verificado', origen: SITIO });
     assert.deepEqual(JSON.parse(res.texto), { ok: true, nombre: 'Ana', estado: 'activa' }, 'el token no puede ir en el cuerpo: el JS lo leería');
-    const sesion = galletaDe(res.galletas, 'pe_cuenta');
-    for (const parte of ['sesion-xyz', 'HttpOnly', 'Secure', 'SameSite=Lax', 'Path=/tienda', `Max-Age=${30 * 86400}`]) assert.ok(sesion.includes(parte), `falta ${parte}`);
+    const sesion = galletaDe(res.galletas, 'pe_sesion');
+    /* Path=/ y no /tienda: la puerta (functions/_middleware.js) la mira en toda la tienda, que en su subdominio vive en «/» */
+    for (const parte of ['pe_sesion=sesion-xyz;', 'HttpOnly', 'Secure', 'SameSite=Lax', 'Path=/;', `Max-Age=${30 * 86400}`]) assert.ok(sesion.includes(parte), `falta ${parte}`);
+    assert.ok(!/Domain=/i.test(sesion), 'la sesión no debe salir del subdominio de la tienda');
     assert.match(galletaDe(res.galletas, 'pe_cuenta_p'), /^pe_cuenta_p=;.*Max-Age=0/, 'el paso intermedio debe borrarse');
+    assert.match(galletaDe(res.galletas, 'pe_cuenta'), /^pe_cuenta=; Path=\/tienda; Max-Age=0/, 'la sesión de antes (solo en /tienda) debe borrarse');
     sinFugas(res);
   });
 }
@@ -203,9 +206,31 @@ test('la foto de un producto pasa como imagen; si el CRM no da una imagen, no ex
 
 test('si el CRM dice 401, la sesión se borra', async () => {
   respuestaCrm = async () => Response.json({ ok: false, error: 'Vuelva a entrar.' }, { status: 401 });
-  const res = await pedir('yo', { galleta: 'pe_cuenta=vencido' });
+  const res = await pedir('yo', { galleta: 'pe_sesion=vencido' });
   assert.equal(res.r.status, 401);
-  assert.ok(res.galletas.some((x) => x.startsWith('pe_cuenta=;') && x.includes('Max-Age=0')));
+  assert.ok(res.galletas.some((x) => x.startsWith('pe_sesion=; Path=/;') && x.includes('Max-Age=0')));
+});
+
+test('el catálogo con una sesión que ya no vale (sesion: false) borra la galleta; con una buena no la toca', async () => {
+  respuestaCrm = async () => Response.json({ ok: true, sesion: false, productos: [{ id: 1, nombre: 'Vaso' }] });
+  const vencida = await pedir('tienda/catalogo', { galleta: 'pe_sesion=vencido' });
+  assert.equal(vencida.r.status, 200, 'el catálogo nunca corta');
+  assert.equal(JSON.parse(vencida.texto).sesion, false);
+  assert.ok(vencida.galletas.some((x) => x.startsWith('pe_sesion=; Path=/;') && x.includes('Max-Age=0')), 'la puerta seguiría dejando pasar a una sesión muerta');
+  sinFugas(vencida);
+
+  const sinGalleta = await pedir('tienda/catalogo');
+  assert.deepEqual(sinGalleta.galletas, [], 'sin sesión no hay nada que borrar');
+
+  respuestaCrm = async () => Response.json({ ok: true, sesion: true, productos: [{ id: 1, nombre: 'Vaso', precio: 1000 }] });
+  const buena = await pedir('tienda/catalogo', { galleta: 'pe_sesion=buena' });
+  assert.deepEqual(buena.galletas, []);
+  assert.equal(JSON.parse(buena.texto).productos[0].precio, 1000);
+});
+
+test('la sesión de antes (pe_cuenta, solo en /tienda) ya no entra: hay que entrar otra vez', async () => {
+  await pedir('yo', { galleta: 'pe_cuenta=tok-de-antes' });
+  assert.equal(llamadas[0].init.headers['X-Cuenta-Token'], undefined);
 });
 
 test('CRM caído o que responde HTML: aviso amable, nunca su página', async () => {
@@ -221,21 +246,22 @@ test('CRM caído o que responde HTML: aviso amable, nunca su página', async () 
   sinFugas(caido);
 });
 
-test('salir borra las dos galletas sin llamar al CRM', async () => {
+test('salir borra la sesión, el paso intermedio y la sesión de antes, sin llamar al CRM', async () => {
   const res = await pedir('salir', { metodo: 'POST', origen: SITIO });
   assert.equal(llamadas.length, 0);
-  assert.ok(res.galletas.some((x) => x.startsWith('pe_cuenta=;')));
-  assert.ok(res.galletas.some((x) => x.startsWith('pe_cuenta_p=;')));
+  assert.ok(res.galletas.some((x) => x.startsWith('pe_sesion=; Path=/; Max-Age=0')));
+  assert.ok(res.galletas.some((x) => x.startsWith('pe_cuenta_p=; Path=/tienda; Max-Age=0')));
+  assert.ok(res.galletas.some((x) => x.startsWith('pe_cuenta=; Path=/tienda; Max-Age=0')));
 });
 
 test('el recibo PDF pasa como PDF privado', async () => {
   respuestaCrm = async () => new Response('%PDF-1.4', { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="FE-1.pdf"' } });
-  const res = await pedir('pedidos/12/recibo.pdf', { galleta: 'pe_cuenta=t' });
+  const res = await pedir('pedidos/12/recibo.pdf', { galleta: 'pe_sesion=t' });
   assert.equal(res.r.headers.get('Content-Type'), 'application/pdf');
   assert.equal(res.r.headers.get('Cache-Control'), 'private, no-store');
 });
 
-test('el portal queda detrás del candado de la tienda (mismo /tienda)', () => {
-  assert.ok(ARCHIVO.startsWith('functions/tienda/'), 'si el portal sale de /tienda, el candado de pruebas ya no lo cubre');
-  assert.match(leer('functions/_middleware.js'), /url\.pathname\.startsWith\('\/tienda\/'\)/, 'el candado ya no cubre /tienda/');
+test('el portal vive en /tienda, donde el middleware lo deja pasar sin redirigirlo', () => {
+  assert.ok(ARCHIVO.startsWith('functions/tienda/mi-cuenta/api/'));
+  assert.match(leer('functions/_middleware.js'), /const API = '\/tienda\/mi-cuenta\/api\/'/, 'el middleware ya no reconoce la API del portal');
 });

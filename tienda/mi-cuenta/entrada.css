@@ -1,0 +1,102 @@
+/* La entrada de la tienda (/mi-cuenta/): bienvenida, crear cuenta, código, contraseña y entrar.
+   La cara de la maqueta de la tienda como app: mesa azul noche de la marca, la tarjeta blanca
+   como la pantalla del celular, botones de pastilla y la cinta tricolor.
+   Los tokens y las letras vienen de tienda.css; los formularios base, de cuenta.css. */
+.entrada{
+  --resorte:cubic-bezier(.34,1.56,.64,1); --suelto:cubic-bezier(.22,1,.36,1);
+  min-height:100vh;min-height:100dvh;display:grid;place-items:center;
+  background:radial-gradient(1200px 600px at 75% -10%,#23357d 0,transparent 60%),radial-gradient(800px 500px at -10% 110%,#1b2a66 0,transparent 60%),var(--noche);
+}
+/* overflow: las pantallas entran deslizándose de lado; sin esto el celular dejaría mover la página mientras tanto */
+.puerta{width:100%;max-width:440px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+.puerta > section{flex:1;display:flex;flex-direction:column}
+.entrada :focus-visible{outline:3px solid var(--amarillo);outline-offset:2px}
+.solo-lector{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ---------- bienvenida ---------- */
+.bienvenida{background:var(--noche);color:#fff;align-items:center;gap:24px;padding:40px 24px 20px;text-align:center}
+.bienvenida .marca{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:240px}
+.bienvenida .logo{width:200px;height:auto;opacity:0;transform:scale(.6);animation:entra .7s var(--resorte) .1s forwards}
+.bienvenida .cinta{width:0;height:7px;border-radius:4px;background:linear-gradient(90deg,var(--rojo) 0 33%,var(--amarillo) 33% 66%,var(--azul) 66%);animation:cinta .6s var(--suelto) .55s forwards}
+.bienvenida .lema{margin:0;max-width:270px;font:600 16px/1.4 var(--font);color:#c9d1ee;text-wrap:balance;opacity:0;animation:sube .5s var(--suelto) .9s forwards}
+.bienvenida .acciones{width:100%;display:grid;gap:12px;opacity:0;animation:sube .5s var(--suelto) 1.05s forwards}
+.bienvenida .para-que{margin:0 0 4px;color:#dfe5fb;font-size:15px;text-wrap:balance}
+@keyframes entra{to{opacity:1;transform:none}}
+@keyframes cinta{to{width:200px}}
+@keyframes sube{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- crear cuenta, código, contraseña, entrar ---------- */
+.reg{padding:28px 24px 12px;gap:16px;animation:pasa .42s var(--suelto)}
+@keyframes pasa{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.reg h1{margin:6px 0 0;font:400 26px/1.1 var(--display);letter-spacing:-.01em;text-wrap:balance}
+.reg .sub{margin:0;color:var(--texto2)}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pasos i{height:5px;border-radius:3px;background:var(--linea);overflow:hidden;position:relative}
+.pasos i.lleno::after{content:"";position:absolute;inset:0;background:var(--azul);transform-origin:left}
+.pasos i.ahora::after{animation:llena .5s var(--suelto) .15s backwards}
+@keyframes llena{from{transform:scaleX(0)}}
+
+.entrada .form{flex:1;display:flex;flex-direction:column;gap:16px}
+.entrada .form label{gap:6px}
+.entrada .form input{padding:13px 14px;border-radius:14px;font-size:17px;transition:border-color .2s,box-shadow .2s}
+.entrada .form input:focus{box-shadow:0 0 0 4px rgba(26,68,190,.12)}
+.por-que{display:flex;gap:10px;align-items:flex-start;margin:0;padding:12px;border-radius:14px;background:var(--suave);font-size:13.5px;color:var(--texto2)}
+.por-que svg{flex:none;width:20px;height:20px;stroke:var(--azul);fill:none;stroke-width:2}
+.empuja{margin-top:auto;display:grid;gap:10px;padding-top:8px}
+.entrada .boton{width:100%;min-height:54px;padding:0 20px;font-size:17px;cursor:pointer;box-shadow:0 6px 16px rgba(26,68,190,.28);transition:transform .15s,background .2s}
+.entrada .boton:active{transform:scale(.97)}
+.entrada .boton.amarillo{background:var(--amarillo);color:var(--texto);box-shadow:0 6px 16px rgba(255,201,51,.3)}
+.entrada .boton.claro{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
+.entrada .boton.wa{box-shadow:0 6px 16px rgba(31,143,78,.28)}
+.entrada .enlace{display:block;min-height:44px;padding:10px;border:0;background:none;color:var(--azul);font:inherit;font-weight:700;font-size:15px;text-align:center;text-decoration:none;cursor:pointer;justify-self:stretch}
+.entrada .enlace.izq{text-align:left;padding-left:0;min-height:0}
+.legal{margin:0;font-size:12.5px;line-height:1.45;color:var(--texto2);text-align:center}
+.legal a{color:var(--texto2);font-weight:700}
+
+/* el código: seis casillas; debajo va un solo campo de verdad (para el teclado y «pegar») */
+.codigo-caja{position:relative}
+.entrada .form .codigo-real{position:absolute;inset:0;z-index:1;width:100%;height:100%;padding:0;border:0;opacity:0;font-size:16px;cursor:text}
+.entrada .codigo{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;letter-spacing:0}
+.codigo span{height:58px;border-radius:14px;border:2px solid var(--linea);display:grid;place-items:center;font:400 26px var(--display);transition:border-color .2s,transform .25s var(--resorte),background .2s}
+.codigo span.lleno{border-color:var(--azul);background:#eef2fd}
+.codigo-caja:focus-within .codigo span.ahora{border-color:var(--azul);box-shadow:0 0 0 4px rgba(26,68,190,.12)}
+.codigo.bien span{border-color:var(--verde);background:var(--verde2);color:var(--verde)}
+
+/* la contraseña: «Ver» y qué tan fuerte va */
+.entrada .form .campo{display:grid;gap:6px}
+.con-ojo{position:relative;display:block}
+.entrada .form .con-ojo input{padding-right:64px}
+.ojo{position:absolute;top:0;right:0;height:100%;min-width:56px;padding:0 14px;border:0;background:none;color:var(--azul);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.fuerza{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.fuerza i{height:5px;border-radius:3px;background:var(--linea);transition:background .25s}
+.fuerza.n1 i:nth-child(-n+1){background:var(--rojo)}
+.fuerza.n2 i:nth-child(-n+2){background:var(--amarillo)}
+.fuerza.n3 i:nth-child(-n+3){background:#7bbf5a}
+.fuerza.n4 i{background:var(--verde)}
+
+/* ---------- cuenta lista ---------- */
+.listo{align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.listo svg{width:110px;height:110px}
+.listo circle{stroke:var(--verde);stroke-width:6;fill:var(--verde2);stroke-dasharray:320;stroke-dashoffset:320;animation:traza .6s var(--suelto) forwards}
+.listo path{stroke:var(--verde);stroke-width:8;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:traza .4s var(--suelto) .45s forwards}
+.listo h1{margin:0;font:400 26px/1.15 var(--display)}
+.listo h1:focus{outline:none}
+.listo p{margin:0;max-width:300px;color:var(--texto2);text-wrap:balance}
+.listo .boton{margin-top:10px}
+@keyframes traza{to{stroke-dashoffset:0}}
+
+/* ---------- pie: términos, datos y ayuda (se ven sin cuenta) ---------- */
+.pie-entrada{margin:0;padding:10px 16px 18px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;font-size:13px}
+.pie-entrada a{color:var(--texto2);font-weight:600;padding:6px 0}
+.bienvenida:not([hidden]) ~ .pie-entrada{background:var(--noche)}
+.puerta:has(.bienvenida:not([hidden])){background:var(--noche)}   /* sin filo blanco en las esquinas de la tarjeta */
+.bienvenida:not([hidden]) ~ .pie-entrada a{color:#a9b3da}
+
+/* en pantalla ancha: la tarjeta en el centro de la mesa, como el celular de la maqueta */
+@media (min-width:560px){
+  .entrada{padding:24px}
+  .puerta{min-height:min(760px,calc(100vh - 48px));border-radius:28px;box-shadow:0 30px 70px rgba(0,0,0,.4)}
+}
+@media (prefers-reduced-motion:reduce){
+  .entrada *,.entrada *::before,.entrada *::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}

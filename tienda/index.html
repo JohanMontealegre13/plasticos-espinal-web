@@ -10,18 +10,18 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=23">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=24">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=24" defer></script>
-  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=5">
-  <script src="/tienda/mi-cuenta/menu.js?v=4" defer></script>
+  <script src="/tienda/tienda.js?v=25" defer></script>
+  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=6">
+  <script src="/tienda/mi-cuenta/menu.js?v=5" defer></script>
 </head>
 <body>
-<div class="proto"><div class="envolver"><span>Versión de prueba · solo con contraseña · precios de muestra</span><a class="url" href="/tienda/salir">Salir</a></div></div>
+<div class="proto"><div class="envolver"><span>Versión de prueba</span></div></div>
 <div class="franja"><div class="envolver">
   <span id="franjaLlegada">🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
   <span>Gratis desde <b id="gratisDesde">$50.000</b> en productos</span>
@@ -149,6 +149,8 @@
         <p class="unidad" id="fichaCodigo"></p>
         <p class="ficha-precio" id="fichaPrecio"></p>
         <p class="ficha-por-unidad" id="fichaUnidad" hidden></p>
+        <!-- Precio por cantidad (los mismos del mostrador): tienda.js lo llena si el producto los tiene -->
+        <div class="ficha-escalones" id="escalonesCaja" hidden><h3>Precio por cantidad</h3><ul id="fichaEscalones"></ul></div>
         <p class="ficha-disp" id="fichaDisp"></p>
         <ul class="confianza" aria-label="Al comprar aquí">
           <li>Paga al recibir o con Bre-B</li>
@@ -203,16 +205,13 @@
     <p class="confianza-linea">Paga al recibir o con Bre-B · <a href="terminos/" target="_blank" rel="noopener">Cambios y retracto</a></p>
   </div>
 
-  <!-- 2. Datos de entrega (se llenan una vez y quedan en este celular) -->
+  <!-- 2. Datos de entrega: salen de la cuenta de quien entró (o de lo último que escribió en este celular).
+       El documento no se pide: el pedido queda con el de la cuenta. -->
   <form class="datos" id="datos" hidden novalidate>
     <button class="volver" type="button" id="volver">‹ Volver a la canasta</button>
     <fieldset>
       <legend>Quién recibe</legend>
       <label for="d-nombre">Nombre completo o del negocio<input id="d-nombre" name="nombre" autocomplete="name" required maxlength="120"></label>
-      <div class="dos">
-        <label for="d-tipo">Documento<select id="d-tipo" name="tipo"><option>CC</option><option>NIT</option><option>CE</option><option>Pasaporte</option></select></label>
-        <label for="d-doc">Número<input id="d-doc" name="documento" inputmode="numeric" required maxlength="20" placeholder="1105678901"></label>
-      </div>
       <label for="d-cel">Celular con WhatsApp<input id="d-cel" name="celular" type="tel" inputmode="tel" autocomplete="tel" required placeholder="318 355 5246"><small>Por ahí le avisamos cuando confirmemos su pedido.</small></label>
     </fieldset>
     <fieldset>

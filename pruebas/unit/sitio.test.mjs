@@ -25,14 +25,13 @@ test('enlaces y recursos locales apuntan a archivos que existen (HTML)', () => {
       /* 404.html se sirve en cualquier dirección: se resuelve desde una subcarpeta cualquiera */
       const base = pagina === '404.html' ? '/una/carpeta/que-no-existe' : urlDe(pagina);
       const ruta = resolver(ref, base);
-      if (ruta.startsWith('/tienda/salir') || ruta.startsWith('/tienda/entrar')) continue; /* las atiende el candado */
       if (!archivoDe(ruta)) rotos.push(`${pagina}: ${ref}`);
     }
   }
   assert.deepEqual(rotos, []);
 });
 
-/* Mi cuenta usa #crear y #olvide como pantallas, no como anclas: cuenta.js las abre según la dirección */
+/* La entrada usa #crear, #entrar y #olvide como pantallas, no como anclas: cuenta.js las abre según la dirección */
 const VISTAS_CUENTA = JSON.parse((leer('tienda/mi-cuenta/cuenta.js').match(/var VISTAS = (\[[^\]]*\])/) || ['', '[]'])[1].replace(/'/g, '"'));
 
 test('enlaces internos #ancla llevan a un id que existe en la página', () => {

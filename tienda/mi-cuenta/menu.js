@@ -1,5 +1,5 @@
 /* Panel pequeño de «Mi cuenta» en la cabecera (tienda y portal del cliente).
-   Con sesión despliega el nombre y tres opciones; sin sesión lleva a entrar.
+   Despliega el nombre y tres opciones; si la sesión se venció, lleva a la entrada.
    Los datos vienen del CRM por /tienda/mi-cuenta/api (ver functions/). */
 (function () {
   'use strict';
@@ -139,8 +139,9 @@
       var salir = el('button', 'salir', 'Salir de mi cuenta');
       salir.type = 'button';
       salir.addEventListener('click', function () {
+        /* Sin cuenta no hay tienda: al salir se queda en la entrada, lista para volver a entrar */
         fetch(API + 'salir', { method: 'POST', credentials: 'same-origin' })
-          .finally(function () { location.href = RAIZ; });
+          .finally(function () { location.href = PORTAL + '#entrar'; });
       });
       panel.appendChild(salir);
       panel.hidden = false;
