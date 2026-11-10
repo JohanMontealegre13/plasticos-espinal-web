@@ -123,9 +123,11 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    dirección, teléfono, «Pida ahora») con la banda del menú debajo.
 1. **Portada** en escena: el título va en el aire de la izquierda de la foto
    (computador), encima de la pared (celular) o arriba de la foto (tableta).
-2. **Marcas** que distribuimos: cinta con los logos oficiales (`img/marcas/`,
-   bajados de la página de cada marca) que avanza sola, con botón de pausa; con
-   «menos movimiento» queda quieta. Solo marcas que de verdad se venden.
+2. **Marcas** que distribuimos: cinta que avanza sola, con botón de pausa; con
+   «menos movimiento» queda quieta. Solo marcas que de verdad se venden. Con
+   logo, las que lo publican en su página oficial (`img/marcas/`); las demás,
+   con su nombre en nuestra letra (`.marcas__nombre`) hasta tener el archivo
+   del proveedor. Nunca un logo sacado de otro lado.
 3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
    catálogo. Sin JS es una fila deslizable.
 4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva

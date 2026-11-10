@@ -353,7 +353,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 /* ---------- 10. Marcas ---------- */
-/* Cinta de marcas: los logos reales, cada uno en su tarjeta blanca, avanzando sin parar. La pista
+/* Cinta de marcas: cada una en su tarjeta blanca, avanzando sin parar. Con logo las que lo publican
+   en su página oficial; las demás, con su nombre en nuestra letra (.marcas__nombre). La pista
    lleva la lista cuatro veces y corre un cuarto de su ancho: al terminar, la vuelta no se nota.
    Se detiene con el mouse encima, con el foco adentro o con el botón de pausa (principal.js). */
 .marcas { background: linear-gradient(180deg, var(--blanco), var(--tint)); padding-block: 26px 30px; border-block: 1px solid var(--linea); overflow: hidden; }
@@ -372,7 +373,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 32s linear infinite; }
+.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 70s linear infinite; }
 .marcas__ventana:hover .marcas__pista, .marcas__ventana:focus-within .marcas__pista, .marcas.esta-pausada .marcas__pista { animation-play-state: paused; }
 @keyframes marcas-rodar { to { transform: translateX(-25%); } }
 .marcas__lista { list-style: none; margin: 0; padding: 0 20px 0 0; display: flex; gap: 20px; flex: none; }
@@ -381,15 +382,17 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   background: #fff; border: 1px solid var(--linea); border-radius: var(--radio-lg); box-shadow: var(--dura-sm);
 }
 .marcas__lista img { display: block; height: 52px; width: auto; max-width: none; }
+.marcas__nombre { font-family: var(--display); font-weight: 400; font-size: 1.375rem; line-height: 1; letter-spacing: .01em; color: var(--azul-osc); white-space: nowrap; }
 @media (max-width: 599px) {
   .marcas__lista { gap: 14px; padding-right: 14px; }
   .marcas__lista li { height: 68px; padding: 0 20px; }
   .marcas__lista img { height: 40px; }
+  .marcas__nombre { font-size: 1.125rem; }
 }
 /* Con «menos movimiento» la cinta no corre: una sola vez cada logo, centrados y en renglones */
 @media (prefers-reduced-motion: reduce) {
   .marcas__pista { width: auto; justify-content: center; }
-  .marcas__lista { flex-wrap: wrap; justify-content: center; padding: 0 var(--gutter); }
+  .marcas__lista { flex: 0 1 auto; min-width: 0; flex-wrap: wrap; justify-content: center; padding: 0 var(--gutter); }
   .marcas__lista[aria-hidden="true"] { display: none; }
   .marcas__ventana { -webkit-mask-image: none; mask-image: none; }
 }
