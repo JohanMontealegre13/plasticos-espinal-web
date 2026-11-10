@@ -4,7 +4,9 @@
 (function () {
   'use strict';
   var API = '/tienda/mi-cuenta/api/';
-  var BASE = '/tienda/mi-cuenta/';
+  /* Raíz de la tienda: «/» en tienda.plasticosespinal.com, «/tienda/» en las pruebas y vistas previas */
+  var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
+  var BASE = RAIZ + 'mi-cuenta/';
   var formato = new Intl.NumberFormat('es-CO');
 
   function $(id) { return document.getElementById(id); }
@@ -42,7 +44,7 @@
   try { enMarco = window.self !== window.top && window.top.location.origin === location.origin; } catch (e) { enMarco = false; }
   function aMisPedidos() {
     var ruta = BASE + 'pedidos/';
-    location.href = enMarco ? ruta : '/tienda/#cuenta=' + encodeURIComponent(ruta);
+    location.href = enMarco ? ruta : RAIZ + '#cuenta=' + encodeURIComponent(ruta);
   }
 
   function error(nodo, texto) { nodo.textContent = texto; nodo.hidden = !texto; }
@@ -172,7 +174,7 @@
         var v = el('div', 'vacio');
         v.appendChild(el('b', '', 'Aún no vemos compras a su nombre.'));
         v.appendChild(el('p', 'ayuda', 'Cuando compre, en el mostrador o en la tienda en línea, dé su cédula y aparecerán aquí.'));
-        var a = el('a', 'boton', 'Hacer un pedido'); a.href = '/tienda/';
+        var a = el('a', 'boton', 'Hacer un pedido'); a.href = RAIZ;
         v.appendChild(a);
         caja.appendChild(v);
         return;

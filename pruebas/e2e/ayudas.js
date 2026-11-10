@@ -39,6 +39,9 @@ export async function sitioDe(page, cambiar) {
   });
 }
 
+/** Direcciones del servidor de pruebas: la normal y la que imita el subdominio de la tienda */
+const LOCALES = ['127.0.0.1', 'tienda.localhost'];
+
 /**
  * Anota todo lo que sale mal en la página: errores de JS, avisos de la CSP,
  * recursos propios que no cargan. Al final de la prueba se exige que esté vacío.
@@ -55,13 +58,13 @@ export function vigilar(page) {
   page.on('response', (r) => {
     const u = new URL(r.url());
     /* Las respuestas de la API (401 sin sesión, 400 código malo) son parte del contrato y se prueban aparte */
-    if (u.hostname === '127.0.0.1' && r.status() >= 400 && r.request().resourceType() !== 'document' && !u.pathname.includes('/api/')) {
+    if (LOCALES.includes(u.hostname) && r.status() >= 400 && r.request().resourceType() !== 'document' && !u.pathname.includes('/api/')) {
       problemas.push(`${r.status()} ${u.pathname}`);
     }
   });
   page.on('requestfailed', (r) => {
     const u = new URL(r.url());
-    if (u.hostname === '127.0.0.1') problemas.push(`falló ${u.pathname}: ${r.failure()?.errorText}`);
+    if (LOCALES.includes(u.hostname)) problemas.push(`falló ${u.pathname}: ${r.failure()?.errorText}`);
   });
   return {
     problemas,

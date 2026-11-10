@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "include": [
+    "/",
+    "/index.html",
+    "/robots.txt",
+    "/api/*",
+    "/tienda",
+    "/tienda/*",
+    "/mi-cuenta",
+    "/mi-cuenta/*",
+    "/terminos",
+    "/terminos/*",
+    "/privacidad",
+    "/privacidad/*"
+  ],
+  "exclude": []
+}
