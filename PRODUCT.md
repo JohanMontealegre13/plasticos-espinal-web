@@ -9,7 +9,7 @@ brand
 Dueños y encargados de negocios del Tolima (El Espinal y alrededores): restaurantes,
 asaderos, panaderías, reposterías, comidas rápidas, heladerías, tiendas y minimercados,
 además de familias que arman eventos. Llegan buscando surtir desechables al por mayor o
-al detal con precio de distribuidora y despacho el mismo día. Contexto de uso: mayormente
+al detal, con quien les resuelva el pedido fácil y el mismo día. Contexto de uso: mayormente
 celular, decisión rápida, quieren cotizar y pedir sin fricción.
 
 ## Product Purpose
@@ -25,6 +25,13 @@ WhatsApp.
 Festiva y sanpedrina (sombrero y tambor del San Pedro, tierra del tamal), pero con la
 confianza de un catálogo corporativo serio. Tres palabras: local, alegre, confiable. Debe
 sentirse cercana y de la región sin perder credibilidad de proveedor mayorista.
+
+## Cómo hablamos (decisión de Johan, 10-nov-2026)
+
+No somos un «mercado rojo»: no competimos por ser los más baratos. Los títulos y
+las frases grandes dicen qué vendemos y para quién, nunca «precio de bodega» ni
+«los más baratos». Lo que nos diferencia es la tecnología con que atendemos
+(catálogo al día, pedido fácil, respuesta rápida), no el precio.
 
 ## Anti-references
 
