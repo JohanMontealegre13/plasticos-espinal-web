@@ -26,14 +26,50 @@ test('la portada dice qué vendemos y para quién, sin competir por precio, y el
   expect(await page.content()).not.toMatch(/precio de (bodega|distribuidora)/i);
   const m = await page.evaluate(() => {
     const caja = (/** @type {string} */ s) => /** @type {Element} */ (document.querySelector(s)).getBoundingClientRect();
-    const foto = caja('.portada__foto'), h1 = caja('.portada h1'), marco = caja('.portada__marco'), resto = caja('.portada__resto');
-    return { ancho: innerWidth, finTitulo: (h1.bottom - foto.top) / foto.height, sobra: marco.bottom - resto.bottom,
-      etiqueta: caja('.portada__etiqueta').height };
+    const foto = caja('.lamina__foto'), h1 = caja('.lamina h1'), botones = caja('.lamina__botones');
+    return { ancho: innerWidth, foto: { izq: foto.left, der: foto.right, abajo: foto.bottom }, h1Der: h1.right, h1Arriba: h1.top,
+      botonesAbajo: botones.bottom, etiqueta: caja('.portada__etiqueta').height };
   });
-  /* La etiqueta va en un solo renglón: si se parte, empuja el título sobre los productos */
+  /* La etiqueta va en un solo renglón */
   expect(m.etiqueta).toBeLessThan(40);
-  if (m.ancho < 600) expect(m.finTitulo, 'el título baja hasta los productos de la foto').toBeLessThan(0.54);
-  if (m.ancho >= 1100) expect(m.sobra, 'el botón se sale de la foto').toBeGreaterThanOrEqual(0);
+  /* La portada va de borde a borde (pedido de Johan, 11-nov-2026) */
+  expect(m.foto.izq).toBe(0);
+  expect(Math.round(m.foto.der)).toBe(m.ancho);
+  if (m.ancho < 760) {
+    /* Celular: el texto va debajo de la foto, nunca encima de los productos */
+    expect(m.h1Arriba).toBeGreaterThanOrEqual(m.foto.abajo);
+  } else {
+    /* Computador y tableta: el título queda en el aire de la izquierda y los botones dentro de la foto */
+    expect(m.h1Der, 'el título se mete en los productos').toBeLessThan(m.ancho * 0.5);
+    expect(m.botonesAbajo, 'los botones se salen de la foto').toBeLessThanOrEqual(m.foto.abajo);
+  }
+});
+
+test('la portada ancha: tres láminas con su foto, la cinta roja y azul, y el carrusel se maneja', async ({ page }) => {
+  const v = vigilar(page);
+  await page.goto('/');
+  const laminas = page.locator('#inicio .lamina');
+  await expect(laminas).toHaveCount(3);
+  /* Cada lámina con una foto distinta, que carga, con texto alternativo */
+  const fotos = await laminas.locator('img').evaluateAll((is) => is.map((i) => ({
+    src: /** @type {HTMLImageElement} */ (i).getAttribute('src'), alt: /** @type {HTMLImageElement} */ (i).alt })));
+  expect(new Set(fotos.map((f) => f.src)).size).toBe(3);
+  for (const f of fotos) { expect(f.src).toMatch(/^img\/portada\/[a-z-]+-1920\.webp$/); expect(f.alt.length).toBeGreaterThan(20); }
+  for (const s of fotos.map((f) => f.src)) expect((await page.request.get('/' + s)).status()).toBe(200);
+  /* Ningún precio de producto: solo el hecho del domicilio */
+  const texto = await page.locator('#inicio').innerText();
+  expect(texto.match(/\$\s?[\d.]+/g) ?? []).toEqual(['$50.000']);
+  /* La cinta de la marca va roja y azul, sin amarillo (Johan, 11-nov-2026) */
+  const cinta = await laminas.first().locator('.lamina__texto').evaluate((e) => getComputedStyle(e, '::before').backgroundImage);
+  expect(cinta).toContain('rgb(230, 57, 39)');
+  expect(cinta).not.toMatch(/rgb\(255, 2\d\d, \d+\)/);
+  /* Los puntos llevan a cada lámina */
+  const puntos = page.locator('#inicio .carrusel__punto');
+  await expect(puntos).toHaveCount(3);
+  await puntos.nth(2).click();
+  await expect(puntos.nth(2)).toHaveAttribute('aria-current', 'true');
+  await expect(laminas.nth(2).locator('.lamina__titulo')).toBeInViewport();
+  v.sinProblemas();
 });
 
 test('el punto de la etiqueta es verde y late como «en línea»; con «menos movimiento» queda quieto', async ({ page }) => {
@@ -144,7 +180,7 @@ test('en celular el inicio no tiene desplazamiento horizontal', async ({ page })
 test('el carrusel de categorías: flechas y puntos mueven la fila y la pausa se puede quitar y poner', async ({ page }) => {
   const v = vigilar(page);
   await page.goto('/');
-  const carrusel = page.locator('[data-carrusel]');
+  const carrusel = page.locator('#catalogo [data-carrusel]');
   const pista = carrusel.locator('.carrusel__pista');
   await carrusel.scrollIntoViewIfNeeded();
   await expect(carrusel).toHaveAttribute('aria-roledescription', 'carrusel');
@@ -167,7 +203,7 @@ test('el carrusel de categorías: flechas y puntos mueven la fila y la pausa se 
 test('el carrusel avanza solo cada 5 s mientras nadie lo toca', async ({ page }) => {
   await page.clock.install();
   await page.goto('/');
-  const pista = page.locator('.carrusel__pista');
+  const pista = page.locator('#catalogo .carrusel__pista');
   await pista.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
   await page.clock.runFor(5200);
@@ -182,7 +218,7 @@ test('con «menos movimiento» el carrusel no avanza solo y nada queda escondido
   await expect(page.locator('html')).not.toHaveClass(/revela-listo/);
   await expect(page.locator('.carrusel__pausa')).toHaveCount(0);
   await page.clock.runFor(11000);
-  expect(await page.locator('.carrusel__pista').evaluate((e) => e.scrollLeft)).toBe(0);
+  for (const s of await page.locator('.carrusel__pista').evaluateAll((es) => es.map((e) => e.scrollLeft))) expect(s).toBe(0);
   for (const op of await page.locator('[data-revela]').evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity))) expect(op).toBe('1');
   await ctx.close();
 });
@@ -193,7 +229,7 @@ test('sin JS todo el contenido se ve (aparecer al bajar no esconde nada por su c
   await page.goto('/');
   for (const op of await page.locator('[data-revela]').evaluateAll((els) => els.map((e) => getComputedStyle(e).opacity))) expect(op).toBe('1');
   /* La fila de categorías se puede deslizar igual */
-  expect(await page.locator('.carrusel__pista').evaluate((e) => getComputedStyle(e).overflowX)).toBe('auto');
+  for (const o of await page.locator('.carrusel__pista').evaluateAll((es) => es.map((e) => getComputedStyle(e).overflowX))) expect(o).toBe('auto');
   await ctx.close();
 });
 
@@ -230,7 +266,7 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
 test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en celular, y cada foto carga', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
-  await page.locator('.carrusel').scrollIntoViewIfNeeded();
+  await page.locator('#catalogo .carrusel').scrollIntoViewIfNeeded();
   const botones = await page.locator('.cat__boton').evaluateAll((els) => els.map((e) => ({
     alto: Math.round(e.getBoundingClientRect().height), minimo: parseFloat(getComputedStyle(e).minHeight),
   })));

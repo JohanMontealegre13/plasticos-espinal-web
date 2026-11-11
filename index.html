@@ -40,7 +40,7 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=19">
+  <link rel="stylesheet" href="css/estilos.css?v=20">
   <script src="js/principal.js?v=13" defer></script>
 
   <script type="application/ld+json">
@@ -150,29 +150,53 @@
 
   <main id="contenido">
 
-    <!-- Portada: escena con aire a la izquierda para el título -->
-    <section class="portada" id="inicio" aria-labelledby="titulo-portada">
-      <div class="contenedor">
-        <div class="portada__marco">
-          <picture class="portada__foto">
-            <source media="(max-width: 599px)" srcset="img/escenas/portada-celular-480.webp 480w, img/escenas/portada-celular-768.webp 768w" sizes="100vw" width="768" height="960">
-            <img src="img/escenas/portada-960.webp" srcset="img/escenas/portada-960.webp 960w, img/escenas/portada-1536.webp 1536w" sizes="(min-width: 1264px) 1200px, 100vw" width="1536" height="640" alt="Contenedor con almuerzo, platos, caja de cartón con empanadas, servilletas y jugo en vaso desechable sobre un mesón claro" fetchpriority="high">
-          </picture>
-          <div class="portada__cabeza">
-            <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
-            <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
-          </div>
-          <div class="portada__resto">
-            <p class="portada__bajada">Vasos, platos, contenedores, bolsas y empaques de las marcas líderes del país, al por mayor y al detal.</p>
-            <div class="portada__botones">
-              <a class="boton boton-amarillo boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
-                <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-                Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-              </a>
-              <a class="boton boton-azul boton-grande portada__secundario" href="#catalogo">Ver productos</a>
+    <!-- Portada ancha (11-nov-2026, pedido de Johan): tres láminas a todo lo ancho, cada una con
+         productos REALES del catálogo y la cinta roja y azul de la marca como objeto dentro de la foto
+         (sin amarillo: los colores de la marca son rojo y azul). El texto va en código, nunca en la
+         imagen. Sin JS es una fila que se desliza; principal.js le pone puntos, pausa y avance solo. -->
+    <section class="heroe" id="inicio" aria-labelledby="titulo-portada">
+      <div class="carrusel carrusel--heroe" data-carrusel>
+        <ul class="carrusel__pista" aria-label="Portada">
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/mesa-cel-600.webp 600w, img/portada/mesa-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/mesa-1920.webp" srcset="img/portada/mesa-1280.webp 1280w, img/portada/mesa-1920.webp 1920w, img/portada/mesa-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Mesa con sancocho en plato hondo de icopor, mojarra en bandeja ovalada, tamal en plato biodegradable, un portacomidas con arroz y fríjoles y tres jugos en vasos desechables, con una cinta roja y azul" fetchpriority="high">
+            </picture>
+            <div class="lamina__texto">
+              <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
+              <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
+              <div class="lamina__botones">
+                <a class="boton boton-claro boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
+                  <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+                  Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+                </a>
+                <a class="boton boton-contorno boton-grande" href="#catalogo">Ver productos</a>
+              </div>
             </div>
-          </div>
-        </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/domicilio-cel-600.webp 600w, img/portada/domicilio-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/domicilio-1920.webp" srcset="img/portada/domicilio-1280.webp 1280w, img/portada/domicilio-1920.webp 1920w, img/portada/domicilio-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Pedido en la puerta de una casa: bolsa de manija a rayas azules con portacomidas y vasos, y dos portacomidas amarrados con una cinta roja y azul" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Domicilio gratis desde $50.000</p>
+              <p class="lamina__bajada">En el casco urbano de El Espinal. Arme su pedido y se lo llevamos.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#contacto">Cómo pedir</a></div>
+            </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/biodegradable-cel-600.webp 600w, img/portada/biodegradable-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/biodegradable-1920.webp" srcset="img/portada/biodegradable-1280.webp 1280w, img/portada/biodegradable-1920.webp 1920w, img/portada/biodegradable-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Platos y portacomidas biodegradables con almuerzo, amarrados con una cinta roja y azul, frente a un cultivo de arroz del Tolima" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Línea biodegradable</p>
+              <p class="lamina__bajada">Platos y portacomidas para servir sin icopor.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#ecologicos">Ver la línea ecológica</a></div>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
 
