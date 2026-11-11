@@ -57,7 +57,7 @@ test('en el computador no salen ni la pastilla ni la tira del domicilio', async 
   await page.setViewportSize({ width: 1280, height: 800 });
   await abrirTienda(page);
   await expect(page.locator('#abajo')).toBeHidden();
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('#n')).toHaveText('1');
   await expect(page.locator('#flota')).toBeHidden();
 });
@@ -124,7 +124,7 @@ test('Inicio borra la búsqueda, devuelve lo de arriba y vuelve arriba', async (
   await expect(page.locator('.benef')).toBeHidden();
   await page.locator('#abInicio').click();
   await expect(page.locator('#q')).toHaveValue('');
-  await expect(page.locator('#tituloVitrina')).toHaveText('Lo más pedido');
+  await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
   await expect(page.locator('.benef')).toBeVisible();
   await expect(page.locator('#cats')).toBeVisible();
   expect(await seccion(page)).toEqual({ rayita: 'inicio', marcadas: ['abInicio'] });
@@ -157,7 +157,7 @@ test('Favoritos muestra solo lo guardado con el corazón; Inicio vuelve a todo',
   await page.locator('#grilla li').getByRole('button', { name: 'Quitar de favoritos' }).click();
   await expect(page.locator('#grilla li')).toHaveCount(0);
   await page.locator('#abInicio').click();
-  await expect(page.locator('#tituloVitrina')).toHaveText('Lo más pedido');
+  await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
   expect(await seccion(page)).toEqual({ rayita: 'inicio', marcadas: ['abInicio'] });
   v.sinProblemas();
 });
@@ -170,15 +170,15 @@ test('Mis pedidos ya no va abajo: queda en el menú de la cuenta', async ({ page
   await expect(page.locator('#menu-cuenta').getByRole('link', { name: /Mis pedidos/ })).toBeVisible();
 });
 
-test('sin portada: la tienda abre en los productos, con «Ver todo» al lado del título', async ({ page }) => {
+test('sin portada: la tienda abre en lo más pedido y debajo todo el catálogo, sin «Ver todo»', async ({ page }) => {
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
   await expect(page.getByText('Todo para su negocio')).toHaveCount(0);
   await expect(page.locator('h1')).toHaveText('Tienda en línea de Plásticos Espinal');
-  await expect(page.locator('#verTodo')).toBeVisible();
-  await page.locator('#verTodo').click();
+  await expect(page.locator('#masPedidoTit')).toHaveText('Lo más pedido');
   await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
-  await expect(page.locator('#verTodo')).toBeHidden();
+  await expect(page.locator('#grilla li')).toHaveCount(8);
+  await expect(page.locator('#verTodo')).toHaveCount(0);
 });
 
 test('las tarjetas con varias fotos las pasan solas; la que se toca se queda quieta', async ({ page }) => {
@@ -186,6 +186,7 @@ test('las tarjetas con varias fotos las pasan solas; la que se toca se queda qui
   const c = structuredClone(CATALOGO_CRM);
   for (const p of c.productos) { p.fotos = ['uno.jpg', 'dos.jpg']; p.foto = 'uno.jpg'; }
   await abrirTienda(page, { catalogo: c });
+  await page.evaluate(() => document.getElementById('grilla').scrollIntoView({ block: 'start' }));   /* arriba está lo más pedido: el catálogo va debajo */
   const pasada = () => page.evaluate(() => [...document.querySelectorAll('#grilla .tira')].slice(0, 2)
     .map((t) => Math.round(t.scrollLeft / t.clientWidth)));
   /* las dos primeras se turnan: en unos segundos las dos ya pasaron de foto */
@@ -197,7 +198,7 @@ test('las tarjetas con varias fotos las pasan solas; la que se toca se queda qui
 test('al agregar brota un chulo verde con «+1» y se va solo', async ({ page }) => {
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('.agregado')).toHaveCount(1);
   await expect(page.locator('.mas-uno')).toHaveText('+1');
   await expect(page.locator('.agregado, .mas-uno')).toHaveCount(0);
@@ -208,8 +209,8 @@ test('la canasta del círculo cuenta los productos, dice el total a quien lo oye
   await abrirTienda(page);
   const canasta = page.locator('#barra');
   await expect(page.locator('#barraN')).toBeHidden();
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
-  await page.getByRole('button', { name: UNO_MAS_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: UNO_MAS_J1 }).click();
   await expect(page.locator('#barraN')).toHaveText('2');
   await expect(canasta).toHaveAccessibleName('Canasta: 2 productos, $23.600');   /* 2 × $9.800 + $4.000 de domicilio */
   await canasta.click();
@@ -222,7 +223,7 @@ test('el aro del círculo se llena hacia el domicilio gratis y se pone verde al 
   await abrirTienda(page);
   const aro = () => page.locator('#barra').evaluate((b) => ({ avance: b.style.getPropertyValue('--avance'), gratis: b.classList.contains('gratis') }));
   expect(await aro()).toEqual({ avance: '0%', gratis: false });
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   expect(await aro()).toEqual({ avance: '19.6%', gratis: false });   /* $9.800 de $50.000 */
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').fill('6');
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').blur();
@@ -236,7 +237,7 @@ test('con algo en la canasta sale la tira: cuánto lleva y cuánto falta; al toc
   await abrirTienda(page);
   const tira = page.locator('#flota');
   await expect(tira).toBeHidden();
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(tira).toBeVisible();
   await expect(tira).toHaveText('Lleva $9.800 · faltan $40.200 para domicilio gratis');
   /* va encima de la pastilla, sin montarse (se mide cuando termina de subir) */
@@ -257,7 +258,7 @@ test('al llegar al domicilio gratis lo dice la tira y sale el aviso; abrir la ti
   const v = vigilar(page);
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('#tostada')).toBeHidden();
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').fill('6');
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').blur();
@@ -280,7 +281,7 @@ test('quien pidió menos movimiento ve el aviso del domicilio gratis, sin papeli
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('.volando, .agregado, .mas-uno')).toHaveCount(0);
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').fill('6');
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').blur();
@@ -293,7 +294,7 @@ test('al agregar desde la vitrina la foto vuela a la canasta y no deja nada suel
   const v = vigilar(page);
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('.volando')).toHaveCount(1);
   await expect(page.locator('.volando')).toHaveCount(0, { timeout: 3000 });
   /* con la canasta abierta no vuela nada: el círculo no está a la vista */

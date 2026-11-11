@@ -72,14 +72,12 @@ test('buscar un código muestra primero ese producto', async ({ page }) => {
 
 test('ordenar por menor precio', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('#verTodo').click();
   await page.locator('#orden').selectOption('menor');
   await expect(page.locator('#grilla li h3').first()).toHaveText('Pitillo flexible x100 und');
 });
 
 test('el orden: menor, mayor, nombre y «Más pedidos», con el agotado siempre al final', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('#verTodo').click();
   const nombres = page.locator('#grilla li h3');
   await expect(page.locator('#orden option')).toHaveText(['Más pedidos', 'Menor precio', 'Mayor precio', 'Nombre A-Z']);
   await expect(page.locator('#orden')).toHaveValue('pedidos');
@@ -97,12 +95,12 @@ test('el orden: menor, mayor, nombre y «Más pedidos», con el agotado siempre 
   await expect(nombres.first()).toHaveText('Contenedor icopor J1 x25 und');
 });
 
-test('el orden también cuenta en la portada y dentro de una categoría', async ({ page }) => {
-  await abrirTienda(page);                                   /* portada: solo lo más pedido */
-  await page.locator('#orden').selectOption('menor');
-  await expect(page.locator('#grilla li h3')).toHaveText(['Vaso 7 oz blanco Wau x50 und', 'Tenedor plástico x100 und', 'Contenedor icopor J1 x25 und']);
+test('el orden también cuenta dentro de una categoría, y no cambia lo más pedido', async ({ page }) => {
+  await abrirTienda(page);
+  const masPedido = await page.locator('#rotan li h3').allTextContents();
   await page.locator('#orden').selectOption('nombre');
-  await expect(page.locator('#grilla li h3').first()).toHaveText('Contenedor icopor J1 x25 und');
+  await expect(page.locator('#grilla li h3').first()).toHaveText('Bolsa kraft #6 x100 und');
+  await expect(page.locator('#rotan li h3')).toHaveText(masPedido);
   await page.locator('.cat[data-cat="c1"]').click();         /* una categoría: contenedores, tenedores y bolsas */
   await expect(page.locator('#grilla li h3')).toHaveText(['Bolsa kraft #6 x100 und', 'Contenedor icopor J1 x25 und', 'Tenedor plástico x100 und']);
   await page.locator('#orden').selectOption('mayor');
@@ -219,7 +217,7 @@ test('buscando dice cuántos productos hay y el filtro puesto, que se quita con 
 
 test('en una categoría el filtro puesto lleva su nombre; sin resultados no hay conteo pero sí el ✕', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('.cat').first().click();
+  await page.locator('.cat[data-cat]:not([data-cat=""])').first().click();
   const nombre = await page.locator('#tituloVitrina').textContent();
   await expect(page.locator('#limpiarTexto')).toHaveText(nombre || '');
   await expect(page.locator('#conteo')).toHaveText(/^\d+ productos?$/);

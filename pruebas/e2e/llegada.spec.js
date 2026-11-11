@@ -8,7 +8,7 @@ test('la franja y la canasta dicen la hora de llegada', async ({ page }) => {
   await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00' });
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Llega hoy antes de las 11:00 a. m.');
   await expect(page.locator('#llegada')).toBeHidden();   /* con la canasta cerrada no se ve */
-  await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await abrirCanasta(page);
   await expect(page.locator('#llegada')).toHaveText('Llega hoy antes de las 11:00 a. m.');
   v.sinProblemas();
@@ -30,7 +30,7 @@ test('la franja sigue la hora de Colombia aunque el equipo esté en otra zona', 
 test('si el horario falta queda el texto de siempre', async ({ page }) => {
   await abrirTienda(page, { hora: '2026-10-22T10:00:00-05:00', sitio: (sitio) => { delete sitio.horario; } });
   await expect(page.locator('#franjaLlegada')).toHaveText('🛵 Domicilio en El Espinal en menos de 1 hora');
-  await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await abrirCanasta(page);
   await expect(page.locator('#llegada')).toBeHidden();
 });

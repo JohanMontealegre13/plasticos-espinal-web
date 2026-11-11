@@ -234,7 +234,7 @@ for (const [caso, volver] of [
   ['otro sitio', 'https://malo.example/tienda/'],
   ['otro sitio sin protocolo', '//malo.example/tienda/'],
   ['una ruta que termina en otro sitio', '/tienda/..//malo.example/'],
-  ['la página principal', '/productos/'],
+  ['la página principal', '/terminos/'],
   ['la misma entrada', '/tienda/mi-cuenta/'],
 ]) {
   test(`una dirección de vuelta a ${caso} no se obedece: al entrar va al inicio de la tienda`, async ({ page }) => {
@@ -401,6 +401,26 @@ test('un enlace guardado a Mis pedidos se va a la tienda sin pedir nada desde la
   await expect(marco(page).locator('#lista')).toContainText('FE-0012');
   await expect(marco(page).locator('#lista')).toContainText('$61.000');
   expect(llamadas.filter((l) => l === 'GET pedidos'), 'solo los pide la ventana').toHaveLength(1);
+});
+
+test('Mis pedidos muestra los pedidos de la tienda que aún no son venta, en cualquier celular', async ({ page }) => {
+  const v = vigilar(page);
+  await api(page, { sesion: true });
+  await page.route('**/tienda/mi-cuenta/api/pedidos', (r) => r.fulfill({ json: { ...PEDIDOS, en_curso: [
+    { codigo: 'PE-0017', fecha: '2026-11-11 00:40', estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', total: 23500, productos: 2, abierto: true },
+    { codigo: 'PE-0009', fecha: '2026-11-08 09:10', estado: 'NO_ENTREGADO', titulo: 'No pudimos tomar el pedido', total: 9000, productos: 1, abierto: false },
+  ] } }));
+  await abrirEnVentana(page, 'pedidos/');
+  const lista = marco(page).locator('#lista');
+  await expect(lista).toContainText('Pedido PE-0017');
+  await expect(lista).toContainText('Confirmando');
+  await expect(lista).toContainText('$23.500');
+  await expect(lista).toContainText('No pudimos tomar el pedido');
+  await expect(lista).toContainText('FE-0012');                 /* las compras siguen debajo */
+  await expect(lista).not.toContainText('Aún no vemos compras');
+  /* Sin el secreto de este celular no hay seguimiento que abrir: no es un enlace */
+  await expect(marco(page).getByRole('link', { name: /PE-0017/ })).toHaveCount(0);
+  v.sinProblemas();
 });
 
 test('una compra muestra sus líneas, total y el recibo por el intermediario', async ({ page }) => {

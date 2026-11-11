@@ -91,7 +91,7 @@ test('las secciones de favoritos y vistos tienen su título y no repiten el bot�
   await expect(page.getByRole('heading', { name: 'Lo que vio hace poco' })).toBeVisible();
   await expect(page.locator('#favoritos li')).toHaveCount(2);
   /* 141 está en la vitrina, en favoritos y en vistos: el botón de agregar es uno solo */
-  await expect(page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toHaveCount(1);
+  await expect(page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toHaveCount(1);
   await expect(page.locator('#favoritos').getByRole('button', { name: /Agregar|Agotado/ })).toHaveCount(0);
 });
 
@@ -167,13 +167,14 @@ test('abrir un favorito y cerrarlo deja «Sus favoritos» donde estaba, aunque �
 test('guardar el primer favorito desde la ficha y volver con «atrás» tampoco mueve la vitrina', async ({ page }) => {
   await abrirTienda(page);
   await page.evaluate(() => window.scrollTo(0, document.getElementById('vitrina').offsetTop - 60));
-  const antes = await page.locator('#vitrina').evaluate((e) => Math.round(e.getBoundingClientRect().top));
+  const antes = await page.locator('#vitrina').evaluate((e) => e.getBoundingClientRect().top);
   await page.locator('#grilla li').first().locator('.nombre').click();
   await page.locator('#ficha').getByRole('button', { name: 'Guardar en favoritos' }).click();
   await page.goBack();
   await expect(page.locator('#ficha')).toBeHidden();
   await expect(page.locator('#favoritos li')).toHaveCount(1);
-  await expect.poll(() => page.locator('#vitrina').evaluate((e) => Math.round(e.getBoundingClientRect().top))).toBe(antes);
+  /* menos de un píxel: el desplazamiento va en píxeles enteros y la vitrina puede quedar en una fracción */
+  await expect.poll(() => page.locator('#vitrina').evaluate((e, a) => Math.abs(e.getBoundingClientRect().top - a), antes)).toBeLessThan(1);
 });
 
 /* ---------- vistos hace poco ---------- */
@@ -281,7 +282,7 @@ test('guardar un favorito mientras se busca no lo muestra hasta que se limpie la
 test('lo de la última vez se SUMA a lo que ya hay en la canasta', async ({ page }) => {
   await sembrar(page, { 'pe-ultimo-v1': [{ id: 141, cantidad: 2 }, { id: 131, cantidad: 1 }] });
   await abrirTienda(page);
-  await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await page.locator('#ultimaVez').click();
   await expect(page.locator('#panel')).toBeVisible();
   await expect(page.locator('#items li')).toHaveCount(2);
@@ -334,8 +335,8 @@ test('lo de la última vez respeta el tope de 999 por línea', async ({ page }) 
 
 /** Llena la canasta con el contenedor y llega hasta el botón «Seguir al pago» con los datos listos. */
 async function hastaElEnvio(/** @type {import('@playwright/test').Page} */ page) {
-  await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
-  await page.getByRole('button', { name: 'Agregar uno más de Contenedor icopor J1 x25 und' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar uno más de Contenedor icopor J1 x25 und' }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await page.locator('#d-nombre').fill('Restaurante La Plaza');

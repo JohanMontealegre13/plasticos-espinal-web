@@ -272,10 +272,14 @@
   /* El pedido de la tienda que va en camino (el que guardó este celular al pedirlo): arriba de todo, y al
      tocarlo se ve su seguimiento en la tienda. Se borra solo cuando el pedido termina. */
   var EN_CURSO = { POR_CONFIRMAR: 'Confirmando', POR_ALISTAR: 'Preparándose', EN_CAMINO: 'En camino' };
-  function intentarEnCurso() {
+  function guardadoAqui() {
     var p;
     try { p = JSON.parse(localStorage.getItem('pe-pedido-v1')); } catch (e) { p = null; }
-    if (!p || !p.codigo || p.final || !p.medio) return;
+    return p && p.codigo && !p.final && p.medio ? p : null;
+  }
+  function intentarEnCurso(enLista) {
+    var p = guardadoAqui();
+    if (!p || enLista.indexOf(p.codigo) >= 0) return;
     var b = el('button', 'compra en-curso');
     b.type = 'button';
     var izq = el('span');
@@ -300,8 +304,10 @@
     }).catch(function (err) { caja.textContent = err.message; });
     function pintar(j) {
       caja.textContent = '';
-      intentarEnCurso();
-      if (!j.pedidos.length) {
+      var enCurso = j.en_curso || [];
+      intentarEnCurso(enCurso.map(function (p) { return p.codigo; }));
+      pintarEnCurso(caja, enCurso);
+      if (!j.pedidos.length && !enCurso.length) {
         var v = el('div', 'vacio');
         v.appendChild(el('b', '', 'Aún no vemos compras a su nombre.'));
         v.appendChild(el('p', 'ayuda', 'Cuando compre, en el mostrador o en la tienda en línea, dé su cédula y aparecerán aquí.'));
@@ -310,6 +316,7 @@
         caja.appendChild(v);
         return;
       }
+      if (!j.pedidos.length) return;
       var ul = el('ul', 'lista');
       j.pedidos.forEach(function (p) {
         var a = el('a', 'compra');
@@ -325,6 +332,34 @@
       });
       caja.appendChild(ul);
     }
+  }
+
+  /* Los pedidos de la tienda que aún no son venta (por confirmar, o que la tienda no tomó): los manda el
+     CRM, así que salen en cualquier celular. El que pidió este mismo celular abre su seguimiento; los
+     demás solo dicen cómo van (el seguimiento pide el secreto que guardó el celular que lo hizo). */
+  function pintarEnCurso(caja, lista) {
+    if (!lista.length) return;
+    var aqui = guardadoAqui();
+    var ul = el('ul', 'lista');
+    lista.forEach(function (p) {
+      var abre = aqui && aqui.codigo === p.codigo;
+      var fila = el(abre ? 'button' : 'div', 'compra' + (p.abierto ? ' en-curso' : ''));
+      if (abre) {
+        fila.type = 'button';
+        fila.addEventListener('click', function () {
+          if (window.parent !== window) window.parent.postMessage({ cuenta: 'cerrar', pedido: true }, location.origin);
+          else location.href = RAIZ;
+        });
+      }
+      var izq = el('span');
+      izq.appendChild(el('span', 'chip dom', 'Tienda en línea'));
+      izq.appendChild(el('span', 'chip' + (p.abierto ? ' vivo' : ' pend'), EN_CURSO[p.estado] || p.titulo));
+      izq.appendChild(el('span', 'det', fecha(p.fecha) + ' · Pedido ' + p.codigo));
+      fila.appendChild(izq);
+      fila.appendChild(el('b', '', pesos(p.total)));
+      var li = el('li'); li.appendChild(fila); ul.appendChild(li);
+    });
+    caja.appendChild(ul);
   }
 
   /* ---------- una compra ---------- */

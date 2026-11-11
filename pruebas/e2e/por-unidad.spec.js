@@ -10,7 +10,6 @@ const tarjeta = (/** @type {import('@playwright/test').Page} */ page, /** @type 
 test('la tarjeta dice el precio por unidad de lo que viene en paquete', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page);
-  await page.locator('#verTodo').click();
   await expect(tarjeta(page, 'Contenedor icopor J1 x25 und').locator('.por-unidad')).toHaveText('$392 c/u');   /* $9.800 / 25 */
   await expect(tarjeta(page, 'Tenedor plástico x100 und').locator('.por-unidad')).toHaveText('$62 c/u');
   await expect(tarjeta(page, 'Detergente en polvo 1 kg').locator('.por-unidad')).toHaveCount(0);       /* se mide: no */
@@ -33,7 +32,6 @@ test('con un empaque creado dice «c/rollo»; bajo $100 lleva centavos; un paque
   por[228].contenido = { cantidad: 300, unidad: 'und', se_mide: false };     /* $3.100 / 300 = $10,33 */
   por[305].contenido = { cantidad: 1, unidad: 'und', se_mide: false };       /* uno solo: el precio ya es por unidad */
   await abrirTienda(page, { catalogo });
-  await page.locator('#verTodo').click();
   await expect(tarjeta(page, 'Servilleta 25x25 x300 und').locator('.por-unidad')).toHaveText('$2.300 c/rollo');
   await expect(tarjeta(page, 'Pitillo flexible x100 und').locator('.por-unidad')).toHaveText('$10,33 c/u');
   await expect(tarjeta(page, 'Bolsa kraft #6 x100 und').locator('.por-unidad')).toHaveCount(0);

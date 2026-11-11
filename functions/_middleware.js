@@ -20,6 +20,10 @@
       Los archivos (.css, .js, logos) y la API pasan sin galleta: la entrada los necesita
       y ninguno trae precios ni datos de nadie.
 
+   4. El catálogo público /productos/ ya no existe (decisión de Johan, 11-nov-2026): todo
+      se pide en la tienda. Su dirección (y la de cada ficha, ?p=ID) se va con 301 a la
+      tienda, la ficha al mismo producto con #p=ID, para que no se pierda ningún enlace viejo.
+
    Vista previa de Cloudflare (*.pages.dev): <vista previa>/?sitio=tienda la muestra como
    si fuera el subdominio (deja la galleta pe_sitio); ?sitio=web vuelve a la página. */
 
@@ -69,6 +73,16 @@ export function pideCuenta(ruta) {
 }
 
 /**
+ * Adónde va una dirección del catálogo viejo (/productos/…): la ficha ?p=ID al mismo
+ * producto en la tienda (#p=ID) y todo lo demás a la entrada de la tienda.
+ * @param {URL} url
+ */
+export function destinoProductos(url) {
+  const id = url.searchParams.get('p');
+  return `https://${DOMINIO_TIENDA}/` + (id && /^\d{1,9}$/.test(id) ? `#p=${id}` : '');
+}
+
+/**
  * Qué hacer con una petición, sin tocar nada (lo usan el middleware, las pruebas y el
  * servidor local de pruebas):
  *   { tipo: 'pasar' }                       sigue tal cual (archivo o función)
@@ -92,6 +106,7 @@ export function rutaDe(url, enTienda, metodo = 'GET') {
     if (COMPARTIDO.test(ruta)) return { tipo: 'pasar' };
     return { tipo: 'tienda', ruta: '/tienda' + ruta };
   }
+  if (lectura && /^\/productos(?:\/|$)/.test(ruta)) return { tipo: 'ir', destino: destinoProductos(url) };
   if (DOMINIOS_WEB.includes(url.hostname) && deTienda && lectura && !ruta.startsWith(API)) {
     return { tipo: 'ir', destino: `https://${DOMINIO_TIENDA}${sinTienda(ruta)}${url.search}` };
   }

@@ -150,16 +150,15 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    muy cuadrados o muy alargados. Sumar o quitar una marca es cambiar las
    cuatro listas iguales de `index.html` y la lista `MARCAS` de
    `pruebas/e2e/inicio.spec.js`.
-3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas que llevan al
-   catálogo. Sin JS es una fila deslizable.
+3. **Categorías** (`#catalogo`) — carrusel de 10 tarjetas; cada una abre una
+   ventana con lo que trae y el botón a la tienda. Sin JS es una fila deslizable.
 4. **Sectores** — mosaico parejo (alta | dos | dos | alta); cada negocio lleva
-   a los productos que más se lleva en el catálogo.
+   a la tienda.
 
-**Solo tres botones de WhatsApp en el inicio** (Johan, 10-nov-2026: «le estamos
-vendiendo demasiado»): «Pida ahora» de la cabecera, el de la portada y el de
-contacto. Sin burbuja flotante ni WhatsApp en el pie, sectores o banners. En el
-catálogo, las tarjetas no llevan botón: el único «Pedir por WhatsApp» está en la
-ficha de cada producto.
+**Pedir va a la tienda** (Johan, 11-nov-2026): la cabecera, la portada, la
+línea ecológica y contacto llevan a la tienda en línea. WhatsApp queda solo para
+dudas, con un botón en contacto. Sin burbuja flotante ni WhatsApp en el pie,
+sectores o banners.
 5. **Banners**: mayorista (oscuro) y línea ecológica (`#ecologicos`, claro).
 6. **Confianza**: cuatro tarjetas, cada una con el filo de arriba del color
    de su ícono.
@@ -205,66 +204,31 @@ los pares principales de la paleta. Probado en escritorio y móvil.
    y los botones del CRM sin su lado festivo (morado, neón, vidrio,
    animaciones de entrada).
 
-## Catálogo público (`/productos/`) y políticas
+## Sin catálogo propio: todo se pide en la tienda (y políticas)
 
-- **Sin precios** (decisión de Johan, 9-nov-2026): el precio publicado obliga
-  (art. 26, Ley 1480), así que cada producto se pide por WhatsApp con su
-  nombre y código, y el precio se confirma antes de despachar. Los precios solo
-  los ve quien entró a la tienda con su cuenta.
-- `/productos/`: categorías en pestañas, buscador en la cabecera (el mismo de
-  la tienda, `js/buscar.js`; ahí se ve también en la ficha de un producto, se
-  sigue buscando sin devolverse y «atrás» vuelve a la ficha), filtros plegables de marca, medida, color, contenido y «solo
-  lo que hay» (salen de las características del CRM, solo cuando hay de dónde
-  escoger; en celular y tableta van detrás del botón «Filtros»), orden y la
-  ficha de cada producto (`?p=ID`): fotos, pestañas de descripción,
-  características y domicilio, y parecidos. Las tarjetas de categoría del
-  inicio llevan a `/productos/?categoria=…` (si el CRM llama distinto la
-  categoría, se busca por el nombre). El catálogo lo pinta `js/catalogo.js`; el
-  inicio no lo carga.
-- «Así se ven en su mesa» (inicio, 11-nov-2026, pedido de Johan; antes «en su negocio»): seis líneas
-  fijas en HTML (platos hondos, platos biodegradables, bandejas, vasos,
-  portacomidas y bolsas de manija), cada una con UNA foto en uso sin repetir
-  (`img/en-uso/`, recortadas de la segunda foto del CRM) y un enlace a su
-  búsqueda o categoría del catálogo. Al pasar el mouse la tarjeta sube, la foto
-  se acerca y aparece una barra amarilla; con movimiento reducido no se mueve.
+- **El catálogo `/productos/` ya no existe** (decisión de Johan, 11-nov-2026):
+  todo botón de pedir y todo enlace a productos lleva a la tienda en línea
+  (`https://tienda.plasticosespinal.com/`). Su dirección se va con 301 a la
+  tienda (`functions/_middleware.js`, `destinoProductos`), y un enlace viejo a
+  una ficha (`/productos/?p=ID`) abre ese mismo producto en la tienda (`#p=ID`),
+  para que no se pierda ningún enlace compartido. Con él se fueron
+  `js/catalogo.js` y las funciones `functions/api/catalogo.js` y
+  `functions/api/foto/`: la página pública ya no le pide nada al CRM.
+- **Sin precios en lo público** (decisión de Johan, 9-nov-2026): el precio
+  publicado obliga (art. 26, Ley 1480). Los precios solo los ve quien entró a la
+  tienda con su cuenta.
+- Las tarjetas de «Compre por categoría» abren una ventana con lo que trae la
+  categoría y el botón a la tienda; sin JavaScript, la tarjeta lleva a la tienda.
+  Los sectores y el banner mayorista también van a la tienda.
+- «Así se ven en su mesa» (inicio, 11-nov-2026, pedido de Johan): seis fotos de
+  muestra fijas en HTML (`img/en-uso/`), sin enlace, con el nombre dentro de la
+  foto (velo azul noche, Archivo Black y la cinta roja y azul de la portada).
 - Medidor de visitas: Cloudflare Web Analytics (sin galletas). La CSP deja pasar
   su guion (`static.cloudflareinsights.com`) y su envío (`cloudflareinsights.com`);
   se enciende en el panel de Cloudflare Pages, no en el código.
-- **Familias de categorías**: el CRM a veces parte una en varias («Aluminio» y
-  «Papel Aluminio», «Vasos» y «Vasos Gold», «Bolsas Manija»…). La que tiene
-  todas sus palabras dentro de otra se la lleva, así la pestaña muestra todos
-  sus productos; un enlace viejo a una parte abre la familia. La que junta varias
-  cosas con «y» («Vasos y platos») queda sola.
-- Datos: `functions/api/catalogo.js` le pide al CRM el mismo catálogo de la
-  tienda (con `PORTAL_CLAVE`) y deja pasar solo nombre, categoría, si hay o no,
-  «más pedido», fotos, contenido, descripción y detalles: nunca precio, stock
-  ni costo. Guarda la última lista buena en la caché de Cloudflare 14 días, así
-  que con el Mac apagado la página sigue mostrando productos. Si no hay ni
-  copia, la página lo dice y ofrece WhatsApp; el inicio simplemente no muestra
-  las pestañas. `functions/api/foto/[archivo].js` sirve las fotos del CRM (solo
-  PNG, JPG, GIF o WebP) con caché de un mes.
-- Solo salen los productos marcados «en tienda» en el CRM (activos y con
-  precio). Un producto sin foto propia lleva la foto de referencia de su tipo
-  (`img/productos/`, Pexels) con el sello «Foto de referencia»; nunca una
-  escena hecha con IA prestada de otro producto.
-- **La foto en uso va de primera** (Johan, 10-nov-2026: la página «tiene que
-  ser muy visual» y «que incite a comprar»). El CRM manda las fotos de cada
-  producto en orden: la principal (el producto con su medida, sobre el color de
-  su categoría), la segunda (el producto en uso: una escena hecha con IA a
-  partir del producto) y las demás. La tarjeta (inicio, catálogo y parecidos) y
-  la ficha abren con la segunda; la principal queda de segunda miniatura. Con
-  una sola foto se muestra esa. Las fotos del CRM llenan el recuadro, sin marco
-  blanco: son cuadradas y traen su propio fondo. Los códigos de
-  `SIN_FOTO_EN_USO` (`js/catalogo.js`) tienen de segunda otra cara del paquete,
-  no una escena, y siguen con la principal de primera: se saca el código de esa
-  lista cuando el producto tenga su foto en uso en el CRM. La página no achica
-  las fotos: salen con el peso con que se subieron al CRM.
-- Interruptor `PRECIOS_PUBLICOS` (variable de Cloudflare Pages): solo con el
-  valor exacto `1` dejaría pasar el precio. Apagado por decisión de Johan; la
-  página tampoco lo pintaría sin cambiar `js/catalogo.js`.
 - `/terminos/` y `/privacidad/`: las políticas públicas (las de la tienda viven
-  en su subdominio y lo público no enlaza a `/tienda`). El pie de todas
-  las páginas públicas trae enlaces rápidos, políticas y contacto.
+  en su subdominio). El pie de todas las páginas públicas trae enlaces rápidos,
+  políticas y contacto.
 
 ## Tienda en línea (`tienda.plasticosespinal.com`, en pruebas: nadie entra sin cuenta)
 

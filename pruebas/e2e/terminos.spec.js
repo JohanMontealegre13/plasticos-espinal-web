@@ -139,7 +139,7 @@ test('si catalogo.json no trae «vendedor», no se rompe nada', async ({ page })
 test('«Seguir al pago» avisa que pedir es aceptar los términos, y el enlace se abre aparte sin perder el pedido', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page);
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();

@@ -39,9 +39,6 @@ const MUTACIONES = [
   /* Vitrina */
   { parte: 'Vitrina', nombre: 'búsqueda vuelve a depender de tildes', archivo: 'js/buscar.js', buscar: ".replace(/[\\u0300-\\u036f]/g, '')", poner: '', pruebas: ['unit', 'e2e'] },
   { parte: 'Vitrina', nombre: 'nombres pintados como HTML (XSS)', archivo: 'tienda/tienda.js', buscar: 'n.textContent = x', poner: 'n.innerHTML = x', pruebas: ['e2e'] },
-  /* Catálogo público: la foto en uso va de primera */
-  { parte: 'Fotos', nombre: 'la tarjeta vuelve a abrir con la foto principal', archivo: 'js/catalogo.js', buscar: 'if (tieneEnUso(p)) lista.unshift(lista.splice(1, 1)[0]);', poner: '', pruebas: ['e2e'] },
-  { parte: 'Fotos', nombre: 'una segunda foto que no es escena pasa de primera', archivo: 'js/catalogo.js', buscar: 'SIN_FOTO_EN_USO.indexOf(p.id) < 0', poner: 'true', pruebas: ['e2e'] },
   /* tienda/catalogo.json (lo que Johan cambia a mano) */
   { parte: 'Catálogo', nombre: 'radio del GPS entre comillas', archivo: 'tienda/catalogo.json', buscar: '"radio_km": 8', poner: '"radio_km": "8"', pruebas: ['unit'] },
   { parte: 'Catálogo', nombre: 'minutos de alistar entre comillas', archivo: 'tienda/catalogo.json', buscar: '"alistar_min": 60', poner: '"alistar_min": "60"', pruebas: ['unit'] },
@@ -53,6 +50,7 @@ const MUTACIONES = [
   { parte: 'Candado', nombre: 'la sesión sin HttpOnly', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: 'Max-Age=${segundos}; HttpOnly;', poner: 'Max-Age=${segundos};', pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'la sesión con otro nombre que el de la puerta', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: "const GALLETA = 'pe_sesion';", poner: "const GALLETA = 'pe_cuenta';", pruebas: ['unit'] },
   { parte: 'Candado', nombre: 'la sesión solo vale en /tienda (la puerta no la vería)', archivo: 'functions/tienda/mi-cuenta/api/[[ruta]].js', buscar: "return galleta(GALLETA, valor, segundos, '/');", poner: 'return galleta(GALLETA, valor, segundos);', pruebas: ['unit'] },
+  { parte: 'Subdominio', nombre: 'un enlace viejo a una ficha de /productos/ pierde el producto', archivo: 'functions/_middleware.js', buscar: '`#p=${id}`', poner: "''", pruebas: ['unit'] },
   { parte: 'Subdominio', nombre: 'la página principal no manda /tienda al subdominio', archivo: 'functions/_middleware.js', buscar: 'if (DOMINIOS_WEB.includes(url.hostname) && deTienda', poner: 'if (false && deTienda', pruebas: ['unit'] },
   { parte: 'Subdominio', nombre: 'las páginas del subdominio se sirven sin candado', archivo: 'functions/_middleware.js', buscar: "const deTienda = destino.tipo === 'tienda' || ", poner: 'const deTienda = ', pruebas: ['unit'] },
   { parte: 'Subdominio', nombre: 'la API del portal se redirige (el POST perdería el cuerpo)', archivo: 'functions/_middleware.js', buscar: 'if (lectura && !ruta.startsWith(API) && esPagina(ruta))', poner: 'if (esPagina(ruta) || ruta.includes("/api/"))', pruebas: ['unit'] },
