@@ -126,10 +126,27 @@
 
     function pintar(yo) {
       panel.textContent = '';
+      var cabeza = el('div', 'cabeza');
+      /* Solo si el CRM ya sabe de fotos (trae «foto» en yo, aunque sea vacía) */
+      if ('foto' in yo) cabeza.appendChild(circuloDeFoto(yo, function () { pintar(yo); }));
       var hola = el('p', 'hola');
       hola.appendChild(el('span', '', 'Hola,'));
       hola.appendChild(el('b', '', (yo.nombre || '').split(' ')[0] || 'cliente'));
-      panel.appendChild(hola);
+      cabeza.appendChild(hola);
+      panel.appendChild(cabeza);
+      if (yo.foto) {
+        var quitar = el('button', 'quitar-foto', 'Quitar foto');
+        quitar.type = 'button';
+        quitar.addEventListener('click', function () {
+          quitar.disabled = true;
+          mandarFoto('foto/quitar', {}).then(function () { yo.foto = ''; fotoArriba(yo); pintar(yo); panel.querySelector('.foto-yo').focus(); },
+            function (e) { quitar.disabled = false; avisoFoto(e.message); });
+        });
+        panel.appendChild(quitar);
+      }
+      var aviso = el('small', 'aviso-foto');
+      aviso.setAttribute('role', 'status');
+      panel.appendChild(aviso);
       [['Mis pedidos', PORTAL + 'pedidos/', 'Compras de la tienda y del mostrador'],
        ['Cupones', PORTAL + 'cupones/', 'Lo que la tienda le regala'],
        ['Mis datos', PORTAL + 'datos/', 'Nombre y dirección de entrega']].forEach(function (o) {
@@ -153,13 +170,106 @@
       boton.setAttribute('aria-expanded', 'true');
     }
 
+    /* ---------- Foto de perfil ---------- */
+    /* Opcional: se pone tocando el círculo de la inicial (no hay otro botón) y se quita con «Quitar foto».
+       Solo la ve su dueño. Antes de mandarla se achica aquí mismo (una foto del celular pesa varios megas);
+       el CRM la vuelve a escribir limpia, sin los datos de la cámara. */
+    var LADO_FOTO = 640;
+    function avisoFoto(texto) { var a = panel.querySelector('.aviso-foto'); if (a) a.textContent = texto || ''; }
+    function mandarFoto(ruta, cuerpo) {
+      return fetch(API + ruta, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (r.status === 401) { location.href = PORTAL; return new Promise(function () {}); }
+            if (!r.ok || !j.ok) throw new Error(j.error || 'No pudimos guardar la foto. Intente más tarde.');
+            return j;
+          });
+        });
+    }
+    function rutaFoto(nombre) { return API + 'foto/' + nombre; }
+    /* El círculo de arriba (el que abre este menú): la foto si hay; si no, lo que ya tenía (la inicial) */
+    var inicialDeArriba = null;
+    function fotoArriba(yo) {
+      var c = boton.querySelector('.yo');
+      if (!c) return;
+      if (inicialDeArriba === null && !c.querySelector('img')) inicialDeArriba = c.textContent;
+      if (yo.foto) {
+        var img = el('img');
+        img.src = rutaFoto(yo.foto); img.alt = ''; img.width = 42; img.height = 42;
+        c.textContent = ''; c.appendChild(img); c.classList.add('con-foto');
+      } else if (c.querySelector('img')) {
+        c.textContent = inicialDeArriba || Array.from((yo.nombre || '').trim() || '·')[0].toUpperCase();
+        c.classList.remove('con-foto');
+      }
+    }
+    /* La foto escogida, achicada y como JPEG en base64 */
+    function achicar(archivo) {
+      return new Promise(function (ok, mal) {
+        var no = function () { mal(new Error('No pudimos leer esa foto. Pruebe con otra.')); };
+        if (!/^image\/(jpeg|png|webp)$/.test(archivo.type)) return mal(new Error('Escoja una foto JPG, PNG o WebP.'));
+        var lector = new FileReader();
+        lector.onerror = no;
+        lector.onload = function () {
+          var img = new Image();
+          img.onerror = no;
+          img.onload = function () {
+            var lado = Math.min(img.naturalWidth, img.naturalHeight), fin = Math.min(lado, LADO_FOTO);
+            if (!lado) return no();
+            var lienzo = document.createElement('canvas');
+            lienzo.width = lienzo.height = fin;
+            var ctx = lienzo.getContext('2d');
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, fin, fin);
+            ctx.drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, fin, fin);
+            ok(lienzo.toDataURL('image/jpeg', 0.88));
+          };
+          img.src = String(lector.result);
+        };
+        lector.readAsDataURL(archivo);
+      });
+    }
+    function circuloDeFoto(yo, repintar) {
+      var caja = el('span', 'foto-caja');
+      var b = el('button', 'foto-yo');
+      b.type = 'button';
+      b.setAttribute('aria-label', yo.foto ? 'Cambiar mi foto de perfil' : 'Poner mi foto de perfil');
+      b.title = yo.foto ? 'Cambiar mi foto' : 'Poner mi foto';
+      if (yo.foto) {
+        var img = el('img');
+        img.src = rutaFoto(yo.foto); img.alt = ''; img.width = 56; img.height = 56;
+        b.appendChild(img);
+      } else b.appendChild(el('span', '', Array.from((yo.nombre || '').trim() || '·')[0].toUpperCase()));
+      var camara = el('span', 'foto-camara');
+      camara.setAttribute('aria-hidden', 'true');
+      b.appendChild(camara);
+      var archivo = el('input');
+      archivo.type = 'file'; archivo.accept = 'image/jpeg,image/png,image/webp'; archivo.hidden = true;
+      archivo.className = 'foto-archivo';
+      archivo.setAttribute('aria-label', 'Foto de perfil');
+      b.addEventListener('click', function () { archivo.click(); });
+      archivo.addEventListener('change', function () {
+        var f = archivo.files && archivo.files[0];
+        if (!f) return;
+        avisoFoto('Guardando su foto…');
+        b.disabled = true;
+        achicar(f).then(function (imagen) { return mandarFoto('foto', { imagen: imagen }); })
+          .then(function (j) { yo.foto = j.foto || ''; fotoArriba(yo); repintar(); panel.querySelector('.foto-yo').focus(); avisoFoto('Foto guardada ✓'); },
+            function (e) { b.disabled = false; archivo.value = ''; avisoFoto(e.message); });
+      });
+      caja.appendChild(b);
+      caja.appendChild(archivo);
+      return caja;
+    }
+    /* Al cargar, el círculo de arriba ya muestra la foto (la tienda le avisa a quién leyó; si no, se pregunta) */
+    document.addEventListener('pe:yo', function (e) { if (e.detail) fotoArriba(e.detail); });
+    if (window.PE_YO) fotoArriba(window.PE_YO);
+
     boton.addEventListener('click', function (e) {
       e.preventDefault();
       if (!panel.hidden) { cerrar(); return; }
       fetch(API + 'yo', { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (yo) {
-          if (yo && yo.ok) pintar(yo);
+          if (yo && yo.ok) { fotoArriba(yo); pintar(yo); }
           else location.href = PORTAL;
         })
         .catch(function () { location.href = PORTAL; });

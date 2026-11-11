@@ -88,18 +88,18 @@ test('sin ventas que contar no dice «más pedido»: «Recomendados» con los qu
   await expect(page.locator('#masPedido')).toBeHidden();
 });
 
-test('las categorías son filtros: «Todos» y una por categoría, debajo de lo más pedido', async ({ page }) => {
+test('las categorías son el primer filtro: «Todas» y una por categoría, debajo de lo más pedido', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page);
-  await expect(page.locator('#cats .cat')).toHaveText(['Todos', 'Contenedores', 'Vasos y platos', 'Aseo']);
-  await expect(page.locator('#cats .cat').first()).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#f-cat option')).toHaveText(['Todas', 'Aseo (2)', 'Contenedores (3)', 'Vasos y platos (3)']);
+  await expect(page.locator('#f-cat')).toHaveValue('');
   await expect(page.locator('#grilla li')).toHaveCount(8);
-  await page.locator('#cats .cat', { hasText: 'Aseo' }).click();
+  await page.locator('#f-cat').selectOption({ label: 'Aseo (2)' });
   await expect(page.locator('#tituloVitrina')).toHaveText('Aseo');
   await expect(page.locator('#grilla li')).toHaveCount(2);
   expect((await page.locator('#grilla li h3').allTextContents()).sort()).toEqual(['Detergente en polvo 1 kg', 'Servilleta 25x25 x300 und']);
   await expect(page.locator('#rotan li')).toHaveCount(3);   /* lo más pedido no se filtra */
-  await page.locator('#cats .cat', { hasText: 'Todos' }).click();
+  await page.locator('#f-cat').selectOption('');
   await expect(page.locator('#grilla li')).toHaveCount(8);
   await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
   /* la fila de categorías de antes (con fotos, arriba) ya no está */
@@ -115,7 +115,7 @@ test('las categorías son filtros: «Todos» y una por categoría, debajo de lo 
 test('un enlace con #c= abre la tienda con esa categoría puesta, por nombre o por su comienzo', async ({ page }) => {
   await abrirTienda(page, { ruta: '/tienda/#c=vasos' });
   await expect(page.locator('#tituloVitrina')).toHaveText('Vasos y platos');
-  await expect(page.locator('#cats .cat', { hasText: 'Vasos y platos' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#f-cat')).toHaveValue('c2');
   await expect(page.locator('#grilla li')).toHaveCount(3);
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('');
   /* y con la tienda abierta, otro enlace cambia el filtro */
@@ -185,7 +185,7 @@ test('el catálogo va de a 50 por página, con «Anterior», números y «Siguie
   /* cambiar el orden o el filtro vuelve a la primera */
   await page.locator('#orden').selectOption('nombre');
   await expect(pag.getByRole('button', { name: 'Página 1 de 3' })).toHaveAttribute('aria-current', 'page');
-  await page.locator('#cats .cat', { hasText: 'Aseo' }).click();
+  await page.locator('#f-cat').selectOption({ label: 'Aseo (2)' });
   await expect(page.locator('#grilla li')).toHaveCount(2);
   await expect(pag).toBeHidden();
   v.sinProblemas();

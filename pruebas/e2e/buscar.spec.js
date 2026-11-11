@@ -101,7 +101,7 @@ test('el orden también cuenta dentro de una categoría, y no cambia lo más ped
   await page.locator('#orden').selectOption('nombre');
   await expect(page.locator('#grilla li h3').first()).toHaveText('Bolsa kraft #6 x100 und');
   await expect(page.locator('#rotan li h3')).toHaveText(masPedido);
-  await page.locator('.cat[data-cat="c1"]').click();         /* una categoría: contenedores, tenedores y bolsas */
+  await page.locator('#f-cat').selectOption('c1');         /* una categoría: contenedores, tenedores y bolsas */
   await expect(page.locator('#grilla li h3')).toHaveText(['Bolsa kraft #6 x100 und', 'Contenedor icopor J1 x25 und', 'Tenedor plástico x100 und']);
   await page.locator('#orden').selectOption('mayor');
   await expect(page.locator('#grilla li h3')).toHaveText(['Bolsa kraft #6 x100 und', 'Contenedor icopor J1 x25 und', 'Tenedor plástico x100 und']);
@@ -217,7 +217,7 @@ test('buscando dice cuántos productos hay y el filtro puesto, que se quita con 
 
 test('en una categoría el filtro puesto lleva su nombre; sin resultados no hay conteo pero sí el ✕', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('.cat[data-cat]:not([data-cat=""])').first().click();
+  await page.locator('#f-cat').selectOption({ index: 1 });
   const nombre = await page.locator('#tituloVitrina').textContent();
   await expect(page.locator('#limpiarTexto')).toHaveText(nombre || '');
   await expect(page.locator('#conteo')).toHaveText(/^\d+ productos?$/);

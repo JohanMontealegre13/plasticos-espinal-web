@@ -53,10 +53,15 @@ test('en el celular abajo van Buscar, Inicio y Favoritos en ese orden, flotando 
   v.sinProblemas();
 });
 
-test('en el computador no salen ni la pastilla ni la tira del domicilio', async ({ page }) => {
+test('en el computador la pastilla flota centrada abajo, sin la tira del domicilio', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await abrirTienda(page);
-  await expect(page.locator('#abajo')).toBeHidden();
+  await expect(page.locator('#abajo')).toBeVisible();
+  const caja = await page.locator('#abajo').boundingBox();
+  expect(caja && Math.abs(caja.x + caja.width / 2 - 640)).toBeLessThan(2);   /* centrada */
+  expect(caja && caja.width).toBeLessThanOrEqual(420);
+  expect(caja && 800 - (caja.y + caja.height)).toBeGreaterThan(8);             /* flota, no toca el borde */
+  await expect(page.locator('.cab .btn-canasta')).toBeVisible();               /* arriba sigue la canasta grande */
   await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
   await expect(page.locator('#n')).toHaveText('1');
   await expect(page.locator('#flota')).toBeHidden();
@@ -357,3 +362,41 @@ test('si la cuenta no trae nombre, el círculo de arriba queda con la silueta', 
   await expect(page.locator('#yo svg')).toBeVisible();
   await expect(page.locator('#yo')).toHaveText('');
 });
+
+test('en el computador la pastilla lleva a Favoritos y la canasta redonda abre la canasta', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await abrirTienda(page);
+  await page.locator('#abFavoritos').click();
+  await expect(page.locator('#pastilla')).toHaveAttribute('data-en', 'favoritos');
+  await page.locator('#barra').click();
+  await expect(page.locator('#panel')).toBeVisible();
+});
+
+test('al final de la página la pastilla no tapa el pie', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await abrirTienda(page);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const tapa = await page.evaluate(() => {
+    const links = [...document.querySelectorAll('.pie a')];
+    const ultimo = links[links.length - 1].getBoundingClientRect();
+    return ultimo.bottom > document.querySelector('#abajo').getBoundingClientRect().top;
+  });
+  expect(tapa).toBe(false);
+});
+
+/** @type {[string, { width: number, height: number }][]} */
+const TAMANOS = [['celular', CELULAR], ['computador', { width: 1280, height: 800 }]];
+for (const [nombre, tam] of TAMANOS) {
+  test(`en el ${nombre} el botón para volver a la página web está a la vista arriba`, async ({ page }) => {
+    await page.setViewportSize(tam);
+    await abrirTienda(page);
+    const web = page.locator('.franja .a-la-web');
+    await expect(web).toBeVisible();
+    await expect(web).toHaveAttribute('href', 'https://plasticosespinal.com/');
+    await expect(web).toHaveText('‹ Página web');
+    const caja = await web.boundingBox();
+    expect(caja && caja.y).toBeLessThan(40);
+    expect(caja && caja.x + caja.width).toBeLessThanOrEqual(tam.width);
+    await expect(page.locator('.pie').getByRole('link', { name: 'Volver a la página web' })).toHaveAttribute('href', 'https://plasticosespinal.com/');
+  });
+}
