@@ -509,19 +509,49 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 
 /* ---------- 11b. Así se ven en su mesa: fotos de muestra, una por línea ---------- */
-/* Son solo fotos de demostración (Johan, 11-nov-2026): sin enlace ni botón, el nombre corto va
-   en una etiqueta pequeña sobre la foto. Rejilla quieta: 2 columnas en celular, 3 desde tableta. */
+/* Son solo fotos de demostración (Johan, 11-nov-2026): sin enlace ni botón. El nombre va DENTRO
+   de la foto, con la letra y la cinta roja y azul de la portada, sobre un velo azul noche abajo.
+   Al aparecer (data-revela → .visto) la foto se asienta, la cinta se dibuja y el nombre sube.
+   Rejilla quieta: 2 columnas en celular, 3 desde tableta. */
 .usos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 700px) { .usos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.uso { position: relative; margin: 0; border-radius: var(--radio-lg); overflow: hidden; background: var(--tinte-azul); box-shadow: var(--dura-sm); }
+.uso { position: relative; container-type: inline-size; margin: 0; border-radius: var(--radio-lg); overflow: hidden; background: var(--noche); box-shadow: var(--dura-sm); isolation: isolate; }
 .uso__foto { display: block; }
-.uso__foto img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.uso__foto img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+@media (min-width: 700px) { .uso__foto img { aspect-ratio: 4 / 3; } }
+/* Velo azul noche de abajo hacia arriba: el nombre se lee sobre cualquier foto */
+.uso::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: linear-gradient(180deg, rgba(14,26,71,0) 42%, rgba(14,26,71,.55) 68%, rgba(14,26,71,.92) 100%);
+}
 .uso__nombre {
-  position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px);
-  padding: 6px 12px; border-radius: var(--pill);
-  background: rgba(255,255,255,.94); color: var(--noche);
-  font-size: .9375rem; font-weight: 700; line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(14,26,71,.18);
+  position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2;
+  display: grid; justify-items: start; gap: 10px;
+  font-family: var(--display); font-weight: 400; line-height: 1.02; letter-spacing: -.01em; text-wrap: balance;
+  font-size: clamp(1.25rem, 5vw, 1.875rem); color: #fff; text-shadow: 0 2px 14px rgba(14,26,71,.45);
+}
+/* La cinta roja y azul de la portada, encima del nombre */
+.uso__nombre::before {
+  content: ""; width: 44px; height: 5px; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--rojo) 0 50%, var(--azul) 50%);
+  transform-origin: left;
+}
+@media (max-width: 559px) {
+  /* El tamaño sale del ancho de la tarjeta: «biodegradables» cabe entero en el celular */
+  .uso__nombre { left: 12px; right: 12px; bottom: 12px; gap: 8px; font-size: 1rem; font-size: clamp(.9375rem, 8.6cqi, 1.375rem); }
+  .uso__nombre::before { width: 34px; height: 4px; }
+}
+/* Movimiento al aparecer: solo con JS y sin «menos movimiento» (.revela-listo) */
+.revela-listo .usos > li .uso__foto img { transform: scale(1.12); transition: transform 1.4s var(--salida); }
+.revela-listo .usos > li .uso__nombre { opacity: 0; transform: translateY(14px); transition: opacity .6s var(--salida), transform .6s var(--salida); transition-delay: calc(var(--retraso, 0ms) + 380ms); }
+.revela-listo .usos > li .uso__nombre::before { transform: scaleX(0); transition: transform .55s var(--salida); transition-delay: calc(var(--retraso, 0ms) + 260ms); }
+.revela-listo .usos > li.visto .uso__foto img { transform: none; }
+.revela-listo .usos > li.visto .uso__nombre { opacity: 1; transform: none; }
+.revela-listo .usos > li.visto .uso__nombre::before { transform: scaleX(1); }
+/* Con el mouse encima, la foto se acerca despacio (solo adorno: no es enlace) */
+@media (hover: hover) and (pointer: fine) {
+  .uso .uso__foto img { transition: transform 1.4s var(--salida); }
+  .usos > li .uso:hover .uso__foto img { transform: scale(1.05); }
 }
 /* Al bajar, las fotos aparecen una tras otra */
 .usos > li:nth-child(2) { --retraso: 80ms; }
@@ -529,7 +559,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .usos > li:nth-child(4) { --retraso: 60ms; }
 .usos > li:nth-child(5) { --retraso: 140ms; }
 .usos > li:nth-child(6) { --retraso: 220ms; }
-@media (max-width: 559px) { .uso__nombre { left: 8px; bottom: 8px; max-width: calc(100% - 16px); padding: 5px 10px; font-size: .8125rem; } }
 
 /* ---------- 12. Mosaico por tipo de negocio ---------- */
 /* Celular y tableta: dos columnas en espejo (alta | dos bajas, dos bajas | alta).

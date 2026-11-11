@@ -374,7 +374,7 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
   }
 });
 
-test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni «Ver productos», con el nombre pequeño encima, aun sin CRM', async ({ page }) => {
+test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni «Ver productos», con el nombre dentro de la foto, aun sin CRM', async ({ page }) => {
   const v = vigilar(page);
   /* El inicio ya no pide el catálogo: si lo pidiera y fallara, igual tiene que verse */
   await page.route('**/api/catalogo', (r) => r.fulfill({ status: 503, body: '' }));
@@ -395,7 +395,7 @@ test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni
     await expect.poll(() => img.evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
     expect(await img.getAttribute('alt')).toBeTruthy();
   }
-  /* El nombre va encima de la foto, pequeño: no más alto que una cuarta parte de la foto */
+  /* El nombre va dentro de la foto, abajo, con la letra de la portada y la cinta roja y azul */
   for (let i = 0; i < 6; i++) {
     const caja = await tarjetas.nth(i).locator('img').boundingBox();
     const nombre = await tarjetas.nth(i).locator('.uso__nombre').boundingBox();
@@ -403,8 +403,11 @@ test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni
     if (!caja || !nombre) continue;
     expect(nombre.y).toBeGreaterThanOrEqual(caja.y);
     expect(nombre.y + nombre.height).toBeLessThanOrEqual(caja.y + caja.height + 0.5);
-    expect(nombre.height).toBeLessThanOrEqual(caja.height / 4);
+    expect(nombre.height).toBeLessThanOrEqual(caja.height / 2);
   }
+  const estilo = await page.locator('#en-uso .uso__nombre').first().evaluate((e) => ({ letra: getComputedStyle(e).fontFamily, cinta: getComputedStyle(e, '::before').backgroundImage }));
+  expect(estilo.letra).toContain('Archivo Black');
+  expect(estilo.cinta).toContain('rgb(230, 57, 39)');
   /* Ya no queda la sección vieja de pestañas ni el script del catálogo en el inicio */
   await expect(page.locator('#destacados')).toHaveCount(0);
   await expect(page.locator('script[src*="catalogo.js"]')).toHaveCount(0);
