@@ -24,7 +24,7 @@ async function simularPedido(/** @type {import('@playwright/test').Page} */ page
 
 /** Agrega un producto, abre la canasta y toca «Pedir ya»: queda a la vista el formulario de entrega. */
 async function hastaLosDatos(/** @type {import('@playwright/test').Page} */ page) {
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();
