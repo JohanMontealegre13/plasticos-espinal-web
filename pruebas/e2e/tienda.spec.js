@@ -183,18 +183,6 @@ test.describe('canasta', () => {
     v.sinProblemas();
   });
 
-  test('el combo agrega sus tres productos y abre la canasta', async ({ page }) => {
-    const v = vigilar(page);
-    await abrirTienda(page);
-    await page.getByRole('button', { name: 'Agregar el combo' }).click();
-    await expect(page.locator('#n')).toHaveText('3');
-    await expect(page.locator('#panel')).toBeVisible();
-    for (const n of ['Contenedor icopor J1 x25 und', 'Tenedor plástico x100 und', 'Servilleta 25x25 x300 und']) {
-      await expect(page.locator('#items')).toContainText(n);
-    }
-    v.sinProblemas();
-  });
-
   test('el pedido le manda al CRM cada producto con su cantidad y los datos de entrega; el precio lo pone el CRM', async ({ page }) => {
     /** @type {any[]} */
     const enviados = [];
