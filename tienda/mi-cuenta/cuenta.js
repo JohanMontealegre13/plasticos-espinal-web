@@ -273,7 +273,7 @@
      tocarlo se ve su seguimiento en la tienda. Se borra solo cuando el pedido termina. */
   var EN_CURSO = { POR_CONFIRMAR: 'Confirmando', POR_ALISTAR: 'Preparándose', EN_CAMINO: 'En camino' };
   function intentarEnCurso() {
-    var p = null;
+    var p;
     try { p = JSON.parse(localStorage.getItem('pe-pedido-v1')); } catch (e) { p = null; }
     if (!p || !p.codigo || p.final || !p.medio) return;
     var b = el('button', 'compra en-curso');
