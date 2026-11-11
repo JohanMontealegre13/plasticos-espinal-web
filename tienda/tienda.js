@@ -61,7 +61,8 @@
   var busquedaGps = 0;            /* número de la búsqueda de ubicación en curso; subirlo descarta la respuesta que llegue tarde */
   var enBuscador = false;         /* el cursor está en el buscador: abajo se marca «Buscar» */
   var soloFavoritos = false;      /* «Favoritos» de abajo: la vitrina muestra solo lo guardado con el corazón */
-  var pintadoCon = null;          /* con qué categoría, orden y modo se pintó la vitrina la última vez: si cambia, las tarjetas entran con movimiento */
+  var pintadoCon = null;
+  var POR_PAGINA = 50, pagina = 1;   /* el catálogo va de a 50 productos por página */          /* con qué categoría, orden y modo se pintó la vitrina la última vez: si cambia, las tarjetas entran con movimiento */
   var llevaba = null, eraGratis = null;   /* lo último que mostró la canasta de abajo: salta solo si cambia y celebra solo al LLEGAR al domicilio gratis */
   /* La persona pidió menos movimiento en su celular: nada vuela, salta ni cae */
   var QUIETO = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -368,6 +369,39 @@
     return { lista: modo === 'pedidos' ? lista : PE.ordenar(lista, modo), consulta: consulta, buscando: true };
   }
 
+  /* Las páginas del catálogo: «Anterior», los números (con … si son muchas) y «Siguiente». Con una sola no sale. */
+  function pintarPaginas(paginas) {
+    var nav = $('paginas');
+    nav.textContent = '';
+    nav.hidden = paginas < 2;
+    if (paginas < 2) return;
+    var boton = function (texto, n, clase, etiqueta) {
+      var b = el('button', 'pag' + (clase ? ' ' + clase : ''), texto);
+      b.type = 'button';
+      b.dataset.pagina = String(n);
+      if (etiqueta) b.setAttribute('aria-label', etiqueta);
+      if (n === pagina && !clase) b.setAttribute('aria-current', 'page');
+      if (n < 1 || n > paginas) b.disabled = true;
+      nav.appendChild(b);
+    };
+    boton('‹ Anterior', pagina - 1, 'pag-ant', 'Página anterior');
+    var vistos = [];
+    for (var n = 1; n <= paginas; n++) {
+      if (n === 1 || n === paginas || Math.abs(n - pagina) <= 1) vistos.push(n);
+    }
+    vistos.forEach(function (n, k) {
+      if (k && n - vistos[k - 1] > 1) nav.appendChild(el('span', 'pag-salto', '…'));
+      boton(String(n), n, '', 'Página ' + n + ' de ' + paginas);
+    });
+    boton('Siguiente ›', pagina + 1, 'pag-sig', 'Página siguiente');
+  }
+  function irAPagina(n) {
+    pagina = n;
+    pintar();
+    var v = $('vitrina'), y = v.getBoundingClientRect().top + window.scrollY - document.querySelector('.cab').offsetHeight - 8;
+    window.scrollTo({ top: Math.max(0, y), behavior: QUIETO ? 'auto' : 'smooth' });
+  }
+
   /* Una tarjeta de producto (la misma en lo más pedido y en el catálogo) */
   function tarjeta(p, favs) {
     var li = el('li'), a = el('article', 'prod'), f = el('div', p.foto ? 'foto propia' : 'foto');
@@ -418,9 +452,11 @@
     /* Las tarjetas entran con movimiento cuando cambia lo que se ve (categoría, orden, entrar o salir de la
        búsqueda), no con cada letra que se escribe. Al abrir la tienda no: mientras cargan las letras y las
        fotos de arriba, una animación ahí le quita al navegador el ancla con la que deja quieta la vitrina */
-    var con = [filtro.cat, $('orden').value, buscando, soloFavoritos].join('|');
+    var con = [filtro.cat, $('orden').value, buscando, soloFavoritos, filtro.q.trim()].join('|');
     g.classList.remove('entra');
     if (pintadoCon !== null && con !== pintadoCon && !QUIETO) { void g.offsetWidth; g.classList.add('entra'); }
+    /* cambió lo que se ve: vuelve a la primera página */
+    if (con !== pintadoCon) pagina = 1;
     pintadoCon = con;
     var titulo = soloFavoritos ? 'Sus favoritos' : filtro.cat ? (cats[filtro.cat] || {}).nombre
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : 'Todos los productos');
@@ -441,7 +477,11 @@
     var pedirlo = $('pedirloWa'), sinNada = r.buscando && !lista.length && !!cat.whatsapp;
     pedirlo.hidden = !sinNada;
     if (sinNada) pedirlo.href = 'https://wa.me/' + cat.whatsapp + '?text=' + encodeURIComponent('Hola, busco: ' + r.consulta);
-    lista.forEach(function (p) { g.appendChild(tarjeta(p, favs)); });
+    /* De a POR_PAGINA (pedido del dueño, 11-nov-2026): debajo, las páginas */
+    var paginas = Math.max(1, Math.ceil(lista.length / POR_PAGINA));
+    if (pagina > paginas) pagina = paginas;
+    lista.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).forEach(function (p) { g.appendChild(tarjeta(p, favs)); });
+    intentar(function () { pintarPaginas(paginas); });
     intentar(pintarMasPedido);
     intentar(marcarSeccion);
     intentar(vigilarFotos);
@@ -803,7 +843,7 @@
   function filtroDeLaDireccion() {
     var m = /^#c=([^&]*)$/.exec(location.hash);
     if (!m) return false;
-    var valor = '';
+    var valor;
     try { valor = decodeURIComponent(m[1]); } catch (e) { valor = m[1]; }
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* sin historial */ }
     var id = categoriaDe(valor);
@@ -1639,6 +1679,10 @@
       }
     });
     intentar(eventosRota);
+    $('paginas').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pagina]');
+      if (b && !b.disabled) irAPagina(Number(b.dataset.pagina));
+    });
     $('ultimaVez').addEventListener('click', pedirLoDeLaUltimaVez);
     $('limpiar').addEventListener('click', function (e) { e.preventDefault(); verTodo(); });
     $('q').addEventListener('input', function () { soloFavoritos = false; filtro = { cat: '', q: this.value }; pintar(); });

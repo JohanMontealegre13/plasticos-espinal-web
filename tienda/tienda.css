@@ -785,3 +785,12 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
   .rotan.cambia>li:nth-child(4){animation-delay:.21s}
 }
 @keyframes rota-entra{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+
+/* páginas del catálogo (de a 50) */
+.paginas{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin-top:22px}
+.pag{min-width:44px;min-height:44px;padding:0 12px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--texto);font:700 15px var(--font);cursor:pointer}
+.pag:hover:not(:disabled){border-color:var(--azul);color:var(--azul)}
+.pag[aria-current="page"]{background:var(--azul);border-color:var(--azul);color:#fff}
+.pag:disabled{opacity:.4;cursor:default}
+.pag-salto{padding:0 4px;color:var(--texto2)}
+@media (max-width:600px){.pag-ant,.pag-sig{font-size:0;padding:0}.pag-ant::before{content:"‹";font-size:20px}.pag-sig::before{content:"›";font-size:20px}}

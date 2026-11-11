@@ -154,3 +154,50 @@ test('computador: el logo sigue arriba, sin «Tienda en línea» al lado', async
   await expect(page.locator('.cab .logo img')).toBeVisible();
   await expect(page.locator('.cab .logo')).toHaveText('');
 });
+
+/** El catálogo de prueba con `n` productos más (todos disponibles, en la categoría c1). */
+function conMuchos(/** @type {number} */ n) {
+  const c = structuredClone(CATALOGO_CRM);
+  for (let i = 1; i <= n; i++) {
+    c.productos.push({ ...c.productos[0], id: 1000 + i, nombre: `Producto de prueba ${String(i).padStart(3, '0')}`, destacado: false, disponible: true });
+  }
+  return c;
+}
+
+test('el catálogo va de a 50 por página, con «Anterior», números y «Siguiente»', async ({ page }) => {
+  const v = vigilar(page);
+  await abrirTienda(page, { catalogo: conMuchos(120) });   /* 128 productos: 3 páginas */
+  await expect(page.locator('#grilla li')).toHaveCount(50);
+  await expect(page.locator('#filtroLinea')).toBeHidden();   /* sin filtro no se cuenta, como antes */
+  const pag = page.locator('#paginas');
+  await expect(pag.getByRole('button', { name: /^Página \d+ de 3$/ })).toHaveCount(3);
+  await expect(pag.getByRole('button', { name: 'Página anterior' })).toBeDisabled();
+  await expect(pag.getByRole('button', { name: 'Página 1 de 3' })).toHaveAttribute('aria-current', 'page');
+  const primera = await page.locator('#grilla li h3').first().textContent();
+  await pag.getByRole('button', { name: 'Página siguiente' }).click();
+  await expect(pag.getByRole('button', { name: 'Página 2 de 3' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('#grilla li h3').first()).not.toHaveText(primera || '');
+  await pag.getByRole('button', { name: 'Página 3 de 3' }).click();
+  await expect(page.locator('#grilla li')).toHaveCount(28);
+  await expect(pag.getByRole('button', { name: 'Página siguiente' })).toBeDisabled();
+  /* la página queda arriba, donde empieza el catálogo */
+  await expect(page.locator('#tituloVitrina')).toBeInViewport();
+  /* cambiar el orden o el filtro vuelve a la primera */
+  await page.locator('#orden').selectOption('nombre');
+  await expect(pag.getByRole('button', { name: 'Página 1 de 3' })).toHaveAttribute('aria-current', 'page');
+  await page.locator('#cats .cat', { hasText: 'Aseo' }).click();
+  await expect(page.locator('#grilla li')).toHaveCount(2);
+  await expect(pag).toBeHidden();
+  v.sinProblemas();
+});
+
+test('buscando también va por páginas, y con 50 o menos no salen', async ({ page }) => {
+  await abrirTienda(page, { catalogo: conMuchos(60) });
+  await page.locator('#q').fill('producto de prueba');
+  await expect(page.locator('#conteo')).toHaveText('60 productos');
+  await expect(page.locator('#grilla li')).toHaveCount(50);
+  await expect(page.locator('#paginas')).toBeVisible();
+  await page.locator('#q').fill('producto de prueba 00');
+  await expect(page.locator('#grilla li')).toHaveCount(9);
+  await expect(page.locator('#paginas')).toBeHidden();
+});
