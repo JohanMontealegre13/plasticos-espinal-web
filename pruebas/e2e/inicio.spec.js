@@ -345,7 +345,7 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
   }
 });
 
-test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA distinta y su enlace al catálogo, aun sin CRM', async ({ page }) => {
+test('«Así se ven en su mesa»: seis líneas, cada una con su foto de IA distinta y su enlace al catálogo, aun sin CRM', async ({ page }) => {
   const v = vigilar(page);
   /* El inicio ya no pide el catálogo: si lo pidiera y fallara, igual tiene que verse */
   await page.route('**/api/catalogo', (r) => r.fulfill({ status: 503, body: '' }));
@@ -382,7 +382,7 @@ test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA di
   v.sinProblemas();
 });
 
-test('las tarjetas de «Así se ven en su negocio» abren su línea en el catálogo', async ({ page }) => {
+test('las tarjetas de «Así se ven en su mesa» abren su línea en el catálogo', async ({ page }) => {
   await page.goto('/');
   await page.locator('#en-uso a.uso', { has: page.getByRole('heading', { name: 'Platos', exact: true }) }).click();
   await expect(page).toHaveURL(/\/productos\/\?categoria=platos$/);
@@ -391,7 +391,15 @@ test('las tarjetas de «Así se ven en su negocio» abren su línea en el catál
   await expect(page).toHaveURL(/\/productos\/\?q=bolsa$/);
 });
 
-test('«Así se ven en su negocio» va claro y corto: solo el nombre y «Ver productos», sin frases', async ({ page }) => {
+test('títulos que pidió Johan: «Así se ven en su mesa» y la bajada de sectores', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#titulo-en-uso')).toHaveText('Así se ven en su mesa');
+  const bajada = page.locator('#sectores .titulo-bajada');
+  await expect(bajada).toHaveText('Productos pensados para cada tipo de negocio. Pensamos primero en nuestros clientes.');
+  await expect(page.locator('body')).not.toContainText('cumpleaños en casa');
+});
+
+test('«Así se ven en su mesa» va claro y corto: solo el nombre y «Ver productos», sin frases', async ({ page }) => {
   await page.goto('/');
   /* Johan (11-nov): «lo que dice no me gusta… algo más claro y conciso» */
   await expect(page.locator('#en-uso p')).toHaveCount(0);

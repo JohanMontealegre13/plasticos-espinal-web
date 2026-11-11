@@ -221,7 +221,7 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   inicio llevan a `/productos/?categoria=…` (si el CRM llama distinto la
   categoría, se busca por el nombre). El catálogo lo pinta `js/catalogo.js`; el
   inicio no lo carga.
-- «Así se ven en su negocio» (inicio, 11-nov-2026, pedido de Johan): seis líneas
+- «Así se ven en su mesa» (inicio, 11-nov-2026, pedido de Johan; antes «en su negocio»): seis líneas
   fijas en HTML (platos hondos, platos biodegradables, bandejas, vasos,
   portacomidas y bolsas de manija), cada una con UNA foto en uso sin repetir
   (`img/en-uso/`, recortadas de la segunda foto del CRM) y un enlace a su
