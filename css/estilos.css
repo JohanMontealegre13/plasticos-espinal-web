@@ -286,19 +286,40 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .titulo--centro::after { margin-inline: auto; }
 @media (max-width: 599px) { .titulo-fila { margin-bottom: 20px; } }
 
-/* ---------- 9. Portada ---------- */
-/* Celular: la foto vertical con el título encima de la pared vacía; abajo la bajada y los botones.
-   Tableta: título y botones arriba, la foto ancha debajo.
-   Computador (1100 px o más): todo sobre la foto, en el aire de la izquierda. */
-.portada { padding-block: 20px clamp(28px, 4vw, 44px); }
-.portada__marco { display: grid; gap: 20px; grid-template-areas: "foto" "resto"; }
-.portada__foto { grid-area: foto; position: relative; display: block; overflow: hidden; border-radius: var(--radio-xl); background: var(--tinte-azul); }
-.portada__foto img { width: 100%; height: 100%; object-fit: cover; }
-.portada__cabeza { grid-area: foto; align-self: start; position: relative; z-index: 1; display: grid; gap: 10px; padding: 24px 20px 0; }
-.portada__resto { grid-area: resto; position: relative; z-index: 1; display: grid; gap: 20px; }
+/* ---------- 9. Portada ancha ---------- */
+/* Tres láminas a todo lo ancho (11-nov-2026, pedido de Johan): la foto manda y el texto va encima.
+   Celular: la foto vertical arriba y el texto abajo en un panel azul noche. Desde 760 px: el texto
+   sobre la foto, a la izquierda, con un velo azul noche. Los dos fondos llevan una cuadrícula que
+   casi no se ve (pedido de Johan: «cuadrados que no se noten de fondo»). Usa el carrusel de la §11. */
+.heroe { position: relative; background: var(--noche); }
+.carrusel--heroe .carrusel__pista { --por-vista: 1; gap: 0; padding: 0; scroll-padding-inline: 0; }
+.lamina { position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.lamina__foto { display: block; aspect-ratio: 1 / 1.05; overflow: hidden; background: var(--noche-2); }
+.lamina__foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lamina__texto {
+  --cuadro: rgba(255,255,255,.045);
+  flex: 1; display: grid; align-content: center; gap: 14px; padding: 24px 20px 28px; color: #fff;
+  background-color: var(--noche);
+  background-image: linear-gradient(var(--cuadro) 1px, transparent 1px), linear-gradient(90deg, var(--cuadro) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.lamina h1, .lamina__titulo {
+  font-family: var(--display); font-weight: 400; line-height: 1.04; letter-spacing: -.01em; text-wrap: balance; color: #fff;
+  font-size: clamp(1.5rem, 6.4vw, 2rem);
+}
+.lamina h1 .resaltado { display: block; color: var(--sobre-noche); }
+.lamina__bajada { max-width: 30rem; font-size: var(--fs-bajada); line-height: 1.5; color: var(--sobre-noche); }
+.lamina__botones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+.boton-contorno { background: transparent; color: #fff; border-color: rgba(255,255,255,.85); }
+@media (hover: hover) and (pointer: fine) { .boton-contorno:hover { background: #fff; color: var(--noche); } }
+/* Cinta roja y azul bajo el título: la misma firma de la foto, en código */
+.lamina__texto::before {
+  content: ""; order: 0; width: 72px; height: 6px; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--rojo) 0 50%, var(--azul) 50%);
+}
 .portada__etiqueta {
   justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 12px;
-  border-radius: var(--pill); background: rgba(255,255,255,.82); color: var(--azul-osc);
+  border-radius: var(--pill); background: rgba(255,255,255,.92); color: var(--azul-osc);
   font-size: .9375rem; font-weight: 700; letter-spacing: .02em; position: relative;
 }
 /* Punto «en línea»: verde, con una onda suave que sale del punto y se apaga (solo tamaño y opacidad,
@@ -308,63 +329,46 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .portada__etiqueta::after { position: absolute; left: 12px; top: 50%; margin-top: -4px; opacity: 0; pointer-events: none; }
 @keyframes en-linea { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(2.8); opacity: 0; } }
 @media (prefers-reduced-motion: no-preference) { .portada__etiqueta::after { animation: en-linea 2.4s ease-out infinite; } }
-.portada h1 {
-  font-family: var(--display); font-weight: 400; font-size: var(--fs-h1); line-height: 1.06;
-  letter-spacing: -.01em; text-wrap: balance; color: var(--noche);
-}
-.portada h1 .resaltado { display: block; color: var(--azul); }
-.portada__bajada { max-width: 34rem; font-size: var(--fs-bajada); line-height: 1.55; color: var(--texto); }
-.portada__botones { display: flex; flex-wrap: wrap; gap: 12px; }
 @media (max-width: 599px) {
-  .portada { padding-top: 16px; }
-  /* El título es largo: la letra se achica con la pantalla para que «Empaques plásticos,» quepa en un
-     renglón y el título termine antes de los productos de la foto */
-  .portada h1 { font-size: clamp(1.375rem, 8.93vw - 6.4px, 1.875rem); }
-  /* La etiqueta en un solo renglón también en pantallas angostas: si se parte, empuja el título */
   .portada__etiqueta { font-size: clamp(.75rem, 5.917vw - 6.86px, .9375rem); }
-  .portada__foto { aspect-ratio: 4 / 5; }
-  .portada__botones { flex-direction: column; }
-  .portada__botones .boton { width: 100%; }
+  .lamina__botones { flex-direction: column; }
+  .lamina__botones .boton { width: 100%; }
 }
-@media (min-width: 600px) and (max-width: 1099px) {
-  .portada__marco { grid-template-areas: "cabeza" "resto" "foto"; gap: 20px; }
-  .portada__cabeza { grid-area: cabeza; padding: 0; }
-  .portada__etiqueta { background: #fff; }
-  .portada__foto { aspect-ratio: 12 / 5; }
+/* Los controles del carrusel, claros sobre el azul noche */
+.carrusel--heroe .carrusel__controles { margin: 0; padding: 4px 0 12px; }
+.carrusel--heroe .carrusel__flecha, .carrusel--heroe .carrusel__pausa { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.5); color: #fff; }
+.carrusel--heroe .carrusel__punto::before { background: rgba(255,255,255,.6); }
+.carrusel--heroe .carrusel__punto[aria-current="true"]::before { background: #fff; }
+@media (hover: hover) and (pointer: fine) {
+  .carrusel--heroe .carrusel__flecha:not([aria-disabled="true"]):hover, .carrusel--heroe .carrusel__pausa:hover { background: rgba(255,255,255,.24); border-color: #fff; }
 }
-@media (min-width: 1100px) {
-  .portada__marco {
-    position: relative; gap: 0; aspect-ratio: 12 / 5;
-    grid-template-columns: minmax(0, 46%) 1fr; grid-template-rows: 1fr auto auto 1fr;
-    grid-template-areas: none;
-    border-radius: var(--radio-xl); overflow: hidden; background: var(--tinte-azul);
+@media (min-width: 760px) {
+  .lamina { display: block; height: clamp(480px, 68vw, 760px); max-height: calc(100vh - 120px); min-height: 460px; }
+  .lamina__foto { position: absolute; inset: 0; aspect-ratio: auto; }
+  .lamina__texto {
+    position: absolute; inset: 0; align-content: center; gap: 18px;
+    padding: 0 0 56px max(var(--gutter), 32px, calc((100% - var(--contenedor)) / 2));
+    background-color: transparent;
+    background-image:
+      linear-gradient(var(--cuadro) 1px, transparent 1px), linear-gradient(90deg, var(--cuadro) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,26,71,.88) 0%, rgba(14,26,71,.7) 32%, rgba(14,26,71,.12) 58%, rgba(14,26,71,0) 70%);
+    background-size: 28px 28px, 28px 28px, auto;
   }
-  .portada__foto { grid-area: 1 / 1 / 5 / 3; border-radius: 0; }
-  /* Velo claro solo a la izquierda: el texto se lee sin tapar el producto */
-  .portada__foto::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(90deg, rgba(238,242,252,.72) 0%, rgba(238,242,252,.45) 30%, rgba(238,242,252,0) 46%);
-  }
-  .portada__cabeza { grid-area: 2 / 1; padding: 0 0 0 clamp(40px, 4vw, 56px); gap: 14px; }
-  .portada__resto { grid-area: 3 / 1; padding: 20px 0 0 clamp(40px, 4vw, 56px); gap: 24px; }
-  /* Cuatro renglones en el aire de la izquierda: el renglón azul cabe entero */
-  .portada h1 { font-size: clamp(2rem, 2.9vw, 2.25rem); }
-  .portada__bajada { max-width: 25rem; }
-  /* Botones de tamaño normal: los dos caben antes del producto */
-  .portada__botones .boton-grande { min-height: 52px; padding: 0 22px; font-size: var(--fs-cuerpo); }
-  /* «Ver productos» se montaría sobre el contenedor de la foto; el menú ya lleva a Productos */
-  .portada__secundario { display: none; }
+  .lamina__texto > * { max-width: min(520px, 42vw); }
+  .lamina h1, .lamina__titulo { font-size: clamp(1.875rem, 2.9vw, 2.75rem); }
+  .lamina__titulo { font-size: clamp(2.25rem, 3.6vw, 3.25rem); }
+  .carrusel--heroe .carrusel__controles { position: absolute; left: 0; right: 0; bottom: 14px; padding: 0; }
 }
 
-/* Entrada de la portada: la foto se asienta y el texto sube en orden. Solo opacidad y movimiento. */
-@keyframes asentar { from { transform: scale(1.06); } to { transform: none; } }
+/* Movimiento: la foto se acerca despacio y el texto de la primera lámina sube en orden.
+   Solo transform y opacidad. Con «menos movimiento», nada se mueve. */
+@keyframes acercar { from { transform: scale(1); } to { transform: scale(1.07); } }
 @keyframes subir { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
-  .portada__foto img { animation: asentar 1.4s var(--salida) both; }
-  .portada__etiqueta, .portada h1, .portada__bajada, .portada__botones { animation: subir var(--t-entrar) var(--salida) both; }
-  .portada h1 { animation-delay: 70ms; }
-  .portada__bajada { animation-delay: 140ms; }
-  .portada__botones { animation-delay: 210ms; }
+  .lamina__foto img { animation: acercar 14s ease-in-out infinite alternate; }
+  .lamina:first-child .lamina__texto > * { animation: subir var(--t-entrar) var(--salida) both; }
+  .lamina:first-child h1 { animation-delay: 70ms; }
+  .lamina:first-child .lamina__botones { animation-delay: 160ms; }
 }
 
 /* ---------- 10. Marcas ---------- */
@@ -506,6 +510,66 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 @media (max-width: 359px) {
   .cat h3 { font-size: .9375rem; }
   .sector h3 { font-size: .9375rem; }
+}
+
+/* ---------- 11b. Así se ven en su negocio: una foto de IA por línea ---------- */
+/* Misma tarjeta que las categorías (foto arriba, pie azul), en rejilla quieta: 2 columnas en
+   celular y 3 desde tableta. Al pasar el mouse la foto se acerca y una franja amarilla corre
+   bajo la foto (idea tomada de tiendas grandes; el color es el de la marca). */
+.usos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+@media (min-width: 700px) { .usos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.usos > li { display: flex; }
+.uso {
+  position: relative; display: flex; flex-direction: column; width: 100%;
+  border-radius: var(--radio-lg); overflow: hidden; background: var(--azul);
+  box-shadow: var(--dura-sm); color: #fff; text-decoration: none;
+  transition: transform var(--t-2) var(--salida), box-shadow var(--t-2) var(--curva);
+}
+.uso__foto { position: relative; overflow: hidden; background: var(--tinte-azul); }
+.uso__foto img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .7s var(--salida); }
+.uso__foto::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--amarillo);
+  transform: scaleX(0); transform-origin: left; transition: transform .45s var(--salida);
+}
+.uso__pie { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.uso h3 { color: #fff; font-size: 1.1875rem; font-weight: 700; line-height: 1.25; }
+.uso p { font-size: var(--fs-chico); line-height: 1.4; color: #dfe6fb; }
+/* El botón va siempre abajo, aunque el título ocupe dos renglones */
+.uso__pie > :nth-last-child(2) { margin-bottom: 12px; }
+.uso__boton {
+  margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 14px;
+  border: 2px solid rgba(255,255,255,.9); border-radius: var(--pill);
+  font-size: var(--fs-chico); font-weight: 700; color: #fff;
+  transition: background-color var(--t) var(--curva), color var(--t) var(--curva);
+}
+.uso__boton .icono { width: 16px; height: 16px; transition: transform var(--t) var(--curva); }
+@media (hover: hover) and (pointer: fine) {
+  .uso:hover { transform: translateY(-6px); box-shadow: var(--elevada); }
+  .uso:hover .uso__foto img { transform: scale(1.08); }
+  .uso:hover .uso__foto::after { transform: scaleX(1); }
+  .uso:hover .uso__boton { background: #fff; color: var(--azul-osc); }
+  .uso:hover .uso__boton .icono { transform: translateX(3px); }
+}
+.uso:focus-visible .uso__foto::after { transform: scaleX(1); }
+.uso:active { transform: translateY(1px); box-shadow: var(--dura-sm); }
+.uso:focus-visible { outline-offset: 2px; }
+/* Al bajar, las tarjetas aparecen una tras otra */
+.usos > li:nth-child(2) { --retraso: 80ms; }
+.usos > li:nth-child(3) { --retraso: 160ms; }
+.usos > li:nth-child(4) { --retraso: 60ms; }
+.usos > li:nth-child(5) { --retraso: 140ms; }
+.usos > li:nth-child(6) { --retraso: 220ms; }
+@media (max-width: 559px) {
+  .uso__pie { padding: 12px 12px 14px; }
+  .uso h3 { font-size: 1.0625rem; }
+  .uso p { display: none; }
+  .uso__boton { align-self: stretch; justify-content: center; padding-inline: 8px; font-size: .9375rem; }
+  .uso__boton .icono { display: none; }
+}
+@media (max-width: 359px) { .uso h3 { font-size: .9375rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .uso, .uso__foto img, .uso__foto::after { transition: none; }
 }
 
 /* ---------- 12. Mosaico por tipo de negocio ---------- */
@@ -880,12 +944,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .pestana-cat__n { font-size: .8125rem; font-weight: 700; padding: 1px 7px; border-radius: var(--pill); background: var(--tinte-azul); color: var(--azul-osc); }
 .pestana-cat[aria-pressed="true"] .pestana-cat__n { background: rgba(255,255,255,.2); color: #fff; }
 .pestanas__panel:focus-visible { outline-offset: 4px; border-radius: var(--radio); }
-.pestanas__todos { margin-top: 8px; }
-
-/* Inicio: «Lo más pedido» dentro de Compre por categoría */
-.destacados { margin-top: clamp(40px, 5vw, 64px); }
-.destacados__titulo { font-family: var(--display); font-weight: 400; font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15; }
-.destacados__titulo::after { content: ""; display: block; width: 48px; height: 4px; margin-top: 10px; border-radius: 4px; background: var(--amarillo); }
 
 /* /productos/ */
 .catalogo__cabeza { display: grid; gap: 16px; margin-bottom: 20px; }

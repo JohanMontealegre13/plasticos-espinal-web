@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Seguridad: respaldo por si el hosting no envía cabeceras (las reales van en _headers) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo=' https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
   <!-- Abre siempre desde arriba aunque la dirección traiga #ancla (fix e7352f9). Si cambia este script, cambia su huella sha256 en la CSP de aquí, de _headers y de .htaccess: pruebas/unit/sitio.test.mjs lo vigila. -->
   <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual';if(location.hash)history.replaceState(null,'',location.pathname+location.search);</script>
@@ -40,9 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=18">
+  <link rel="stylesheet" href="css/estilos.css?v=20">
   <script src="js/principal.js?v=13" defer></script>
-  <script src="js/catalogo.js?v=5" defer></script>
 
   <script type="application/ld+json">
   {
@@ -151,29 +150,53 @@
 
   <main id="contenido">
 
-    <!-- Portada: escena con aire a la izquierda para el título -->
-    <section class="portada" id="inicio" aria-labelledby="titulo-portada">
-      <div class="contenedor">
-        <div class="portada__marco">
-          <picture class="portada__foto">
-            <source media="(max-width: 599px)" srcset="img/escenas/portada-celular-480.webp 480w, img/escenas/portada-celular-768.webp 768w" sizes="100vw" width="768" height="960">
-            <img src="img/escenas/portada-960.webp" srcset="img/escenas/portada-960.webp 960w, img/escenas/portada-1536.webp 1536w" sizes="(min-width: 1264px) 1200px, 100vw" width="1536" height="640" alt="Contenedor con almuerzo, platos, caja de cartón con empanadas, servilletas y jugo en vaso desechable sobre un mesón claro" fetchpriority="high">
-          </picture>
-          <div class="portada__cabeza">
-            <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
-            <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
-          </div>
-          <div class="portada__resto">
-            <p class="portada__bajada">Vasos, platos, contenedores, bolsas y empaques de las marcas líderes del país, al por mayor y al detal.</p>
-            <div class="portada__botones">
-              <a class="boton boton-amarillo boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
-                <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-                Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-              </a>
-              <a class="boton boton-azul boton-grande portada__secundario" href="#catalogo">Ver productos</a>
+    <!-- Portada ancha (11-nov-2026, pedido de Johan): tres láminas a todo lo ancho, cada una con
+         productos REALES del catálogo y la cinta roja y azul de la marca como objeto dentro de la foto
+         (sin amarillo: los colores de la marca son rojo y azul). El texto va en código, nunca en la
+         imagen. Sin JS es una fila que se desliza; principal.js le pone puntos, pausa y avance solo. -->
+    <section class="heroe" id="inicio" aria-labelledby="titulo-portada">
+      <div class="carrusel carrusel--heroe" data-carrusel>
+        <ul class="carrusel__pista" aria-label="Portada">
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/mesa-cel-600.webp 600w, img/portada/mesa-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/mesa-1920.webp" srcset="img/portada/mesa-1280.webp 1280w, img/portada/mesa-1920.webp 1920w, img/portada/mesa-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Mesa con sancocho en plato hondo de icopor, mojarra en bandeja ovalada, tamal en plato biodegradable, un portacomidas con arroz y fríjoles y tres jugos en vasos desechables, con una cinta roja y azul" fetchpriority="high">
+            </picture>
+            <div class="lamina__texto">
+              <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
+              <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
+              <div class="lamina__botones">
+                <a class="boton boton-claro boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
+                  <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+                  Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+                </a>
+                <a class="boton boton-contorno boton-grande" href="#catalogo">Ver productos</a>
+              </div>
             </div>
-          </div>
-        </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/domicilio-cel-600.webp 600w, img/portada/domicilio-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/domicilio-1920.webp" srcset="img/portada/domicilio-1280.webp 1280w, img/portada/domicilio-1920.webp 1920w, img/portada/domicilio-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Pedido en la puerta de una casa: bolsa de manija a rayas azules con portacomidas y vasos, y dos portacomidas amarrados con una cinta roja y azul" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Domicilio gratis desde $50.000</p>
+              <p class="lamina__bajada">En el casco urbano de El Espinal. Arme su pedido y se lo llevamos.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#contacto">Cómo pedir</a></div>
+            </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/biodegradable-cel-600.webp 600w, img/portada/biodegradable-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/biodegradable-1920.webp" srcset="img/portada/biodegradable-1280.webp 1280w, img/portada/biodegradable-1920.webp 1920w, img/portada/biodegradable-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Platos y portacomidas biodegradables con almuerzo, amarrados con una cinta roja y azul, frente a un cultivo de arroz del Tolima" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Línea biodegradable</p>
+              <p class="lamina__bajada">Platos y portacomidas para servir sin icopor.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#ecologicos">Ver la línea ecológica</a></div>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -373,19 +396,81 @@
             </li>
           </ul>
         </div>
+      </div>
+    </section>
 
-        <!-- Lo más pedido por categoría, en pestañas: lo llena js/catalogo.js con los productos del CRM.
-             Si el catálogo no carga, este bloque no aparece y el inicio sigue completo. -->
-        <div class="destacados" id="destacados" data-pestanas hidden>
-          <div class="titulo-fila destacados__cabeza">
-            <div>
-              <h3 class="destacados__titulo" id="titulo-destacados">Productos de la bodega</h3>
-              <p class="titulo-bajada">Toque uno para ver sus fotos, su medida y en qué viene.</p>
-            </div>
+    <!-- Así se ven en su negocio: una foto de IA por categoría, cada una distinta (Johan, 10-nov-2026).
+         Va escrita aquí, no la pinta el catálogo: se ve igual aunque el CRM no conteste. -->
+    <section class="seccion" id="en-uso" aria-labelledby="titulo-en-uso">
+      <div class="contenedor">
+        <div class="titulo-fila" data-revela>
+          <div>
+            <h2 class="titulo" id="titulo-en-uso">Así se ven en su negocio</h2>
+            <p class="titulo-bajada">Toque una y vea todo lo que manejamos de esa línea.</p>
           </div>
-          <div class="pestanas__lista" role="tablist" id="pestanasLista" aria-labelledby="titulo-destacados"></div>
-          <div id="pestanasPaneles"></div>
         </div>
+        <ul class="usos">
+          <li data-revela>
+            <a class="uso" href="/productos/?q=plato%20hondo">
+              <span class="uso__foto"><img src="img/en-uso/platos-hondos-360.webp" srcset="img/en-uso/platos-hondos-360.webp 360w, img/en-uso/platos-hondos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Sancocho servido en un plato hondo de icopor"></span>
+              <div class="uso__pie">
+                <h3>Platos hondos</h3>
+                <p>Para la sopa, el sancocho y el caldo.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?q=plato%20biodegradable">
+              <span class="uso__foto"><img src="img/en-uso/plato-biodegradable-360.webp" srcset="img/en-uso/plato-biodegradable-360.webp 360w, img/en-uso/plato-biodegradable-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Almuerzo con ensalada, verduras asadas y arroz en un plato biodegradable"></span>
+              <div class="uso__pie">
+                <h3>Platos biodegradables</h3>
+                <p>Planos, para servir el almuerzo completo.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?q=ovalado">
+              <span class="uso__foto"><img src="img/en-uso/bandejas-360.webp" srcset="img/en-uso/bandejas-360.webp 360w, img/en-uso/bandejas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Pescado frito con patacones y arroz en una bandeja ovalada de icopor"></span>
+              <div class="uso__pie">
+                <h3>Bandejas</h3>
+                <p>Ovaladas, para el pescado y el plato fuerte.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=vasos">
+              <span class="uso__foto"><img src="img/en-uso/vasos-360.webp" srcset="img/en-uso/vasos-360.webp 360w, img/en-uso/vasos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Tres jugos de colores en vasos transparentes"></span>
+              <div class="uso__pie">
+                <h3>Vasos</h3>
+                <p>Para jugos, granizados y bebidas frías.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=portacomidas">
+              <span class="uso__foto"><img src="img/en-uso/portacomidas-360.webp" srcset="img/en-uso/portacomidas-360.webp 360w, img/en-uso/portacomidas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Portacomidas con ensalada y fruta"></span>
+              <div class="uso__pie">
+                <h3>Portacomidas</h3>
+                <p>Para el domicilio y el almuerzo para llevar.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=bolsas-manija">
+              <span class="uso__foto"><img src="img/en-uso/bolsas-manija-360.webp" srcset="img/en-uso/bolsas-manija-360.webp 360w, img/en-uso/bolsas-manija-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de manija con mangos y aguacates en una plaza de mercado"></span>
+              <div class="uso__pie">
+                <h3>Bolsas de manija</h3>
+                <p>Del mercado a la tienda, en todos los tamaños.</p>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+        </ul>
       </div>
     </section>
 

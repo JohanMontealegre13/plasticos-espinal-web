@@ -2,12 +2,17 @@
 # plasticos-espinal-web, rama main), que SÍ lee este archivo tal cual.
 # La <meta http-equiv="Content-Security-Policy"> de index.html y 404.html queda
 # de respaldo; HSTS, X-Frame-Options y frame-ancestors solo llegan por aquí.
+# static.cloudflareinsights.com y cloudflareinsights.com: el medidor de visitas
+# de Cloudflare (Web Analytics, sin galletas), que Pages agrega solo cuando se
+# enciende en su panel (pedido de Johan, 11-nov-2026).
 
 # Cabeceras de seguridad (Cloudflare Pages; Netlify usa la misma sintaxis).
+# static.cloudflareinsights.com y cloudflareinsights.com: el medidor de visitas de Cloudflare
+# (Web Analytics, sin galletas), que Pages pone solo cuando se enciende en el panel (Johan, 10-nov-2026).
 # Si algún día se publica en Apache (cPanel), las mismas reglas van en .htaccess.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo=' https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
