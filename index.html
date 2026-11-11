@@ -40,8 +40,11 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- La primera foto de la portada pide de primera, antes de leer el CSS (celular y computador). -->
+  <link rel="preload" as="image" media="(max-width: 599px)" imagesrcset="img/portada/mesa-cel-600.webp 600w, img/portada/mesa-cel-960.webp 960w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" media="(min-width: 600px)" imagesrcset="img/portada/mesa-1280.webp 1280w, img/portada/mesa-1920.webp 1920w, img/portada/mesa-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
   <link rel="stylesheet" href="css/estilos.css?v=21">
-  <script src="js/principal.js?v=14" defer></script>
+  <script src="js/principal.js?v=15" defer></script>
 
   <script type="application/ld+json">
   {
@@ -103,12 +106,12 @@
 
   <a class="saltar" href="#contenido">Saltar al contenido</a>
 
-  <div class="anuncio">
+  <aside class="anuncio" aria-label="Aviso">
     <div class="contenedor anuncio__fila">
       <p><svg class="icono" aria-hidden="true"><use href="#i-camion"/></svg><span>Domicilio <b>gratis desde $50.000</b> en El Espinal</span></p>
       <p class="anuncio__extra">Al por mayor y al detal · 24 años en el Tolima</p>
     </div>
-  </div>
+  </aside>
 
   <header class="cabecera">
     <div class="contenedor cabecera__fila">
@@ -176,8 +179,8 @@
           </li>
           <li class="lamina">
             <picture class="lamina__foto">
-              <source media="(max-width: 599px)" srcset="img/portada/domicilio-cel-600.webp 600w, img/portada/domicilio-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
-              <img src="img/portada/domicilio-1920.webp" srcset="img/portada/domicilio-1280.webp 1280w, img/portada/domicilio-1920.webp 1920w, img/portada/domicilio-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Pedido en la puerta de una casa: bolsa de manija a rayas azules con portacomidas y vasos, y dos portacomidas amarrados con una cinta roja y azul" loading="lazy" decoding="async">
+              <source media="(max-width: 599px)" data-srcset="img/portada/domicilio-cel-600.webp 600w, img/portada/domicilio-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="img/portada/domicilio-1920.webp" data-srcset="img/portada/domicilio-1280.webp 1280w, img/portada/domicilio-1920.webp 1920w, img/portada/domicilio-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Pedido en la puerta de una casa: bolsa de manija a rayas azules con portacomidas y vasos, y dos portacomidas amarrados con una cinta roja y azul" loading="lazy" decoding="async">
             </picture>
             <div class="lamina__texto">
               <p class="lamina__titulo">Domicilio gratis desde $50.000</p>
@@ -187,8 +190,8 @@
           </li>
           <li class="lamina">
             <picture class="lamina__foto">
-              <source media="(max-width: 599px)" srcset="img/portada/biodegradable-cel-600.webp 600w, img/portada/biodegradable-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
-              <img src="img/portada/biodegradable-1920.webp" srcset="img/portada/biodegradable-1280.webp 1280w, img/portada/biodegradable-1920.webp 1920w, img/portada/biodegradable-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Platos y portacomidas biodegradables con almuerzo, amarrados con una cinta roja y azul, frente a un cultivo de arroz del Tolima" loading="lazy" decoding="async">
+              <source media="(max-width: 599px)" data-srcset="img/portada/biodegradable-cel-600.webp 600w, img/portada/biodegradable-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="img/portada/biodegradable-1920.webp" data-srcset="img/portada/biodegradable-1280.webp 1280w, img/portada/biodegradable-1920.webp 1920w, img/portada/biodegradable-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Platos y portacomidas biodegradables con almuerzo, amarrados con una cinta roja y azul, frente a un cultivo de arroz del Tolima" loading="lazy" decoding="async">
             </picture>
             <div class="lamina__texto">
               <p class="lamina__titulo">Línea biodegradable</p>

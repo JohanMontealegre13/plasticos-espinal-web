@@ -234,6 +234,34 @@
 
   document.querySelectorAll('[data-carrusel]').forEach(function (el) { carrusel(/** @type {HTMLElement} */ (el)); });
 
+  /* 5b. Fotos que esperan: las láminas 2 y 3 de la portada traen su foto en data-src/data-srcset
+         para que, con datos lentos, la primera foto no comparta la conexión con ellas. Se ponen
+         cuando la página terminó de cargar, o antes si alguien desliza o toca la portada (o el
+         carrusel avanza solo). */
+  (function () {
+    var esperan = document.querySelectorAll('[data-srcset], [data-src]');
+    if (!esperan.length) return;
+    var hecho = false;
+    var poner = function () {
+      if (hecho) return;
+      hecho = true;
+      esperan.forEach(function (el) {
+        var e = /** @type {HTMLElement} */ (el);
+        if (e.dataset.srcset) { e.setAttribute('srcset', e.dataset.srcset); e.removeAttribute('data-srcset'); }
+        if (e.dataset.src) { e.setAttribute('src', e.dataset.src); e.removeAttribute('data-src'); }
+      });
+    };
+    if (document.readyState === 'complete') { poner(); return; }
+    window.addEventListener('load', poner, { once: true });
+    var heroe = document.querySelector('.carrusel--heroe');
+    if (heroe) {
+      var pistaH = heroe.querySelector('.carrusel__pista');
+      if (pistaH) pistaH.addEventListener('scroll', poner, { once: true, passive: true });
+      heroe.addEventListener('pointerdown', poner, { once: true, passive: true });
+      heroe.addEventListener('focusin', poner, { once: true });
+    }
+  })();
+
   /* 6. Cinta de marcas: sin JS corre sola por CSS. Con JS la mueve principal.js para que también se
         pueda arrastrar a los lados con el mouse o el dedo (y con la rueda de lado del trackpad);
         al soltarla sigue sola desde donde quedó. Se detiene con el mouse encima, con el foco adentro

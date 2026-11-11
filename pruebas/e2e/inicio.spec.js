@@ -50,7 +50,8 @@ test('la portada ancha: tres láminas con su foto, la cinta roja y azul, y el ca
   await page.goto('/');
   const laminas = page.locator('#inicio .lamina');
   await expect(laminas).toHaveCount(3);
-  /* Cada lámina con una foto distinta, que carga, con texto alternativo */
+  /* Cada lámina con una foto distinta, que carga, con texto alternativo (la 2 y la 3 la reciben al cargar la página) */
+  await expect(laminas.locator('img[src]')).toHaveCount(3);
   const fotos = await laminas.locator('img').evaluateAll((is) => is.map((i) => ({
     src: /** @type {HTMLImageElement} */ (i).getAttribute('src'), alt: /** @type {HTMLImageElement} */ (i).alt })));
   expect(new Set(fotos.map((f) => f.src)).size).toBe(3);
@@ -70,6 +71,29 @@ test('la portada ancha: tres láminas con su foto, la cinta roja y azul, y el ca
   await expect(puntos.nth(2)).toHaveAttribute('aria-current', 'true');
   await expect(laminas.nth(2).locator('.lamina__titulo')).toBeInViewport();
   v.sinProblemas();
+});
+
+test('con datos lentos la primera foto de la portada va de primera: se pide antes del CSS y las otras dos esperan a la página', async ({ page }) => {
+  /* La primera foto se pide desde la cabecera, para celular y para computador */
+  const pre = await page.request.get('/');
+  const html = await pre.text();
+  expect(html).toMatch(/<link rel="preload" as="image" media="\(max-width: 599px\)" imagesrcset="img\/portada\/mesa-cel-600\.webp/);
+  expect(html).toMatch(/<link rel="preload" as="image" media="\(min-width: 600px\)" imagesrcset="img\/portada\/mesa-1280\.webp/);
+  /* En el HTML, las láminas 2 y 3 no piden foto todavía */
+  expect(html.match(/<img src="img\/portada\//g) ?? []).toHaveLength(1);
+  expect(html.match(/data-srcset="img\/portada\//g) ?? []).toHaveLength(4);
+  /* Con la página cargada, las tres fotos llegan y se ven */
+  await page.goto('/');
+  const fotos = page.locator('#inicio .lamina img');
+  await expect(fotos).toHaveCount(3);
+  for (const i of [1, 2]) await page.locator('#inicio .carrusel__punto').nth(i).click();
+  await expect.poll(() => fotos.evaluateAll((is) => is.filter((i) => /** @type {HTMLImageElement} */ (i).currentSrc && /** @type {HTMLImageElement} */ (i).naturalWidth > 0).length), { timeout: 15000 }).toBe(3);
+  await expect(page.locator('[data-srcset], [data-src]')).toHaveCount(0);
+});
+
+test('el aviso de arriba va en una región con nombre (todo el contenido dentro de una región)', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('complementary', { name: 'Aviso' })).toContainText('Domicilio');
 });
 
 test('la portada cambia de lámina cada 3 s, también con el mouse encima, y se detiene con la pausa', async ({ page }) => {
