@@ -1,6 +1,6 @@
 /* Plásticos Espinal · tienda en línea (solo con cuenta; su entrada tiene estilos propios en mi-cuenta/entrada.css).
    Tienda primero: búsqueda + canasta arriba, categorías en fotos, vitrina; la
-   marca queda en la esquina y en el pie. */
+   marca queda en la esquina y en el pie. En el celular tiene cara de app (al final de este archivo). */
 @font-face {
   font-family: "Archivo"; font-style: normal; font-weight: 400 800; font-display: swap;
   src: url("../fonts/archivo-latin.woff2") format("woff2");
@@ -14,6 +14,7 @@
   --rojo:#D42215; --azul:#1A44BE; --noche:#0E1A47; --amarillo:#FFC933; --verde:#0f7a43; --verde2:#e8f4ed;
   --display:"Archivo Black","Archivo",system-ui,sans-serif; --font:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --r:14px;
+  --resorte:cubic-bezier(.34,1.56,.64,1); --suelto:cubic-bezier(.22,1,.36,1);   /* curvas del movimiento: con rebote y suave */
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -24,9 +25,6 @@ button{font:inherit;cursor:pointer}
 h1,h2,h3,p{margin:0}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);letter-spacing:-.01em}
 
-/* etiqueta del prototipo */
-.proto{background:var(--suave);border-bottom:1px solid var(--linea);font-size:13px;color:var(--texto2)}
-.proto .envolver{display:flex;gap:10px;align-items:center;padding-block:8px;flex-wrap:wrap}
 .url::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--verde)}
 
 /* franja de servicio */
@@ -42,7 +40,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .logo span{font-size:12px;line-height:1.15;color:var(--texto2);border-left:1px solid var(--linea);padding-left:10px}
 .logo span b{display:block;color:var(--rojo);font-size:15px;font-family:var(--display);font-weight:400;letter-spacing:.02em}
 .buscar{display:flex;align-items:center;gap:10px;height:50px;border:2px solid var(--azul);border-radius:99px;padding:0 6px 0 18px;background:#fff}
-.buscar input{flex:1;min-width:0;border:0;outline:0;font:500 16px var(--font);color:var(--texto);background:transparent}
+.buscar input{flex:1;min-width:0;border:0;outline:0;font:500 16px var(--font);color:var(--texto);background:transparent;text-overflow:ellipsis}
 .buscar button{height:38px;padding:0 18px;border:0;border-radius:99px;background:var(--azul);color:#fff;font-weight:700}
 .ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .btn-canasta{position:relative;display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 18px;border:0;border-radius:99px;background:var(--amarillo);color:var(--noche);font-weight:800}
@@ -56,7 +54,6 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
   .btn-canasta{width:50px;justify-content:center;padding:0}
   .btn-canasta{grid-column:3;grid-row:1;justify-self:end}
   .franja span+span{display:none}
-  .proto .envolver{font-size:12px}
 }
 
 /* categorías */
@@ -67,22 +64,13 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .cat[aria-pressed="true"]{color:var(--azul)}
 
 /* portada */
-.portada{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;padding-block:14px 8px}
-@media (max-width:860px){.portada{grid-template-columns:minmax(0,1fr)}}
+.portada{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-block:14px 8px}
 .banner{position:relative;overflow:hidden;border-radius:20px;background:var(--azul);color:#fff;padding:clamp(22px,4vw,40px);display:grid;gap:14px;align-content:center;min-height:250px}
 .banner::after{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;border:38px solid rgba(255,255,255,.08)}
 .banner .chip{justify-self:start;background:var(--amarillo);color:var(--noche);font-weight:800;font-size:13px;padding:4px 10px;border-radius:99px}
 .banner h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,4.4vw,46px);line-height:1.02;max-width:15ch}
 .banner p{max-width:38ch;color:#dfe6ff}
 .banner .acc{justify-self:start;border:0;border-radius:99px;background:#fff;color:var(--azul);font-weight:800;padding:12px 22px}
-.combo{border-radius:20px;background:var(--suave);padding:20px;display:grid;gap:10px;align-content:start;border:1px solid var(--linea)}
-.combo img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px}
-.combo .et{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--rojo)}
-.combo h3{font-size:20px;font-weight:800}
-.combo .pr{display:flex;align-items:baseline;gap:10px}
-.combo .pr b{font-family:var(--display);font-weight:400;font-size:24px}
-.combo .pr s{color:var(--texto2)}
-.combo button{border:0;border-radius:99px;background:var(--verde);color:#fff;font-weight:700;padding:12px}
 
 /* beneficios */
 .benef{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-block:18px}
@@ -140,16 +128,6 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .cant input{width:100%;min-width:0;border:0;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:17px;font-weight:800;text-align:center;padding:0;border-radius:0;-webkit-appearance:none;appearance:none}
 .cant input:focus{outline:none;background:#fff;color:var(--verde)}
 
-/* negocios */
-.negocios{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-@media (max-width:860px){.negocios{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.neg{position:relative;border-radius:var(--r);overflow:hidden;min-height:170px;display:flex;align-items:end;color:#fff;border:0;padding:0;text-align:left}
-.neg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.neg::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(14,26,71,.85))}
-.neg span{position:relative;z-index:1;padding:14px;display:grid;gap:2px}
-.neg b{font-size:17px}
-.neg small{font-size:13px;color:#dfe6ff}
-
 /* cómo funciona */
 .pasos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:p}
 @media (max-width:760px){.pasos{grid-template-columns:minmax(0,1fr)}}
@@ -170,31 +148,48 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* las páginas de texto no tienen la barra de la canasta: el pie no necesita el hueco de abajo */
 .texto-legal ~ .pie .envolver{padding-bottom:34px}
 
-/* barra fija de abajo en el celular: Inicio, Categorías, Favoritos y Pedidos y, aparte, la canasta en amarillo
-   (en el celular es la única canasta: la de arriba se esconde). Azul noche y no blanca: en el iPhone Safari
-   pinta su barra con el color de lo que toca el borde de abajo */
-.abajo{display:none}
+/* Abajo, en el celular: la pastilla de secciones (Buscar, Inicio, Pedidos) y, aparte, la canasta en su círculo.
+   Flotan sobre la tienda y nada de ancho completo toca el borde de abajo: en el iPhone Safari pinta su barra con
+   el color de lo que toque ese borde, y una franja pegada ahí se veía cortada. En el computador no salen. */
+@property --avance{syntax:"<percentage>";inherits:false;initial-value:0%}
+.abajo,.flota{display:none}
 @media (max-width:760px){
-  .abajo{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;gap:6px;background:var(--noche);padding:6px 8px calc(6px + env(safe-area-inset-bottom)) 4px;box-shadow:0 -4px 16px rgba(14,26,71,.18)}
-  .abajo-grupo{flex:1 1 auto;min-width:0;display:flex}
-  .abajo-btn{flex:1 1 0;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 1px;border:0;border-radius:12px;background:none;color:#dfe6ff;font:inherit;font-size:11.5px;font-weight:700;line-height:1.1;letter-spacing:-.01em;text-decoration:none}
+  .abajo{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;pointer-events:none}
+  .abajo > *{pointer-events:auto}
+  .pastilla{position:relative;flex:1 1 auto;min-width:0;height:64px;padding:6px;border-radius:32px;background:var(--noche);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));box-shadow:0 10px 24px rgba(14,26,71,.32)}
+  .abajo-btn{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 2px;border:0;border-radius:26px;background:none;color:#c9d1ee;font:inherit;font-size:11.5px;font-weight:700;line-height:1.1;text-decoration:none;transition:color .25s}
   .abajo-btn > span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .abajo-btn:active{background:rgba(255,255,255,.1)}
-  .abajo-btn .ico{width:24px;height:24px}
-  .abajo-btn:focus-visible,.abajo-canasta:focus-visible{outline:3px solid #fff;outline-offset:2px}
-  /* la canasta: botón propio, amarillo y con relieve, para que se distinga de los accesos */
-  .abajo-canasta{flex:none;display:flex;align-items:center;gap:8px;min-height:52px;min-width:96px;padding:0 12px;border:0;border-radius:16px;background:var(--amarillo);color:var(--noche);font:inherit;font-size:15px;font-weight:800;line-height:1.1;white-space:nowrap;box-shadow:0 4px 0 #c99a12,0 6px 16px rgba(0,0,0,.28)}
-  .abajo-canasta:active{transform:translateY(2px);box-shadow:0 2px 0 #c99a12,0 3px 8px rgba(0,0,0,.25)}
+  .abajo-btn .ico{width:23px;height:23px;transition:transform .2s var(--resorte)}
+  .abajo-btn:active .ico{transform:scale(.86)}
+  .abajo-btn[aria-current]{color:var(--noche)}
+  .abajo-btn:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+  /* la rayita amarilla ocupa un tercio de la pastilla y se corre a la sección abierta (data-en lo pone tienda.js) */
+  .rayita{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 3);border-radius:26px;background:var(--amarillo);transform:translateX(100%);transition:transform .45s var(--resorte)}
+  .pastilla[data-en="buscar"] .rayita{transform:translateX(0)}
+  .pastilla[data-en="pedidos"] .rayita{transform:translateX(200%)}
+  /* la canasta: círculo amarillo con un aro que se llena hacia el domicilio gratis (--avance) y se pone verde al llegar */
+  .abajo-canasta{position:relative;flex:none;width:64px;height:64px;padding:4px;border:0;border-radius:50%;background:conic-gradient(#f5a524 var(--avance,0%),#dfe4f0 0);box-shadow:0 10px 24px rgba(14,26,71,.28);transition:--avance .6s var(--suelto)}
+  .abajo-canasta.gratis{background:conic-gradient(#1fae5b var(--avance,0%),#dfe4f0 0)}
+  .abajo-canasta .adentro{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--amarillo);color:var(--noche);transition:transform .15s}
+  .abajo-canasta:active .adentro{transform:scale(.93)}
   .abajo-canasta .ico{width:26px;height:26px;stroke-width:2.2}
-  .abajo-ico{position:relative;display:block;overflow:visible}
-  .abajo-canasta .n{position:absolute;top:-8px;right:-10px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--rojo);color:#fff;font-size:12px;display:grid;place-items:center;box-shadow:0 0 0 2px var(--amarillo)}
+  .abajo-canasta .n{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border:2px solid #fff;border-radius:11px;background:var(--rojo);color:#fff;font-size:12.5px;font-weight:800;line-height:1;display:grid;place-items:center}
+  .abajo-canasta:focus-visible{outline:3px solid var(--azul);outline-offset:3px}
+  /* la tira del domicilio gratis: sale encima de la pastilla con algo en la canasta, y al tocarla abre la canasta */
+  .flota{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:29;display:grid;gap:6px;padding:9px 12px 10px;border:1px solid var(--linea);border-radius:16px;background:#fff;color:var(--texto2);font:inherit;font-size:12.5px;line-height:1.3;text-align:left;box-shadow:0 8px 20px rgba(14,26,71,.16);animation:sube-tira .45s var(--resorte)}
+  .flota b{color:var(--texto)}
+  .flota .tubo{display:block;height:6px;border-radius:3px;background:#e3e7f1;overflow:hidden}
+  .flota .tubo i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--amarillo),#f5a524);transition:width .6s var(--suelto)}
+  .flota.gratis b.si{color:var(--verde)}
+  .flota.gratis .tubo i{background:linear-gradient(90deg,#1fae5b,#55d68b)}
   /* la canasta de arriba sobra: la de abajo hace lo mismo y está a la mano del pulgar */
   .cab .btn-canasta{display:none}
 }
+@keyframes sube-tira{from{transform:translateY(120%);opacity:0}to{transform:none;opacity:1}}
 
 /* panel de canasta */
-.velo{position:fixed;inset:0;background:rgba(14,26,71,.45);z-index:40}
-.panel{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(420px,100%);background:#fff;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(14,26,71,.2)}
+.velo{position:fixed;inset:0;background:rgba(14,26,71,.45);z-index:40;animation:velo .25s ease-out}
+.panel{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(420px,100%);background:#fff;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(14,26,71,.2);animation:panel-lado .32s var(--suelto)}
 .panel header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--linea)}
 .panel header h2{font-size:19px;margin-right:auto}
 .panel header .vaciar{justify-self:auto}
@@ -227,9 +222,17 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 
 /* cuenta en la cabecera */
 .btn-cuenta{display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 16px;border-radius:99px;background:var(--suave);color:var(--noche);font-weight:800;text-decoration:none}
+/* el círculo de quien entró: su inicial (tienda.js); sin nombre queda la silueta */
+.yo{flex:none;display:grid;place-items:center;width:36px;height:36px;margin-left:-8px;border-radius:50%;background:var(--amarillo);color:var(--noche);font-weight:800;font-size:17px;line-height:1;transition:transform .2s var(--resorte)}
+.yo .ico{width:20px;height:20px}
+.btn-cuenta:active .yo{transform:scale(.92)}
 @media (min-width:761px){.cab .envolver{grid-template-columns:auto minmax(0,1fr) auto auto}}
 /* celular: sin la canasta de arriba (va abajo), la cuenta queda sola a la derecha del logo */
-@media (max-width:760px){.btn-cuenta .txt{display:none}.btn-cuenta{width:50px;padding:0;justify-content:center;grid-column:3;grid-row:1;justify-self:end}}
+@media (max-width:760px){
+  .btn-cuenta .txt{display:none}
+  .btn-cuenta{width:50px;padding:0;justify-content:center;grid-column:3;grid-row:1;justify-self:end;background:none}
+  .yo{width:42px;height:42px;margin-left:0;font-size:18px;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--azul)}
+}
 
 /* datos de entrega (paso 2 de la canasta) */
 .datos{flex:1;overflow-y:auto;padding:14px 20px 20px;display:grid;gap:14px;align-content:start}
@@ -274,7 +277,10 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* Sin doble toque que acerque la pantalla; el pellizco para ampliar sigue */
 html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 /* El pie llega hasta abajo del todo y deja espacio a la barra y al aviso */
-@media (max-width:760px){.pie{padding-bottom:calc(90px + env(safe-area-inset-bottom))}}
+@media (max-width:760px){
+  .pie{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+  .con-canasta .pie{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+}
 
 /* medio de pago */
 .pago,.final,.pqr{flex:1;overflow-y:auto;padding:16px;display:grid;gap:14px;align-content:start}
@@ -578,3 +584,70 @@ html.con-ficha{overflow:hidden}
 .caract dt{padding:10px 12px;font-weight:700;font-size:14.5px}
 .caract dd{margin:0;padding:10px 12px;font-size:14.5px;overflow-wrap:anywhere}
 .ficha-desc{white-space:pre-line;line-height:1.55;overflow-wrap:anywhere}
+
+/* ---------- Cara de app (nov-2026): cabecera del celular, modo búsqueda y movimiento ---------- */
+/* Celular: el buscador es una pastilla suave sin botón (se busca al escribir) y la cabecera suelta una sombra
+   cuando la página ya bajó (tienda.js le pone .bajo) */
+@media (max-width:760px){
+  .cab{border-bottom-color:transparent;transition:box-shadow .25s,border-color .25s}
+  .cab.bajo{border-bottom-color:var(--linea);box-shadow:0 6px 18px rgba(14,26,71,.08)}
+  .cab .envolver{padding-block:10px}
+  .buscar{padding:0 12px 0 16px;border-color:transparent;background:var(--suave);transition:border-color .2s,background .2s}
+  .buscar:focus-within{border-color:var(--azul);background:#fff}
+  .buscar button{display:none}
+  .banner{min-height:0;padding:20px;gap:10px}
+}
+/* Buscando: quedan solo los resultados, pegados a la cabecera. Categorías, portada y lo demás vuelven al borrar
+   la búsqueda (tienda.js pone la clase en <html>) */
+.buscando .cats,.buscando .portada,.buscando .ultima,.buscando .benef,.buscando .como{display:none}
+
+/* Mientras llega el catálogo: tarjetas grises con un brillo que pasa, en el lugar de los productos */
+.esqueleto{margin-bottom:14px}
+.esqueleto li{border:1px solid var(--linea);border-radius:var(--r);overflow:hidden;background:#fff}
+.esqueleto li::before{content:"";display:block;aspect-ratio:1;background:linear-gradient(100deg,var(--suave) 40%,#fff 50%,var(--suave) 60%) 0 0/300% 100%;animation:brillo 1.2s linear infinite}
+.esqueleto li::after{content:"";display:block;height:70px;margin:10px 12px 12px;border-radius:8px;background:var(--suave)}
+@media (max-width:600px){.esqueleto li:nth-child(n+5){display:none}}
+@keyframes brillo{from{background-position:100% 0}to{background-position:-100% 0}}
+
+/* Las tarjetas suben una tras otra cuando cambia lo que se ve (no al escribir en el buscador): tienda.js pone .entra */
+.grilla.entra > li{animation:aparece .4s var(--suelto) backwards}
+.grilla.entra > li:nth-child(2){animation-delay:.04s}
+.grilla.entra > li:nth-child(3){animation-delay:.08s}
+.grilla.entra > li:nth-child(4){animation-delay:.12s}
+.grilla.entra > li:nth-child(5){animation-delay:.16s}
+.grilla.entra > li:nth-child(6){animation-delay:.2s}
+.grilla.entra > li:nth-child(n+7){animation-delay:.24s}
+
+/* Lo que se toca responde: se hunde un poco bajo el dedo */
+.mas,.enviar,.banner .acc,.ultima-btn,.cat img{transition:transform .15s}
+.mas:active:not(:disabled),.enviar:active:not(:disabled),.banner .acc:active,.ultima-btn:active{transform:scale(.96)}
+.cat:active img{transform:scale(.93)}
+/* Al agregar: el botón se abre en − n + con un rebote, y al cambiar la cantidad el número late (clases de tienda.js) */
+[data-ctrl].abre .cant{animation:brota .35s var(--resorte)}
+[data-ctrl].cambia .cant input{animation:salta .3s var(--resorte)}
+.salta{animation:salta .5s var(--resorte)}
+@keyframes salta{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes brota{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+/* La foto que vuela a la canasta al agregar desde la vitrina */
+.volando{position:fixed;z-index:60;margin:0;border-radius:12px;object-fit:cover;pointer-events:none;box-shadow:0 6px 16px rgba(14,26,71,.25)}
+
+/* La canasta entra deslizando (desde abajo en el celular, desde el lado en el computador: la animación va en
+   .panel y .velo, arriba) y cada paso del pedido entra con un movimiento corto. «Su pedido» conserva su hoja. */
+.panel .datos,.panel .pago{animation:aparece .3s var(--suelto)}
+@media (max-width:760px){.panel{animation-name:panel-sube}}
+@keyframes panel-lado{from{transform:translateX(48px);opacity:0}to{transform:none;opacity:1}}
+@keyframes panel-sube{from{transform:translateY(48px);opacity:0}to{transform:none;opacity:1}}
+@keyframes velo{from{opacity:0}to{opacity:1}}
+/* El menú de la cuenta brota desde el círculo */
+.menu-cuenta{transform-origin:top right;animation:brota .22s var(--suelto)}
+
+/* Aviso corto que baja y se va solo, y el confeti al llegar al domicilio gratis (los pinta tienda.js) */
+.tostada{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));z-index:90;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);margin:0;padding:10px 18px;border-radius:99px;background:var(--verde);color:#fff;font-weight:800;font-size:15px;text-align:center;box-shadow:0 10px 24px rgba(15,122,67,.35);animation:baja .45s var(--resorte)}
+@keyframes baja{from{transform:translate(-50%,-160%)}to{transform:translate(-50%,0)}}
+.confeti{position:fixed;inset:0;z-index:89;overflow:hidden;pointer-events:none}
+.confeti i{position:absolute;left:50%;top:38%;width:8px;height:12px;border-radius:2px}
+
+@media (prefers-reduced-motion:reduce){
+  .rayita,.abajo-btn,.abajo-btn .ico,.abajo-canasta,.abajo-canasta .adentro,.flota .tubo i,.yo,.cab,.buscar,.mas,.enviar,.banner .acc,.ultima-btn,.cat img{transition:none}
+  .flota,.tostada,.salta,.esqueleto li::before,.grilla.entra > li,[data-ctrl].abre .cant,[data-ctrl].cambia .cant input,.panel,.velo,.panel .datos,.panel .pago,.menu-cuenta{animation:none}
+}
