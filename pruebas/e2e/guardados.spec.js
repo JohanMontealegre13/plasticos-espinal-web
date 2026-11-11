@@ -245,7 +245,7 @@ test('un favorito agotado se ve con su sello, abre su ficha y no se puede agrega
   await page.locator('#favoritos li').getByRole('button').click();
   await expect(page.locator('#fichaDisp')).toHaveText('Agotado');
   await expect(page.locator('#ficha').getByRole('button', { name: /^Agregar/ })).toHaveCount(0);
-  await expect(page.locator('#n')).toBeHidden();
+  await expect(page.locator('#barraN')).toBeHidden();
 });
 
 /* ---------- mientras se busca ---------- */
@@ -291,7 +291,7 @@ test('lo de la última vez se SUMA a lo que ya hay en la canasta', async ({ page
   await expect(page.locator('#noEstan')).toBeHidden();
   /* la vitrina también se enteró */
   await page.locator('#cerrar').click();
-  await expect(page.locator('#n')).toHaveText('4');
+  await expect(page.locator('#barraN')).toHaveText('4');
 });
 
 test('el aviso de lo que no está se quita al abrir la canasta otra vez', async ({ page }) => {
@@ -321,7 +321,7 @@ test('si nada de lo de la última vez está hoy, el botón no sale y la canasta 
   await sembrar(page, { 'pe-ultimo-v1': [{ id: 398, cantidad: 1 }, { id: 777, cantidad: 2 }] });
   await abrirTienda(page);
   await expect(page.locator('#ultimaVez')).toBeHidden();
-  await expect(page.locator('#n')).toBeHidden();
+  await expect(page.locator('#barraN')).toBeHidden();
 });
 
 test('lo de la última vez respeta el tope de 999 por línea', async ({ page }) => {

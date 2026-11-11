@@ -114,7 +114,7 @@ test.describe('canasta', () => {
     await expect(page.locator('#tot')).toHaveText('$13.800');
     await panel.getByRole('button', { name: 'Quitar uno de Contenedor icopor J1 x25 und' }).click();
     await expect(page.locator('#vacio')).toBeVisible();
-    await expect(page.locator('#n')).toBeHidden();
+    await expect(page.locator('#barraN')).toBeHidden();
   });
 
   test('la canasta sobrevive a recargar la página', async ({ page }) => {
@@ -122,7 +122,7 @@ test.describe('canasta', () => {
     await agregar(page, 'Contenedor icopor J1 x25 und');
     await agregar(page, 'Tenedor plástico x100 und');
     await page.reload();
-    await expect(page.locator('#n')).toHaveText('2');
+    await expect(page.locator('#barraN')).toHaveText('2');
     await abrirCanasta(page);
     await expect(page.locator('#items li')).toHaveCount(2);
   });
@@ -137,7 +137,7 @@ test.describe('canasta', () => {
     const catalogo = catalogoCrm();
     catalogo.productos.find((/** @type {any} */ p) => p.id === 131).disponible = false;
     await abrirTienda(page, { catalogo });
-    await expect(page.locator('#n')).toHaveText('2');            /* solo los 2 contenedores */
+    await expect(page.locator('#barraN')).toHaveText('2');            /* solo los 2 contenedores */
     expect(JSON.parse(await page.evaluate(() => localStorage.getItem('pe-canasta-v1') || '{}'))).toEqual({ 141: 2 });
   });
 
@@ -148,7 +148,7 @@ test.describe('canasta', () => {
     });
     await abrirTienda(page);
     await agregar(page, 'Contenedor icopor J1 x25 und');
-    await expect(page.locator('#n')).toHaveText('1');
+    await expect(page.locator('#barraN')).toHaveText('1');
     await abrirCanasta(page);
     await expect(page.locator('#tot')).toHaveText('$13.800');
     v.sinProblemas();
@@ -203,7 +203,7 @@ test.describe('canasta', () => {
     /* la cédula no viaja: el CRM pone la de la cuenta que hizo el pedido */
     expect(Object.keys(datos).sort()).toEqual(['barrio', 'celular', 'direccion', 'indicaciones', 'nombre']);
     expect(JSON.stringify(enviados[0])).not.toMatch(/precio|total/i);
-    await expect(page.locator('#n')).toBeHidden();                /* la canasta queda vacía para el próximo pedido */
+    await expect(page.locator('#barraN')).toBeHidden();                /* la canasta queda vacía para el próximo pedido */
   });
 });
 

@@ -32,7 +32,9 @@
   var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var YO = '/tienda/mi-cuenta/api/yo';   /* quien entró: sus datos de entrega guardados */
-  var DATOS = '/tienda/mi-cuenta/api/datos';   /* «Mis datos»: ahí queda la dirección predeterminada */
+  var DATOS = '/tienda/mi-cuenta/api/datos';
+  var FAVORITOS = '/tienda/mi-cuenta/api/favoritos';   /* los favoritos viven en la cuenta: iguales en todos sus equipos */
+  var CLAVE_FAV_CUENTA = 'pe-favoritos-cuenta';   /* de quién son los favoritos de este navegador (su documento) */   /* «Mis datos»: ahí queda la dirección predeterminada */
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
   var PRECISION_MAX_M = 200;           /* un punto del GPS con más error que esto (en metros) no se adjunta: por antena o por internet
@@ -1029,10 +1031,54 @@
     var ids = idsDe(guardados.favoritos), i = ids.indexOf(id);
     if (i >= 0) ids.splice(i, 1); else ids = window.PE.alFrente(ids, id, MAX_FAVORITOS);
     guardados.favoritos.escribir(ids);
+    intentar(function () { subirFavoritos(ids); });
     /* la tarjeta de la vitrina y el corazón de la ficha son el mismo favorito */
     document.querySelectorAll('[data-fav="' + id + '"]').forEach(function (b) { pintarCorazon(b, i < 0); });
     pintarGuardados();
     if (soloFavoritos) pintar();   /* viendo Favoritos, el que se quitó se va y el nuevo aparece */
+  }
+  /* Favoritos en la cuenta: el celular y el computador muestran los mismos. La primera vez que esta cuenta
+     entra en este navegador se juntan los de aquí con los de la cuenta (no se pierde ninguno); de ahí en
+     adelante manda la cuenta, así lo que se quita en un equipo se quita en todos. Sin respuesta del CRM
+     (o un CRM que aún no los guarda) quedan solo en el navegador, como antes. */
+  var favEnCuenta = false, favReloj = 0;
+  function unirFavoritos(yo) {
+    if (!guardados || !yo || !Array.isArray(yo.favoritos) || !yo.documento) return;
+    var nube = idsDe({ leer: function () { return yo.favoritos; } }), lista = nube.slice(), marca = null;
+    try { marca = localStorage.getItem(CLAVE_FAV_CUENTA); } catch (e) { /* sin almacenamiento */ }
+    if (marca !== yo.documento) {
+      /* primera vez de esta cuenta aquí: los de otra cuenta no se mezclan, los sueltos sí se juntan */
+      if (!marca) idsDe(guardados.favoritos).forEach(function (id) { if (lista.indexOf(id) < 0) lista.push(id); });
+      try { localStorage.setItem(CLAVE_FAV_CUENTA, yo.documento); } catch (e) { /* sin almacenamiento */ }
+    }
+    lista = lista.slice(0, MAX_FAVORITOS);
+    favEnCuenta = true;
+    var antes = idsDe(guardados.favoritos).join(',');
+    guardados.favoritos.escribir(lista);
+    if (lista.join(',') !== nube.join(',')) subirFavoritos(lista);
+    if (lista.join(',') !== antes) {
+      document.querySelectorAll('[data-fav]').forEach(function (b) { pintarCorazon(b, lista.indexOf(Number(b.dataset.fav)) >= 0); });
+      intentar(pintarGuardados);
+      if (soloFavoritos) pintar();
+    }
+  }
+  function subirFavoritos(ids) {
+    if (!favEnCuenta) return;
+    clearTimeout(favReloj);
+    favReloj = setTimeout(function () {
+      fetch(FAVORITOS, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ favoritos: ids }) })
+        .catch(function () { /* sin red: quedan en este navegador y se suben con el próximo cambio */ });
+    }, 400);
+  }
+  /* Al volver a la pestaña (quizá con favoritos cambiados en el celular), se traen los de la cuenta */
+  function favoritosAlVolver() {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState !== 'visible' || !favEnCuenta) return;
+      fetch(YO, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (yo) { if (yo && yo.ok) intentar(function () { unirFavoritos(yo); }); })
+        .catch(function () { /* sin red: siguen los de aquí */ });
+    });
   }
   function recordarVisto(id) {
     if (!guardados) return;
@@ -1342,6 +1388,7 @@
     $('errPago').hidden = true;
     marcarMedio('');
     pintarBilletes();
+    document.querySelectorAll('#pago [data-cancelar]').forEach(function (b) { b.hidden = pedido.puede_cancelar === false; });
     vista('pago');
   }
   function marcarMedio(m) {
@@ -1539,6 +1586,7 @@
     $('fPasos').hidden = pedido.estado === 'NO_ENTREGADO';
     $('fMotivo').hidden = !pedido.motivo;
     $('fMotivo').textContent = pedido.motivo ? 'Motivo: ' + pedido.motivo : '';
+    $('cancelarFinal').hidden = !pedido.puede_cancelar || !!pedido.final;
     pintarAviso();
   }
   function pasoFinal() { pintarFinal(); vista('final'); vigilar(); }
@@ -1562,17 +1610,58 @@
   function pintarAviso() {
     var a = $('avisoPedido');
     if (!pedido || !pedido.codigo) { a.hidden = true; avisoDe = ''; clearTimeout(relojAviso); return; }
-    var texto = pedido.codigo + ' · ' + (pedido.titulo || 'Pedido por confirmar');
+    var pendiente = faltaPago(pedido);
+    var texto = pedido.codigo + ' · ' + (pendiente ? 'Falta terminar el pago' : (pedido.titulo || 'Pedido por confirmar'));
     $('avisoTexto').textContent = texto;
     if (texto === avisoDe) return;
     avisoDe = texto;
     a.hidden = false;
     clearTimeout(relojAviso);
-    relojAviso = setTimeout(function () { a.hidden = true; }, AVISO_SEGUNDOS * 1000);
+    /* Con el pago a medias la franja se queda: es el camino de vuelta para terminarlo */
+    if (!pendiente) relojAviso = setTimeout(function () { a.hidden = true; }, AVISO_SEGUNDOS * 1000);
+  }
+  /* Falta el pago: no escogió cómo pagar, o escogió QR y no tocó «PAGO CONFIRMADO» (pudo salirse de la pantalla) */
+  function faltaPago(p) {
+    return !!p && !p.final && (!p.estado || p.estado === 'POR_CONFIRMAR') && (!p.medio || (p.medio === 'qr' && !p.pago_avisado));
   }
   function abrirPedido() {
     abrir();
-    if (!pedido.medio) pasoPago(); else pasoFinal();
+    if (faltaPago(pedido)) pasoPago(); else pasoFinal();
+  }
+  /* Abrir un pedido por su código (desde «Mis pedidos» o un enlace #pedido=PE-…): con la sesión de la cuenta el CRM
+     lo da aunque este navegador no tenga su secreto, así se retoma en cualquier equipo */
+  function abrirPedidoCodigo(codigo) {
+    codigo = String(codigo || '').toUpperCase();
+    if (!/^PE-[A-Z0-9]{3,8}$/.test(codigo)) return;
+    if (pedido && pedido.codigo === codigo) { abrirPedido(); return; }
+    llamar('/' + codigo, 'GET').then(function (r) {
+      pedido = r; guardarPedido(pedido);
+      abrirPedido();
+      vigilar();
+    }).catch(function () { /* no es de esta cuenta o ya no existe: la tienda sigue normal */ });
+  }
+  function pedidoDeLaDireccion() {
+    var m = /^#pedido=(PE-[A-Za-z0-9]{3,8})$/.exec(location.hash);
+    if (!m) return;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* sin historial */ }
+    abrirPedidoCodigo(m[1]);
+  }
+  /* Cancelar el pedido: hasta que salga a repartir (lo revisa el CRM). Se pregunta antes: no tiene vuelta atrás */
+  function cancelarPedido(boton) {
+    if (!pedido || !pedido.codigo) return;
+    var aviso = pedido.medio === 'qr' && pedido.pago_avisado
+      ? ' Si ya transfirió, le devolvemos la plata.' : '';
+    if (!window.confirm('¿Cancelar el pedido ' + pedido.codigo + '?' + aviso)) return;
+    var err = $('errCancelar'), errPago = $('errPago');
+    err.hidden = true;
+    ocupado(boton, true);
+    llamar('/' + pedido.codigo + '/cancelar', 'POST', {}).then(function (r) {
+      Object.assign(pedido, r); guardarPedido(pedido);
+      pasoFinal();
+    }).catch(function (e) {
+      var donde = vistaActual() === 'pago' ? errPago : err;
+      donde.textContent = e.message; donde.hidden = false;
+    }).then(function () { ocupado(boton, false); });
   }
 
   /* ---------- Canasta ---------- */
@@ -1600,7 +1689,8 @@
       ul.appendChild(li);
     });
     var vacia = c.n === 0;
-    $('n').hidden = vacia; $('n').textContent = c.n;
+    var arriba = $('n');   /* la canasta de arriba ya no existe en la tienda (la de abajo es la única) */
+    if (arriba) { arriba.hidden = vacia; arriba.textContent = c.n; }
     intentar(function () { pintarAbajo(c, gratis); });
     $('dom').textContent = vacia ? '$0' : (c.d ? pesos(c.d) : 'Gratis');
     $('falta').textContent = c.cupon ? '· con su cupón' : (!vacia && c.s < gratis ? '· gratis si agrega ' + pesos(gratis - c.s) : '');
@@ -1894,8 +1984,13 @@
       cerrar();
     });
     $('avisoPedido').addEventListener('click', abrirPedido);
-    /* «Mis pedidos» (en su ventana) pide abrir el pedido en curso */
-    window.addEventListener('pe:abrir-pedido', function () { if (pedido && pedido.codigo) abrirPedido(); });
+    document.querySelectorAll('[data-cancelar]').forEach(function (b) { b.addEventListener('click', function () { cancelarPedido(b); }); });
+    /* «Mis pedidos» (en su ventana) pide abrir un pedido: el que trae su código o el que está en curso aquí */
+    window.addEventListener('pe:abrir-pedido', function (e) {
+      var codigo = e && e.detail && typeof e.detail === 'string' ? e.detail : '';
+      if (codigo) abrirPedidoCodigo(codigo);
+      else if (pedido && pedido.codigo) abrirPedido();
+    });
   }
 
   /* ---------- Carga ---------- */
@@ -1946,6 +2041,8 @@
       /* Lo que es un extra va con intentar: si falla, los productos se ven igual (nunca «No pudimos cargar») */
       $('ubicarCaja').hidden = !intentar(ubicacionDisponible);
       guardados = intentar(abrirGuardados) || null;
+      intentar(function () { unirFavoritos(cuenta); });
+      intentar(favoritosAlVolver);
       pintarCategorias();
       eventos();
       eventosFicha();
@@ -1964,6 +2061,7 @@
       pintarAviso();
       vigilar();
       intentar(fichaDeLaDireccion);   /* un enlace con #p=ID abre esa ficha */
+      intentar(pedidoDeLaDireccion);  /* y uno con #pedido=PE-… abre ese pedido (desde «Mis pedidos») */
       setInterval(pintarLlegada, 60000);   /* la hora de llegada corre sola mientras la página está abierta */
       setInterval(function () { intentar(recordarCanasta); }, 15000);
     })

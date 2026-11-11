@@ -10,20 +10,18 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=30">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=31">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=31" defer></script>
+  <script src="/tienda/tienda.js?v=32" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=8">
-  <script src="/tienda/mi-cuenta/menu.js?v=7" defer></script>
+  <script src="/tienda/mi-cuenta/menu.js?v=8" defer></script>
 </head>
 <body>
 <div class="franja"><div class="envolver">
-  <!-- Volver a la página web: siempre a la vista -->
-  <a class="a-la-web" href="https://plasticosespinal.com/">‹ Página web</a>
   <span id="franjaLlegada">🛵 Domicilio en El Espinal <b>en menos de 1 hora</b></span>
   <span>Gratis desde <b id="gratisDesde">$50.000</b> en productos</span>
   <span>Pague con <b>Bre-B</b> o efectivo</span>
@@ -35,8 +33,11 @@
   <a class="logo" href="./"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"></a>
   <label class="buscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" enterkeyhint="search" placeholder="¿Qué necesita hoy? vasos, bolsas, contenedores…" aria-label="Buscar productos"><button type="button" id="btnq">Buscar</button></label>
   <!-- La cuenta: un círculo con la inicial de quien entró (tienda.js la pone); al tocarlo sale su menú (mi-cuenta/menu.js) -->
-  <a class="btn-cuenta" href="mi-cuenta/" aria-label="Mi cuenta"><span class="yo" id="yo" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><span class="txt">Mi cuenta</span></a>
-  <button class="btn-canasta" type="button" data-abrir><svg class="ico" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="txt">Canasta</span><span class="n" id="n" hidden>0</span></button>
+  <!-- Debajo de la cuenta, chiquito, el camino de vuelta a la página web (pedido del dueño, 11-nov-2026) -->
+  <div class="cuenta-col">
+    <a class="btn-cuenta" href="mi-cuenta/" aria-label="Mi cuenta"><span class="yo" id="yo" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><span class="txt">Mi cuenta</span></a>
+    <a class="a-la-web" href="https://plasticosespinal.com/">Página web ›</a>
+  </div>
 </div>
 <button class="aviso-pedido" type="button" id="avisoPedido" hidden><span class="envolver"><span class="pulso" aria-hidden="true"></span><span id="avisoTexto"></span><span class="ver">Ver<span class="largo"> su pedido</span> ›</span></span></button>
 </header>
@@ -274,6 +275,8 @@
       <button class="enviar" type="button" id="listoEfe">Confirmar pedido</button>
     </div>
     <p class="errores" id="errPago" role="alert" hidden></p>
+    <!-- Cancelar: hasta que el pedido salga a repartir (decisión del dueño, 11-nov-2026) -->
+    <button class="cancelar-pedido" type="button" data-cancelar>Cancelar pedido</button>
   </section>
 
   <!-- 3b. Pantalla del QR: el código aparece despacio y el botón sale después -->
@@ -341,6 +344,8 @@
       <ol class="novedades" id="fNovedades"></ol>
     </div>
     <button class="enviar" type="button" id="otraCompra">Seguir comprando</button>
+    <button class="cancelar-pedido" type="button" id="cancelarFinal" data-cancelar hidden>Cancelar pedido</button>
+    <p class="errores" id="errCancelar" role="alert" hidden></p>
   </section>
 </aside>
 </body>

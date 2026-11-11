@@ -61,9 +61,9 @@ test('en el computador la pastilla flota centrada abajo, sin la tira del domicil
   expect(caja && Math.abs(caja.x + caja.width / 2 - 640)).toBeLessThan(2);   /* centrada */
   expect(caja && caja.width).toBeLessThanOrEqual(420);
   expect(caja && 800 - (caja.y + caja.height)).toBeGreaterThan(8);             /* flota, no toca el borde */
-  await expect(page.locator('.cab .btn-canasta')).toBeVisible();               /* arriba sigue la canasta grande */
+  await expect(page.locator('.cab .btn-canasta')).toHaveCount(0);              /* arriba ya no hay canasta: la de abajo es la única */
   await page.locator('#grilla').getByRole('button', { name: AGREGAR_J1 }).click();
-  await expect(page.locator('#n')).toHaveText('1');
+  await expect(page.locator('#barraN')).toHaveText('1');
   await expect(page.locator('#flota')).toBeHidden();
 });
 
@@ -329,11 +329,13 @@ test('en el celular la canasta es una sola: el círculo amarillo, aparte de la p
   expect(m.derecha).toBeLessThanOrEqual(16);                  /* a la derecha, a la mano del pulgar */
 });
 
-test('en el computador sigue la canasta de arriba', async ({ page }) => {
+test('en el computador la canasta es la de abajo y el buscador gana el espacio de la de arriba', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await abrirTienda(page);
-  await expect(page.locator('.cab .btn-canasta')).toBeVisible();
-  await page.locator('.cab .btn-canasta').click();
+  await expect(page.locator('.cab .btn-canasta')).toHaveCount(0);
+  const buscar = await page.locator('.cab .buscar').boundingBox();
+  expect(buscar && buscar.width).toBeGreaterThan(700);
+  await page.locator('#barra').click();
   await expect(page.locator('#panel')).toBeVisible();
 });
 
@@ -387,15 +389,17 @@ test('al final de la página la pastilla no tapa el pie', async ({ page }) => {
 /** @type {[string, { width: number, height: number }][]} */
 const TAMANOS = [['celular', CELULAR], ['computador', { width: 1280, height: 800 }]];
 for (const [nombre, tam] of TAMANOS) {
-  test(`en el ${nombre} el botón para volver a la página web está a la vista arriba`, async ({ page }) => {
+  test(`en el ${nombre} «Página web» va chiquito debajo de la cuenta`, async ({ page }) => {
     await page.setViewportSize(tam);
     await abrirTienda(page);
-    const web = page.locator('.franja .a-la-web');
+    await expect(page.locator('.franja .a-la-web')).toHaveCount(0);
+    const web = page.locator('.cab .cuenta-col .a-la-web');
     await expect(web).toBeVisible();
     await expect(web).toHaveAttribute('href', 'https://plasticosespinal.com/');
-    await expect(web).toHaveText('‹ Página web');
-    const caja = await web.boundingBox();
-    expect(caja && caja.y).toBeLessThan(40);
+    await expect(web).toHaveText('Página web ›');
+    const caja = await web.boundingBox(), cuenta = await page.locator('.cab .btn-cuenta').boundingBox();
+    expect(caja && cuenta && caja.y).toBeGreaterThanOrEqual((cuenta?.y || 0) + (cuenta?.height || 0) - 1);   /* debajo de la cuenta */
+    expect(caja && caja.height).toBeLessThan(20);                                                          /* chiquito */
     expect(caja && caja.x + caja.width).toBeLessThanOrEqual(tam.width);
     await expect(page.locator('.pie').getByRole('link', { name: 'Volver a la página web' })).toHaveAttribute('href', 'https://plasticosespinal.com/');
   });

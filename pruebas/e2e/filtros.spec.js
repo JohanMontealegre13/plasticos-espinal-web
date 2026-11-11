@@ -96,3 +96,17 @@ test('sin detalles ni tipo (un CRM de antes) solo sale el filtro de categoría',
   await abrirTienda(page);
   await expect(page.locator('#cats .nivel .nivel-tit')).toHaveText(['Categoría']);
 });
+
+test('toda la pastilla del filtro abre la lista: también la flecha y el título', async ({ page }) => {
+  await abrirTienda(page, { catalogo: conDetalles() });
+  const pastilla = page.locator('#cats .nivel').first();
+  await pastilla.scrollIntoViewIfNeeded();
+  const caja = await pastilla.boundingBox();
+  if (!caja) throw new Error('sin pastilla');
+  /* lo que hay debajo del dedo en la flecha (derecha), en el título (arriba) y en el borde izquierdo es la lista */
+  const puntos = [[caja.x + caja.width - 18, caja.y + caja.height / 2], [caja.x + 20, caja.y + 10], [caja.x + 6, caja.y + caja.height - 8]];
+  for (const [x, y] of puntos) {
+    const id = await page.evaluate(([px, py]) => { const e = document.elementFromPoint(px, py); return e && e.id; }, [x, y]);
+    expect(id, `en ${x},${y}`).toBe('f-cat');
+  }
+});

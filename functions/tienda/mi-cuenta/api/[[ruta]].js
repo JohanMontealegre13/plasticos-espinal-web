@@ -51,6 +51,8 @@ const RUTAS = [
   [/^pedidos\/\d{1,9}\/recibo\.pdf$/, 'GET'],
   [/^datos$/, 'POST'],
   /* Foto de perfil: ponerla, quitarla y verla (solo su dueño; el nombre cambia con cada foto) */
+  /* Favoritos de la tienda: la misma lista en el celular y en el computador */
+  [/^favoritos$/, 'POST'],
   [/^foto$/, 'POST'],
   [/^foto\/quitar$/, 'POST'],
   [/^foto\/[0-9a-f]{32}\.jpg$/, 'GET'],
@@ -58,10 +60,12 @@ const RUTAS = [
   [/^tienda\/catalogo$/, 'GET'],
   /* Foto del producto: el nombre lo pone el CRM y cambia con cada foto */
   [/^tienda\/foto\/[0-9a-f]{32}\.(?:png|jpe?g|gif|webp)$/, 'GET'],
-  /* Pedido de la tienda: crear, elegir pago y ver en qué va (con su secreto) */
+  /* Pedido de la tienda: crear, elegir pago y ver en qué va (con su secreto o la sesión de su cuenta) */
   [/^tienda\/pedido$/, 'POST'],
   [/^tienda\/pedido\/PE-[A-Z2-9]{5}$/, 'GET'],
   [/^tienda\/pedido\/PE-[A-Z2-9]{5}\/pago$/, 'POST'],
+  /* Cancelarlo: hasta que salga a repartir (lo decide el CRM) */
+  [/^tienda\/pedido\/PE-[A-Z2-9]{5}\/cancelar$/, 'POST'],
 ];
 
 function leerGalleta(request, nombre) {
