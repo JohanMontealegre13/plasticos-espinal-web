@@ -331,6 +331,9 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
   await expect(page.locator('#catalogo .cat__boton')).toHaveCount(0);
   await expect(page.locator('#catalogo .carrusel__pista')).not.toContainText('Ver productos');
   for (const href of await page.locator('#catalogo a.cat').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) expect(href).toMatch(/^\/productos\/\?/);
+  /* Johan (11-nov): la de la foto de aluminio se llama «Moldes de aluminio», no «Bandejas» */
+  await expect(page.locator('#catalogo a.cat', { has: page.getByRole('heading', { name: 'Moldes de aluminio', exact: true }) })).toHaveAttribute('href', '/productos/?categoria=aluminio');
+  await expect(page.locator('#catalogo .cat h3', { hasText: 'Bandejas' })).toHaveCount(0);
   /* Las escenas con productos de verdad (Higgsfield, 10-nov-2026) están puestas y existen */
   for (const nombre of ['cat-portacomidas', 'cat-bolsas-papel', 'cat-aluminio', 'sec-reposteria', 'sec-salsas', 'sec-heladeria']) {
     const img = page.locator(`img[src*="img/escenas/${nombre}-"]`);
