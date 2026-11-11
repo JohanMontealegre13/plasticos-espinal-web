@@ -443,72 +443,7 @@ test('la ficha abre con la foto en uso, la principal queda de segunda y cada min
   v.sinProblemas();
 });
 
-test('inicio: las pestañas de productos muestran la foto en uso de cada uno', async ({ page }) => {
-  const v = vigilar(page);
-  await simularConFotos(page);
-  await page.goto('/');
-  const bloque = page.locator('#destacados');
-  await bloque.getByRole('tab', { name: 'Platos', exact: true }).click();
-  const panel = bloque.locator('[role="tabpanel"]:visible');
-  await expect(panel.locator('.tarjeta-prod').filter({ hasText: 'Plato 26 cm' }).locator('.tarjeta-prod__foto img')).toHaveAttribute('src', URL_FOTO('b'));
-  await expect(panel.locator('.tarjeta-prod').filter({ hasText: 'Plato 18 cm' }).locator('.tarjeta-prod__foto img')).toHaveAttribute('src', URL_FOTO('e'));
-  await sinDesborde(page);
-  v.sinProblemas();
-});
-
 /* ---------------- Inicio ---------------- */
-
-test('el inicio muestra los productos de la bodega en pestañas por categoría', async ({ page }) => {
-  const v = vigilar(page);
-  await simularCatalogo(page);
-  await page.goto('/');
-  const bloque = page.locator('#destacados');
-  await expect(bloque).toBeVisible();
-  const tabs = bloque.getByRole('tab');
-  await expect(tabs).toHaveCount(3);
-  /* la de más productos va primero (Contenedores: 3) */
-  await expect(tabs.first()).toHaveText('Contenedores');
-  await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-  await expect(bloque.locator('[role="tabpanel"]:visible .tarjeta-prod')).toHaveCount(3);
-  await tabs.first().focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(tabs.nth(1)).toBeFocused();
-  const todos = bloque.locator('[role="tabpanel"]:visible .pestanas__todos');
-  await expect(todos).toHaveAttribute('href', /\/productos\/\?categoria=/);
-  await expect(bloque).not.toContainText('$');
-  await sinDesborde(page);
-  v.sinProblemas();
-});
-
-test('inicio: la rejilla de productos no se desliza de lado; 8 en computador, 6 en celular y «Ver los 9»', async ({ page }) => {
-  const v = vigilar(page);
-  await simularCatalogo(page, { catalogo: PLATOS });
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/');
-  const bloque = page.locator('#destacados');
-  await expect(bloque.getByRole('tab').first()).toHaveText('Platos');
-  const panel = bloque.locator('[role="tabpanel"]:visible');
-  await expect(panel.locator('.tarjeta-prod:visible')).toHaveCount(8);
-  const rejilla = panel.locator('.rejilla-prod');
-  expect(await rejilla.evaluate((r) => r.scrollWidth - r.clientWidth), 'nada escondido de lado').toBeLessThanOrEqual(0);
-  await expect(panel.locator('.pestanas__todos')).toHaveText(/Ver los 9 productos de platos/);
-  await page.setViewportSize({ width: 412, height: 900 });
-  await expect(panel.locator('.tarjeta-prod:visible')).toHaveCount(6);
-  expect(await rejilla.evaluate((r) => r.scrollWidth - r.clientWidth)).toBeLessThanOrEqual(0);
-  await sinDesborde(page);
-  v.sinProblemas();
-});
-
-test('sin catálogo el inicio se ve completo, sin la sección de pestañas', async ({ page }) => {
-  const v = vigilar(page);
-  await simularCatalogo(page, { estado: 503 });
-  await page.goto('/');
-  await expect(page.locator('#catalogo .cat').first()).toBeVisible();
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('#destacados')).toBeHidden();
-  v.sinProblemas();
-});
 
 test('las tarjetas de categoría del inicio llevan al catálogo', async ({ page }) => {
   await simularCatalogo(page);

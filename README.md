@@ -130,13 +130,17 @@ roto llegue al aire, en GitHub se marca «Revisión del sitio» como obligatoria
    dirección, teléfono, «Pida ahora») con la banda del menú debajo. Entre las
    dos va la cinta roja y azul de la marca, la misma que abre el pie; sale en
    todas las páginas y se queda arriba cuando la cabecera queda fija.
-1. **Portada** en escena: el título va en el aire de la izquierda de la foto
-   (computador), encima de la pared (celular) o arriba de la foto (tableta).
-   Dice qué vendemos y para quién, nunca el precio (ver «Cómo hablamos» en
-   `PRODUCT.md`). Es largo: su letra se achica con la pantalla para que no
-   tape los productos de la foto ni saque el botón (lo vigila una prueba). El
-   punto de la etiqueta es verde y late como un «en línea»; con «menos
-   movimiento» queda quieto.
+1. **Portada ancha** (11-nov-2026, pedido de Johan): tres láminas de borde a
+   borde (la mesa del Tolima, el domicilio y la línea biodegradable), fotos de
+   Higgsfield con productos REALES del catálogo y la cinta roja y azul de la
+   marca como objeto dentro de la escena (sin amarillo). El texto va en código
+   (`img/portada/`, sin letras en la imagen). Computador y tableta: el texto
+   sobre la foto, a la izquierda, con velo azul noche y una cuadrícula que casi
+   no se ve; celular: la foto arriba y el texto abajo en un panel azul noche.
+   Usa el mismo carrusel de las categorías (puntos, pausa, avance solo cada
+   5 s; con «menos movimiento» quieto). La primera lámina lleva el título
+   dictado por Johan y el WhatsApp de la portada; nunca precios de producto.
+   El punto de la etiqueta es verde y late como un «en línea».
 2. **Marcas** que distribuimos: cinta que avanza sola, con botón de pausa; con
    «menos movimiento» queda quieta. Solo marcas que de verdad se venden, cada
    una con su logo y sus colores (`img/marcas/`): el de su página oficial o el
@@ -213,11 +217,19 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   lo que hay» (salen de las características del CRM, solo cuando hay de dónde
   escoger; en celular y tableta van detrás del botón «Filtros»), orden y la
   ficha de cada producto (`?p=ID`): fotos, pestañas de descripción,
-  características y domicilio, y parecidos. El inicio muestra los productos por
-  categoría en pestañas («Productos de la bodega»), en una rejilla quieta (nada
-  que deslizar de lado: 8 en computador, 6 en celular) y
-  las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
-  distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
+  características y domicilio, y parecidos. Las tarjetas de categoría del
+  inicio llevan a `/productos/?categoria=…` (si el CRM llama distinto la
+  categoría, se busca por el nombre). El catálogo lo pinta `js/catalogo.js`; el
+  inicio no lo carga.
+- «Así se ven en su negocio» (inicio, 11-nov-2026, pedido de Johan): seis líneas
+  fijas en HTML (platos hondos, platos biodegradables, bandejas, vasos,
+  portacomidas y bolsas de manija), cada una con UNA foto en uso sin repetir
+  (`img/en-uso/`, recortadas de la segunda foto del CRM) y un enlace a su
+  búsqueda o categoría del catálogo. Al pasar el mouse la tarjeta sube, la foto
+  se acerca y aparece una barra amarilla; con movimiento reducido no se mueve.
+- Medidor de visitas: Cloudflare Web Analytics (sin galletas). La CSP deja pasar
+  su guion (`static.cloudflareinsights.com`) y su envío (`cloudflareinsights.com`);
+  se enciende en el panel de Cloudflare Pages, no en el código.
 - **Familias de categorías**: el CRM a veces parte una en varias («Aluminio» y
   «Papel Aluminio», «Vasos» y «Vasos Gold», «Bolsas Manija»…). La que tiene
   todas sus palabras dentro de otra se la lleva, así la pestaña muestra todos

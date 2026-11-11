@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Seguridad: respaldo por si el hosting no envía cabeceras (las reales van en _headers) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QeXCqeDORQJgN/3Mir6Grr85GTNXUyaFeY2nKgTuGMo=' https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
   <!-- Abre siempre desde arriba aunque la dirección traiga #ancla (fix e7352f9). Si cambia este script, cambia su huella sha256 en la CSP de aquí, de _headers y de .htaccess: pruebas/unit/sitio.test.mjs lo vigila. -->
   <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual';if(location.hash)history.replaceState(null,'',location.pathname+location.search);</script>
@@ -40,9 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=18">
-  <script src="js/principal.js?v=13" defer></script>
-  <script src="js/catalogo.js?v=5" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=21">
+  <script src="js/principal.js?v=14" defer></script>
 
   <script type="application/ld+json">
   {
@@ -151,29 +150,53 @@
 
   <main id="contenido">
 
-    <!-- Portada: escena con aire a la izquierda para el título -->
-    <section class="portada" id="inicio" aria-labelledby="titulo-portada">
-      <div class="contenedor">
-        <div class="portada__marco">
-          <picture class="portada__foto">
-            <source media="(max-width: 599px)" srcset="img/escenas/portada-celular-480.webp 480w, img/escenas/portada-celular-768.webp 768w" sizes="100vw" width="768" height="960">
-            <img src="img/escenas/portada-960.webp" srcset="img/escenas/portada-960.webp 960w, img/escenas/portada-1536.webp 1536w" sizes="(min-width: 1264px) 1200px, 100vw" width="1536" height="640" alt="Contenedor con almuerzo, platos, caja de cartón con empanadas, servilletas y jugo en vaso desechable sobre un mesón claro" fetchpriority="high">
-          </picture>
-          <div class="portada__cabeza">
-            <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
-            <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
-          </div>
-          <div class="portada__resto">
-            <p class="portada__bajada">Vasos, platos, contenedores, bolsas y empaques de las marcas líderes del país, al por mayor y al detal.</p>
-            <div class="portada__botones">
-              <a class="boton boton-amarillo boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
-                <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
-                Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
-              </a>
-              <a class="boton boton-azul boton-grande portada__secundario" href="#catalogo">Ver productos</a>
+    <!-- Portada ancha (11-nov-2026, pedido de Johan): tres láminas a todo lo ancho, cada una con
+         productos REALES del catálogo y la cinta roja y azul de la marca como objeto dentro de la foto
+         (sin amarillo: los colores de la marca son rojo y azul). El texto va en código, nunca en la
+         imagen. Sin JS es una fila que se desliza; principal.js le pone puntos, pausa y avance solo. -->
+    <section class="heroe" id="inicio" aria-labelledby="titulo-portada">
+      <div class="carrusel carrusel--heroe" data-carrusel data-cada="3000" data-sigue-con-raton>
+        <ul class="carrusel__pista" aria-label="Portada">
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/mesa-cel-600.webp 600w, img/portada/mesa-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/mesa-1920.webp" srcset="img/portada/mesa-1280.webp 1280w, img/portada/mesa-1920.webp 1920w, img/portada/mesa-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Mesa con sancocho en plato hondo de icopor, mojarra en bandeja ovalada, tamal en plato biodegradable, un portacomidas con arroz y fríjoles y tres jugos en vasos desechables, con una cinta roja y azul" fetchpriority="high">
+            </picture>
+            <div class="lamina__texto">
+              <p class="portada__etiqueta">Distribuidora en El Espinal, Tolima</p>
+              <h1 id="titulo-portada">Empaques plásticos, desechables y biodegradables <span class="resaltado">para su&nbsp;negocio y&nbsp;hogar</span></h1>
+              <div class="lamina__botones">
+                <a class="boton boton-claro boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20cotizar%20un%20pedido." target="_blank" rel="noopener">
+                  <svg class="icono icono-wa" aria-hidden="true"><use href="#i-wa"/></svg>
+                  Pida por WhatsApp<span class="sr-only"> (abre WhatsApp)</span>
+                </a>
+                <a class="boton boton-contorno boton-grande" href="#catalogo">Ver productos</a>
+              </div>
             </div>
-          </div>
-        </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/domicilio-cel-600.webp 600w, img/portada/domicilio-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/domicilio-1920.webp" srcset="img/portada/domicilio-1280.webp 1280w, img/portada/domicilio-1920.webp 1920w, img/portada/domicilio-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Pedido en la puerta de una casa: bolsa de manija a rayas azules con portacomidas y vasos, y dos portacomidas amarrados con una cinta roja y azul" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Domicilio gratis desde $50.000</p>
+              <p class="lamina__bajada">En el casco urbano de El Espinal. Arme su pedido y se lo llevamos.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#contacto">Cómo pedir</a></div>
+            </div>
+          </li>
+          <li class="lamina">
+            <picture class="lamina__foto">
+              <source media="(max-width: 599px)" srcset="img/portada/biodegradable-cel-600.webp 600w, img/portada/biodegradable-cel-960.webp 960w" sizes="100vw" width="960" height="1200">
+              <img src="img/portada/biodegradable-1920.webp" srcset="img/portada/biodegradable-1280.webp 1280w, img/portada/biodegradable-1920.webp 1920w, img/portada/biodegradable-2560.webp 2560w" sizes="100vw" width="1920" height="1086" alt="Platos y portacomidas biodegradables con almuerzo, amarrados con una cinta roja y azul, frente a un cultivo de arroz del Tolima" loading="lazy" decoding="async">
+            </picture>
+            <div class="lamina__texto">
+              <p class="lamina__titulo">Línea biodegradable</p>
+              <p class="lamina__bajada">Platos y portacomidas para servir sin icopor.</p>
+              <div class="lamina__botones"><a class="boton boton-contorno boton-grande" href="#ecologicos">Ver la línea ecológica</a></div>
+            </div>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -190,65 +213,65 @@
         <div class="marcas__pista">
           <ul class="marcas__lista">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="Darnel" decoding="async"></li>
-            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="El Sol" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="Darnel BIO" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="Ajover" decoding="async"></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="El Sol" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="Prodía" decoding="async"></li>
             <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="Wau" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="Acme León" decoding="async"></li>
             <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="Frutaroma" decoding="async"></li>
+            <li class="marca--liquipops"><img class="es-alta" src="img/marcas/liquipops.webp" width="246" height="168" alt="LiquiPops" decoding="async"></li>
             <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="Carvajal" decoding="async"></li>
-            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="Casa Best" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="House" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="Surtiplast" decoding="async"></li>
-            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="Darnel BIO" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="Vacán" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="Prodalum" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
             <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
             <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li class="marca--liquipops"><img class="es-alta" src="img/marcas/liquipops.webp" width="246" height="168" alt="" decoding="async"></li>
             <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
-            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
-            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
             <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
             <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li class="marca--liquipops"><img class="es-alta" src="img/marcas/liquipops.webp" width="246" height="168" alt="" decoding="async"></li>
             <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
-            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
-            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
           <ul class="marcas__lista" aria-hidden="true">
             <li><img src="img/marcas/darnel.webp" width="218" height="144" alt="" decoding="async"></li>
-            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
+            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img src="img/marcas/ajover.svg" width="110" height="44" alt="" decoding="async"></li>
+            <li class="marca--sol"><img class="es-alta" src="img/marcas/el-sol.webp" width="225" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/prodia.webp" width="330" height="192" alt="" decoding="async"></li>
             <li class="marca--wau"><img class="es-alta" src="img/marcas/wau.webp" width="318" height="180" alt="" decoding="async"></li>
             <li><img src="img/marcas/acme-leon.webp" width="305" height="144" alt="" decoding="async"></li>
             <li><img src="img/marcas/frutaroma.webp" width="202" height="101" alt="" decoding="async"></li>
+            <li class="marca--liquipops"><img class="es-alta" src="img/marcas/liquipops.webp" width="246" height="168" alt="" decoding="async"></li>
             <li><img src="img/marcas/carvajal.webp" width="438" height="156" alt="" decoding="async"></li>
-            <li><img class="es-alta" src="img/marcas/casa-best.webp" width="211" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/house.webp" width="346" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/surtiplast.webp" width="724" height="172" alt="" decoding="async"></li>
-            <li><img src="img/marcas/darnel-bio.webp" width="290" height="192" alt="" decoding="async"></li>
             <li><img class="es-alta" src="img/marcas/vacan.webp" width="195" height="192" alt="" decoding="async"></li>
             <li><img class="es-baja" src="img/marcas/prodalum.webp" width="426" height="78" alt="" decoding="async"></li>
           </ul>
@@ -277,7 +300,6 @@
                 <div class="cat__pie">
                   <h3>Contenedores</h3>
                   <p>Con divisiones, para porciones y almuerzos.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -287,7 +309,6 @@
                 <div class="cat__pie">
                   <h3>Vasos</h3>
                   <p>De 3 a 22 oz, para bebidas frías y calientes.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -297,7 +318,6 @@
                 <div class="cat__pie">
                   <h3>Platos</h3>
                   <p>Planos, hondos y ovalados, de 12 a 26 cm.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -307,7 +327,6 @@
                 <div class="cat__pie">
                   <h3>Cubiertos</h3>
                   <p>Tenedores, cucharas y cuchillos, sueltos o en kit.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -317,7 +336,6 @@
                 <div class="cat__pie">
                   <h3>Bolsas</h3>
                   <p>De empaque, de basura y por kilo, todos los calibres.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -327,7 +345,6 @@
                 <div class="cat__pie">
                   <h3>Empaques</h3>
                   <p>Para domicilios, comidas rápidas y repostería.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -337,17 +354,15 @@
                 <div class="cat__pie">
                   <h3>Tapas y domos</h3>
                   <p>Planas, con orificio y domos para tortas y postres.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
             <li>
-              <a class="cat" href="/productos/?categoria=bandejas">
+              <a class="cat" href="/productos/?categoria=aluminio">
                 <span class="cat__foto"><img src="img/escenas/cat-aluminio-360.webp" srcset="img/escenas/cat-aluminio-360.webp 360w, img/escenas/cat-aluminio-720.webp 720w" sizes="(min-width: 1100px) 230px, (min-width: 900px) 25vw, (min-width: 560px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt=""></span>
                 <div class="cat__pie">
-                  <h3>Bandejas</h3>
-                  <p>Para carnes y frutas, y de aluminio para hornear.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+                  <h3>Moldes de aluminio</h3>
+                  <p>Moldes y papel aluminio para hornear y envolver.</p>
                 </div>
               </a>
             </li>
@@ -357,7 +372,6 @@
                 <div class="cat__pie">
                   <h3>Pitillos</h3>
                   <p>Biodegradables: rectos y flexibles, por bolsa.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -367,25 +381,80 @@
                 <div class="cat__pie">
                   <h3>Servilletas y más</h3>
                   <p>Servilletas, mezcladores, guantes y aseo.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
           </ul>
         </div>
+      </div>
+    </section>
 
-        <!-- Lo más pedido por categoría, en pestañas: lo llena js/catalogo.js con los productos del CRM.
-             Si el catálogo no carga, este bloque no aparece y el inicio sigue completo. -->
-        <div class="destacados" id="destacados" data-pestanas hidden>
-          <div class="titulo-fila destacados__cabeza">
-            <div>
-              <h3 class="destacados__titulo" id="titulo-destacados">Productos de la bodega</h3>
-              <p class="titulo-bajada">Toque uno para ver sus fotos, su medida y en qué viene.</p>
-            </div>
+    <!-- Así se ven en su negocio: una foto de IA por categoría, cada una distinta (Johan, 10-nov-2026).
+         Va escrita aquí, no la pinta el catálogo: se ve igual aunque el CRM no conteste. Solo el
+         nombre corto y «Ver productos», sin frases (Johan, 11-nov: «claro y conciso»). -->
+    <section class="seccion" id="en-uso" aria-labelledby="titulo-en-uso">
+      <div class="contenedor">
+        <div class="titulo-fila" data-revela>
+          <div>
+            <h2 class="titulo" id="titulo-en-uso">Así se ven en su negocio</h2>
           </div>
-          <div class="pestanas__lista" role="tablist" id="pestanasLista" aria-labelledby="titulo-destacados"></div>
-          <div id="pestanasPaneles"></div>
         </div>
+        <ul class="usos">
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=platos">
+              <span class="uso__foto"><img src="img/en-uso/platos-hondos-360.webp" srcset="img/en-uso/platos-hondos-360.webp 360w, img/en-uso/platos-hondos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Sancocho servido en un plato hondo de icopor"></span>
+              <div class="uso__pie">
+                <h3>Platos</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?q=plato%20biodegradable">
+              <span class="uso__foto"><img src="img/en-uso/plato-biodegradable-360.webp" srcset="img/en-uso/plato-biodegradable-360.webp 360w, img/en-uso/plato-biodegradable-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Almuerzo con ensalada, verduras asadas y arroz en un plato biodegradable"></span>
+              <div class="uso__pie">
+                <h3>Platos biodegradables</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?q=ovalado">
+              <span class="uso__foto"><img src="img/en-uso/bandejas-360.webp" srcset="img/en-uso/bandejas-360.webp 360w, img/en-uso/bandejas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Pescado frito con patacones y arroz en una bandeja ovalada de icopor"></span>
+              <div class="uso__pie">
+                <h3>Bandejas</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=vasos">
+              <span class="uso__foto"><img src="img/en-uso/vasos-360.webp" srcset="img/en-uso/vasos-360.webp 360w, img/en-uso/vasos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Tres jugos de colores en vasos transparentes"></span>
+              <div class="uso__pie">
+                <h3>Vasos</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?categoria=portacomidas">
+              <span class="uso__foto"><img src="img/en-uso/portacomidas-360.webp" srcset="img/en-uso/portacomidas-360.webp 360w, img/en-uso/portacomidas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Portacomidas con ensalada y fruta"></span>
+              <div class="uso__pie">
+                <h3>Portacomidas</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+          <li data-revela>
+            <a class="uso" href="/productos/?q=bolsa">
+              <span class="uso__foto"><img src="img/en-uso/bolsas-manija-360.webp" srcset="img/en-uso/bolsas-manija-360.webp 360w, img/en-uso/bolsas-manija-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de manija con mangos y aguacates en una plaza de mercado"></span>
+              <div class="uso__pie">
+                <h3>Bolsas</h3>
+                <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
+              </div>
+            </a>
+          </li>
+        </ul>
       </div>
     </section>
 
@@ -523,7 +592,7 @@
               <h2 class="titulo" id="titulo-nosotros">24 años cumpliéndole a los clientes del Tolima</h2>
             </div>
           </div>
-          <p>Desde hace 24 años Plásticos Espinal surte a los restaurantes, asaderos, panaderías, tiendas y familias de la región. En todo este tiempo hemos aprendido una cosa: el negocio necesita su pedido completo y a tiempo, y en eso no fallamos.</p>
+          <p>Desde hace 24 años Plásticos Espinal provee a los restaurantes, asaderos, panaderías, tiendas y familias de la región. En todo este tiempo hemos aprendido que el cliente necesita su pedido completo y a tiempo, y en eso no fallamos.</p>
           <p>Trabajamos directo con las marcas líderes del país y ponemos la tecnología de su lado: catálogo en línea al día, pedido fácil por WhatsApp y la confianza de quien lleva más de dos décadas cumpliéndole a la región.</p>
           <p class="nosotros__resena">
             <span>¿Ya lo atendimos? Cuéntele a más gente:</span>
@@ -595,7 +664,7 @@
           <ol class="pasos" aria-label="Cómo se pide">
             <li><b>Busque en el catálogo</b><span>Cada producto tiene su foto y su código.</span></li>
             <li><b>Escríbanos por WhatsApp</b><span>Con el código o el nombre, y la cantidad.</span></li>
-            <li><b>Reciba su pedido</b><span>Le confirmamos precio y disponibilidad; se lo llevamos o lo recoge en el local.</span></li>
+            <li><b>Reciba su pedido</b><span>Le confirmamos precio y disponibilidad; se lo llevamos o lo recoge en nuestro punto de venta.</span></li>
           </ol>
           <div class="contacto__acciones">
             <a class="boton boton-wa boton-grande" href="https://wa.me/573183555246?text=Hola%2C%20Pl%C3%A1sticos%20Espinal%20%F0%9F%91%8B%20Quiero%20hacer%20un%20pedido." target="_blank" rel="noopener">
