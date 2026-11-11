@@ -115,8 +115,9 @@ test('sin titular la línea no sale', async ({ page }) => {
 
 test('la franja del pedido se ve unos segundos al volver a la tienda y se va', async ({ page }) => {
   await page.clock.install();
-  await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
-  await page.addInitScript((p) => { localStorage.setItem('pe-pedido-v1', JSON.stringify(p)); }, PEDIDO);
+  const pagado = { ...PEDIDO, medio: 'efectivo' };
+  await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...pagado } }));
+  await page.addInitScript((p) => { localStorage.setItem('pe-pedido-v1', JSON.stringify(p)); }, pagado);
   await abrirTienda(page);
   await expect(page.locator('#avisoPedido')).toBeVisible();
   await expect(page.locator('#avisoTexto')).toHaveText('PE-ABCDE · Pedido por confirmar');

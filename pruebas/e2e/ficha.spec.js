@@ -62,7 +62,7 @@ test('en un navegador sin <dialog> la ficha cerrada no se pinta al final de la p
 test('agregar desde la ficha suma en la canasta', async ({ page }) => {
   await abrirTienda(page, { ruta: '/tienda/#p=141' });
   await page.locator('#ficha').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
-  await expect(page.locator('#n')).toHaveText('1');
+  await expect(page.locator('#barraN')).toHaveText('1');
 });
 test('compartir sin navigator.share abre WhatsApp con el enlace', async ({ page }) => {
   await page.addInitScript(() => { delete Navigator.prototype.share; });
@@ -212,7 +212,7 @@ test('el − n + de la ficha y el de la tarjeta se mueven juntos', async ({ page
   await ficha.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await ficha.getByRole('button', { name: 'Agregar uno más de Contenedor icopor J1 x25 und' }).click();
   await expect(ficha.getByLabel('Cantidad de Contenedor icopor J1 x25 und')).toHaveValue('2');
-  await expect(page.locator('#n')).toHaveText('2');
+  await expect(page.locator('#barraN')).toHaveText('2');
   await page.keyboard.press('Escape');
   await expect(page.locator('#grilla li', { hasText: 'Contenedor icopor J1' }).getByLabel('Cantidad de Contenedor icopor J1 x25 und')).toHaveValue('2');
 });

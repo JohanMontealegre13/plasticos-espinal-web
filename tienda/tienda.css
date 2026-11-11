@@ -58,10 +58,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 /* categorías: pastillas que filtran el catálogo (se corren de lado en el celular) */
 .chips{display:flex;gap:8px;overflow-x:auto;margin:-2px -16px 14px;padding:2px 16px;scrollbar-width:none}
 /* Filtros en cascada: una pastilla por nivel con su título arriba y la lista adentro */
-.nivel{flex:none;position:relative;display:grid;gap:0;min-width:150px;max-width:240px;padding:6px 38px 6px 16px;border:2px solid var(--linea);border-radius:16px;background:#fff;cursor:pointer}
+/* toda la pastilla abre la lista: el select la cubre entera y el título y la flecha van encima sin atrapar el toque */
+.nivel{flex:none;position:relative;display:block;min-width:150px;max-width:240px;padding:0;border:2px solid var(--linea);border-radius:16px;background:#fff;cursor:pointer}
 .nivel::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;border-right:2.5px solid var(--azul);border-bottom:2.5px solid var(--azul);transform:translateY(-70%) rotate(45deg);pointer-events:none}
-.nivel-tit{font-size:12px;font-weight:700;color:var(--texto2);line-height:1.2}
-.nivel select{appearance:none;-webkit-appearance:none;width:100%;min-height:26px;padding:0;border:0;background:none;color:var(--texto);font:800 15px var(--font);text-overflow:ellipsis;cursor:pointer}
+.nivel-tit{position:absolute;left:16px;right:38px;top:6px;font-size:12px;font-weight:700;color:var(--texto2);line-height:1.2;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nivel select{appearance:none;-webkit-appearance:none;display:block;width:100%;min-height:52px;padding:21px 38px 5px 16px;border:0;border-radius:14px;background:none;color:var(--texto);font:800 15px var(--font);text-overflow:ellipsis;cursor:pointer}
 .nivel select:focus{outline:none}
 .nivel:focus-within{border-color:var(--azul);box-shadow:0 0 0 3px rgba(36,83,216,.18)}
 .nivel:hover{border-color:var(--azul)}
@@ -248,11 +249,21 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .yo{flex:none;display:grid;place-items:center;width:36px;height:36px;margin-left:-8px;border-radius:50%;background:var(--amarillo);color:var(--noche);font-weight:800;font-size:17px;line-height:1;transition:transform .2s var(--resorte)}
 .yo .ico{width:20px;height:20px}
 .btn-cuenta:active .yo{transform:scale(.92)}
-@media (min-width:761px){.cab .envolver{grid-template-columns:auto minmax(0,1fr) auto auto}}
+/* sin canasta arriba (la de abajo es la única, también en el computador): el buscador gana ese espacio */
+@media (min-width:761px){.cab .envolver{grid-template-columns:auto minmax(0,1fr) auto}}
+/* la cuenta y, debajo, chiquito, «Página web ›» */
+.cuenta-col{position:relative;display:flex;flex-direction:column;align-items:center}
+.cuenta-col .a-la-web{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:1px}
+.cab .envolver{padding-bottom:19px}
+.cuenta-col .a-la-web{font-size:11px;font-weight:700;line-height:1.1;color:var(--texto2);text-decoration:none;white-space:nowrap;padding:2px 4px;border-radius:6px}
+.cuenta-col .a-la-web:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
+@media (hover:hover){.cuenta-col .a-la-web:hover{color:var(--azul);text-decoration:underline}}
 /* celular: sin la canasta de arriba (va abajo), la cuenta queda sola a la derecha del logo */
 @media (max-width:760px){
   .btn-cuenta .txt{display:none}
-  .btn-cuenta{width:50px;padding:0;justify-content:center;grid-column:3;grid-row:1;justify-self:end;background:none}
+  .cuenta-col{grid-column:3;grid-row:1;justify-self:end}
+  .btn-cuenta{width:50px;height:44px;padding:0;justify-content:center;background:none}
+  .cuenta-col .a-la-web{font-size:10px}
   .yo{width:42px;height:42px;margin-left:0;font-size:18px;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--azul)}
 }
 
@@ -340,6 +351,10 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .pasos-pedido li.ahora::before{background:var(--amarillo)}
 .motivo{background:#fdecea;color:#8f1a10;border-radius:10px;padding:10px 12px;font-weight:600}
 .final .enviar{margin-top:6px}
+/* cancelar el pedido: discreto, debajo de lo principal (pregunta antes) */
+.cancelar-pedido{display:block;margin:14px auto 0;padding:8px 14px;border:0;background:none;color:var(--rojo);font:700 14px var(--font);text-decoration:underline;cursor:pointer}
+.cancelar-pedido:disabled{opacity:.5;cursor:wait}
+.cancelar-pedido[hidden]{display:none}
 
 /* botón cerrar: en la canasta un círculo; en «Su pedido», la píldora de Mis pedidos */
 .cerrar{display:inline-grid;place-items:center;color:var(--noche);cursor:pointer}
@@ -835,11 +850,6 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 .ubicar-otro[hidden]{display:none}
 
 /* Volver a la página web: siempre a la vista, en la franja de arriba (pedido del dueño, 11-nov-2026) */
-.franja .a-la-web{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 12px;border:1.5px solid rgba(255,255,255,.55);border-radius:99px;color:#fff;font-weight:800;font-size:13px;text-decoration:none;white-space:nowrap}
-.franja .a-la-web:focus-visible{outline:3px solid var(--amarillo);outline-offset:2px}
-@media (hover:hover){.franja .a-la-web:hover{background:#fff;color:var(--noche)}}
-@media (min-width:761px){.franja .envolver{position:relative}.franja .a-la-web{position:absolute;left:20px;top:50%;transform:translateY(-50%)}}
-@media (max-width:760px){.franja .envolver{justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:10px;text-align:left}.franja .a-la-web{order:2;flex:none;min-height:32px}}
 /* En el celular los filtros van de a dos por fila: se ven todos sin correr de lado */
 @media (max-width:760px){
   html:not(.buscando):not(.en-favoritos) .chips:has(.nivel){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin-inline:0;padding-inline:0}

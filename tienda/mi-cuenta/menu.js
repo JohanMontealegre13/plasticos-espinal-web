@@ -85,7 +85,7 @@
       if (e.origin !== location.origin || !e.data || e.data.cuenta !== 'cerrar') return;
       cerrarVentana();
       /* «Mis pedidos» pidió ver el pedido en curso: lo abre la tienda (tienda.js) */
-      if (e.data.pedido) { window.dispatchEvent(new CustomEvent('pe:abrir-pedido')); return; }
+      if (e.data.pedido) { window.dispatchEvent(new CustomEvent('pe:abrir-pedido', { detail: typeof e.data.pedido === 'string' ? e.data.pedido : '' })); return; }
       if (e.data.ir) location.href = e.data.ir;
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ventana) cerrarVentana(); });

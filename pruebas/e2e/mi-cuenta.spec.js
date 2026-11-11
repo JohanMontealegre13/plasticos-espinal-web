@@ -407,7 +407,7 @@ test('Mis pedidos muestra los pedidos de la tienda que aún no son venta, en cua
   const v = vigilar(page);
   await api(page, { sesion: true });
   await page.route('**/tienda/mi-cuenta/api/pedidos', (r) => r.fulfill({ json: { ...PEDIDOS, en_curso: [
-    { codigo: 'PE-0017', fecha: '2026-11-11 00:40', estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', total: 23500, productos: 2, abierto: true },
+    { codigo: 'PE-0017', fecha: '2026-11-11 00:40', estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', total: 23500, productos: 2, abierto: true, medio: 'efectivo' },
     { codigo: 'PE-0009', fecha: '2026-11-08 09:10', estado: 'NO_ENTREGADO', titulo: 'No pudimos tomar el pedido', total: 9000, productos: 1, abierto: false },
   ] } }));
   await abrirEnVentana(page, 'pedidos/');
@@ -418,9 +418,25 @@ test('Mis pedidos muestra los pedidos de la tienda que aún no son venta, en cua
   await expect(lista).toContainText('No pudimos tomar el pedido');
   await expect(lista).toContainText('FE-0012');                 /* las compras siguen debajo */
   await expect(lista).not.toContainText('Aún no vemos compras');
-  /* Sin el secreto de este celular no hay seguimiento que abrir: no es un enlace */
+  /* Se abre con un botón (la tienda lo pide con la sesión), no con un enlace con el secreto */
   await expect(marco(page).getByRole('link', { name: /PE-0017/ })).toHaveCount(0);
   v.sinProblemas();
+});
+
+test('un pedido con el pago a medias dice «Terminar el pago» y lo abre en la tienda', async ({ page }) => {
+  await api(page, { sesion: true });
+  await page.route('**/tienda/mi-cuenta/api/pedidos', (r) => r.fulfill({ json: { ...PEDIDOS, en_curso: [
+    { codigo: 'PE-ABCDE', fecha: '2026-11-11 00:40', estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', total: 23500, productos: 2, abierto: true, medio: 'qr', pago_avisado: false },
+  ] } }));
+  await page.route('**/tienda/mi-cuenta/api/tienda/pedido/PE-ABCDE', (r) => r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE',
+    estado: 'POR_CONFIRMAR', titulo: 'Pedido por confirmar', medio: 'qr', pago_avisado: false, total: 23500, puede_cancelar: true, final: false } }));
+  await abrirEnVentana(page, 'pedidos/');
+  const fila = marco(page).getByRole('button', { name: /PE-ABCDE/ });
+  await expect(fila).toContainText('Falta el pago');
+  await expect(fila).toContainText('Terminar el pago');
+  await fila.click();
+  await expect(page.locator('#pago')).toBeVisible();
+  await expect(page.locator('#pCodigo')).toHaveText('PE-ABCDE');
 });
 
 test('una compra muestra sus líneas, total y el recibo por el intermediario', async ({ page }) => {

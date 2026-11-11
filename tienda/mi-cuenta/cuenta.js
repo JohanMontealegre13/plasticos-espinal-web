@@ -275,7 +275,7 @@
   function guardadoAqui() {
     var p;
     try { p = JSON.parse(localStorage.getItem('pe-pedido-v1')); } catch (e) { p = null; }
-    return p && p.codigo && !p.final && p.medio ? p : null;
+    return p && p.codigo && !p.final ? p : null;
   }
   function intentarEnCurso(enLista) {
     var p = guardadoAqui();
@@ -292,6 +292,12 @@
       else location.href = RAIZ;
     });
     $('lista').appendChild(b);
+  }
+
+  /* Abre un pedido en la tienda: dentro de su ventana se lo pide a la tienda; suelta, va con #pedido=PE-… */
+  function abrirEnLaTienda(codigo) {
+    if (window.parent !== window) window.parent.postMessage({ cuenta: 'cerrar', pedido: codigo }, location.origin);
+    else location.href = RAIZ + '#pedido=' + encodeURIComponent(codigo);
   }
 
   /* ---------- Mis pedidos ---------- */
@@ -335,28 +341,26 @@
   }
 
   /* Los pedidos de la tienda que aún no son venta (por confirmar, o que la tienda no tomó): los manda el
-     CRM, así que salen en cualquier celular. El que pidió este mismo celular abre su seguimiento; los
-     demás solo dicen cómo van (el seguimiento pide el secreto que guardó el celular que lo hizo). */
+     CRM, así que salen en cualquier celular, y el abierto se abre en la tienda desde cualquiera de ellos. */
   function pintarEnCurso(caja, lista) {
     if (!lista.length) return;
-    var aqui = guardadoAqui();
     var ul = el('ul', 'lista');
     lista.forEach(function (p) {
-      var abre = aqui && aqui.codigo === p.codigo;
-      var fila = el(abre ? 'button' : 'div', 'compra' + (p.abierto ? ' en-curso' : ''));
+      /* Abierto = se puede abrir en la tienda desde cualquier equipo de la cuenta: terminar el pago, seguirlo o
+         cancelarlo (el CRM lo da con la sesión, aunque este celular no tenga su secreto) */
+      var abre = !!p.abierto;
+      var falta = abre && p.estado === 'POR_CONFIRMAR' && 'medio' in p && (!p.medio || (p.medio === 'qr' && !p.pago_avisado));
+      var fila = el(abre ? 'button' : 'div', 'compra' + (abre ? ' en-curso' : ''));
       if (abre) {
         fila.type = 'button';
-        fila.addEventListener('click', function () {
-          if (window.parent !== window) window.parent.postMessage({ cuenta: 'cerrar', pedido: true }, location.origin);
-          else location.href = RAIZ;
-        });
+        fila.addEventListener('click', function () { abrirEnLaTienda(p.codigo); });
       }
       var izq = el('span');
       izq.appendChild(el('span', 'chip dom', 'Tienda en línea'));
-      izq.appendChild(el('span', 'chip' + (p.abierto ? ' vivo' : ' pend'), EN_CURSO[p.estado] || p.titulo));
+      izq.appendChild(el('span', 'chip' + (falta ? ' pend' : (p.abierto ? ' vivo' : ' pend')), falta ? 'Falta el pago' : (EN_CURSO[p.estado] || p.titulo)));
       izq.appendChild(el('span', 'det', fecha(p.fecha) + ' · Pedido ' + p.codigo));
       fila.appendChild(izq);
-      fila.appendChild(el('b', '', pesos(p.total)));
+      fila.appendChild(el('b', '', falta ? 'Terminar el pago ›' : pesos(p.total)));
       var li = el('li'); li.appendChild(fila); ul.appendChild(li);
     });
     caja.appendChild(ul);
