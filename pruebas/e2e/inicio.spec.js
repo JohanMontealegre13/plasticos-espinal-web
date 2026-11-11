@@ -125,8 +125,8 @@ test('solo tres botones de WhatsApp (cabecera, portada y contacto), al número d
   for (const h of sectores) expect(h).toMatch(/^\/productos\/(\?(categoria|q)=[a-z-]+)?$/);
 });
 
-/* Las marcas de la cinta, en su orden (confirmadas por Johan, 10-nov-2026) */
-const MARCAS = ['Darnel', 'El Sol', 'Ajover', 'Prodía', 'Wau', 'Acme León', 'Frutaroma', 'Carvajal', 'Casa Best', 'House', 'Surtiplast', 'Darnel BIO', 'Vacán', 'Prodalum'];
+/* Las marcas de la cinta, en su orden (confirmadas por Johan, 10-nov-2026; Casa Best sale el 11-nov: ya no es proveedor) */
+const MARCAS = ['Darnel', 'El Sol', 'Ajover', 'Prodía', 'Wau', 'Acme León', 'Frutaroma', 'Carvajal', 'House', 'Surtiplast', 'Darnel BIO', 'Vacán', 'Prodalum'];
 
 test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede pausar y vuelve a correr', async ({ page }) => {
   const v = vigilar(page);
