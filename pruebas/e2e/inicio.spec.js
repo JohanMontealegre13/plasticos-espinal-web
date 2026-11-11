@@ -259,8 +259,9 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
   expect(arriba.size).toBe(1);
   expect(abajo.size).toBe(1);
   /* Las tarjetas de categoría que se ven miden lo mismo de alto */
-  const altos = await page.locator('.cat').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
-  expect(new Set(altos).size).toBe(1);
+  /* Sin Math.round: 246,5 y 246,48 px (la rejilla reparte en 1/64 de px) se redondean a 247 y 246 */
+  const altos = await page.locator('.cat').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  expect(Math.max(...altos) - Math.min(...altos), `altos: ${altos.join(', ')}`).toBeLessThanOrEqual(1);
 });
 
 test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en celular, y cada foto carga', async ({ page }) => {
@@ -311,8 +312,9 @@ test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA di
   const botones = await page.locator('.uso__boton').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height - parseFloat(getComputedStyle(e).minHeight)));
   for (const b of botones) expect(b).toBeLessThanOrEqual(4);
   /* Columnas parejas: las seis miden lo mismo de alto */
-  const altos = await tarjetas.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
-  expect(new Set(altos).size).toBe(1);
+  /* Sin Math.round: 246,5 y 246,48 px (la rejilla reparte en 1/64 de px) se redondean a 247 y 246 */
+  const altos = await tarjetas.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  expect(Math.max(...altos) - Math.min(...altos), `altos: ${altos.join(', ')}`).toBeLessThanOrEqual(1);
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(ancho, 'la página se desborda de lado').toBeLessThanOrEqual(0);
   v.sinProblemas();
