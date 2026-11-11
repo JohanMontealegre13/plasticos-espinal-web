@@ -395,7 +395,7 @@ test('títulos que pidió Johan: «Así se ven en su mesa» y la bajada de secto
   await page.goto('/');
   await expect(page.locator('#titulo-en-uso')).toHaveText('Así se ven en su mesa');
   const bajada = page.locator('#sectores .titulo-bajada');
-  await expect(bajada).toHaveText('Productos únicos para cada tipo de negocio. Pensamos primero en nuestros clientes.');
+  await expect(bajada).toHaveText('Productos pensados para cada tipo de negocio. Pensamos primero en nuestros clientes.');
   await expect(page.locator('body')).not.toContainText('cumpleaños en casa');
 });
 
