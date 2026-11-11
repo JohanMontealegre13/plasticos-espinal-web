@@ -673,11 +673,59 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 /* Domicilio gratis por el cupón: en verde, como lo que la tienda regala */
 #dom.con-cupon{color:var(--verde)}
 
-/* Seguimiento del pedido: la escena en video, lo que pidió y cada novedad */
-.escena{width:min(260px,70vw);height:min(260px,70vw);flex:none;border-radius:22px;overflow:hidden;background:var(--suave);display:grid;place-items:center;box-shadow:0 10px 26px rgba(14,26,71,.14)}
-.escena video{width:100%;height:100%;object-fit:cover;display:block}
+/* Seguimiento del pedido: el video de fondo se funde con la hoja (de borde a borde, se desvanece hacia abajo
+   y se acerca despacio); el título queda encima de lo desvanecido. Sin video: el color de la marca. */
+.final{position:relative}
+.escena{width:calc(100% + 40px);margin:-8px -20px -70px;height:min(62vw,300px);flex:none;overflow:hidden;position:relative;display:grid;place-items:center;
+  background:radial-gradient(120% 90% at 50% 20%,var(--azul),var(--noche));
+  -webkit-mask-image:linear-gradient(#000 45%,rgba(0,0,0,.55) 70%,transparent);mask-image:linear-gradient(#000 45%,rgba(0,0,0,.55) 70%,transparent)}
+.escena video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;animation:acercar 16s ease-in-out infinite alternate}
 .escena video[hidden]{display:none}
+.escena .sello-estado{background:rgba(255,255,255,.14);color:#fff;margin-bottom:60px}
 .escena .sello-estado[hidden]{display:none}
+@keyframes acercar{from{transform:scale(1.02)}to{transform:scale(1.14) translateY(-2%)}}
+.final h3{position:relative}
+/* El carril de carga */
+.carga{width:100%;max-width:420px;display:grid;gap:6px}
+.carga[hidden]{display:none}
+.carril{position:relative;height:58px;--paso:15%}
+.carga[data-estado="POR_ALISTAR"] .carril{--paso:45%}
+.carga[data-estado="EN_CAMINO"] .carril{--paso:76%}
+.carga[data-estado="ENTREGADO"] .carril{--paso:100%}
+.carril .linea{position:absolute;left:0;right:0;bottom:8px;height:10px;border-radius:99px;background:var(--suave);overflow:hidden}
+.carril .linea::before,.carril .linea::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--paso);border-radius:99px;transition:width 1.2s cubic-bezier(.3,1.3,.5,1)}
+.carril .linea::before{background:linear-gradient(90deg,var(--azul),var(--rojo))}
+.carril .linea::after{background:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 7px,transparent 7px 14px);background-size:40px 100%;animation:rayas .9s linear infinite}
+.carga[data-estado="ENTREGADO"] .linea::after{animation:none;opacity:0}
+@keyframes rayas{to{background-position:40px 0}}
+.viajero{position:absolute;bottom:20px;left:clamp(0px,calc(var(--paso) - 20px),calc(100% - 40px));width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 6px 16px rgba(14,26,71,.2);display:grid;place-items:center;transition:left 1.2s cubic-bezier(.3,1.3,.5,1);animation:flotar 1.6s ease-in-out infinite}
+.viajero svg{width:24px;height:24px;fill:none;stroke:var(--noche);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:none;grid-area:1/1}
+.carga[data-estado="POR_CONFIRMAR"] .v-cel,.carga[data-estado="POR_ALISTAR"] .v-bolsa,.carga[data-estado="EN_CAMINO"] .v-moto,.carga[data-estado="ENTREGADO"] .v-listo{display:block}
+.carga[data-estado="ENTREGADO"] .v-listo{stroke:var(--verde)}
+@keyframes flotar{50%{transform:translateY(-4px)}}
+.carga[data-estado="EN_CAMINO"] .viajero{animation:rodar 1.8s ease-in-out infinite}
+@keyframes rodar{0%,100%{transform:translateX(-6px) rotate(-2deg)}50%{transform:translateX(6px) translateY(-2px) rotate(2deg)}}
+/* El celular late como si sonara */
+.carga[data-estado="POR_CONFIRMAR"] .viajero::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--azul);animation:onda 1.6s ease-out infinite}
+@keyframes onda{from{transform:scale(1);opacity:.8}to{transform:scale(1.9);opacity:0}}
+/* La bolsa se llena: caen productos de colores; al entregar, salen como confeti */
+.caen{position:absolute;inset:0;pointer-events:none;display:none}
+.carga[data-estado="POR_ALISTAR"] .caen,.carga[data-estado="ENTREGADO"] .caen{display:block}
+.caen i{position:absolute;left:50%;top:-22px;width:9px;height:9px;margin-left:-4.5px;border-radius:3px;background:var(--azul);opacity:0;animation:caer 1.6s ease-in infinite}
+.caen i:nth-child(2){background:var(--rojo);animation-delay:.4s;border-radius:50%}
+.caen i:nth-child(3){background:var(--amarillo);animation-delay:.8s}
+.caen i:nth-child(4){background:var(--verde);animation-delay:1.2s;border-radius:50%}
+@keyframes caer{0%{transform:translate(var(--x,0),-14px) rotate(0);opacity:0}25%{opacity:1}80%{opacity:1}100%{transform:translate(0,26px) rotate(160deg);opacity:0}}
+.caen i:nth-child(1){--x:-10px}.caen i:nth-child(2){--x:8px}.caen i:nth-child(3){--x:-4px}.caen i:nth-child(4){--x:12px}
+.carga[data-estado="ENTREGADO"] .caen i{animation:confeti 1.4s ease-out 1 both}
+@keyframes confeti{0%{transform:translate(0,30px) scale(.4);opacity:0}30%{opacity:1}100%{transform:translate(calc(var(--x) * 4),-26px) rotate(260deg);opacity:0}}
+.haciendo{font-weight:700;color:var(--noche);min-height:1.4em}
+.haciendo.entra{animation:frase .5s ease-out both}
+@keyframes frase{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .escena video,.viajero,.carril .linea::after,.viajero::after,.caen i,.haciendo.entra{animation:none!important}
+  .caen{display:none!important}
+}
 .seguimiento{width:100%;text-align:left;display:grid;gap:8px;border-top:1px solid var(--linea);padding-top:12px}
 .seguimiento h4{font-size:14px;color:var(--texto2);margin:4px 0 0}
 .lo-pedido,.novedades{list-style:none;margin:0;padding:0;display:grid;gap:6px}
@@ -689,3 +737,5 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 .novedades li.nueva{animation:novedad .6s ease-out both}
 @keyframes novedad{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.novedades li.nueva{animation:none}}
+/* Con el carril a la vista, los pasos quedan como nombres debajo (la barra ya la pinta el carril) */
+.final .carga:not([hidden]) ~ .pasos-pedido li::before{display:none}

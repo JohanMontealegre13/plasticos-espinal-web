@@ -30,6 +30,10 @@ test('el seguimiento muestra la escena del estado, lo que pidió y cada novedad 
   await expect(page.locator('#fLineas li')).toHaveText(['2 ×Vaso <b>8 oz</b> x50 und', '1 ×Plato 23 cm']);
   await expect(page.locator('#fNovedades li span')).toHaveText(['Recibimos su pedido', 'La tienda confirmó su pedido y lo está alistando']);
   await expect(page.locator('#fNovedades li time').first()).toHaveText(/8:05/);
+  /* El carril de carga: la bolsa que se llena y lo que se está haciendo */
+  await expect(page.locator('#fCarga')).toHaveAttribute('data-estado', 'POR_ALISTAR');
+  await expect(page.locator('#fCarga .v-bolsa')).toBeVisible();
+  await expect(page.locator('#fHaciendo')).toHaveText('Buscando sus productos en la bodega');
   expect(v.problemas.filter((p) => !p.includes('/tienda/img/pedido/'))).toEqual([]);
 });
 
@@ -48,6 +52,17 @@ test('cada estado tiene su escena', async ({ page }) => {
   await abrirTienda(page);
   await page.locator('#avisoPedido').click();
   await expect(page.locator('#fVideo')).toHaveAttribute('src', '/tienda/img/pedido/en-camino.mp4');
+  await expect(page.locator('#fCarga .v-moto')).toBeVisible();
+});
+
+test('las frases de lo que se está haciendo van pasando solas', async ({ page }) => {
+  await page.clock.install();
+  await conPedido(page);
+  await abrirTienda(page);
+  await page.locator('#avisoPedido').click();
+  await expect(page.locator('#fHaciendo')).toHaveText('Buscando sus productos en la bodega');
+  await page.clock.runFor(3300);
+  await expect(page.locator('#fHaciendo')).toHaveText('Contando las cantidades');
 });
 
 test('«Mis pedidos» muestra arriba el pedido en curso y al tocarlo abre su seguimiento', async ({ page }) => {

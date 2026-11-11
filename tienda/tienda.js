@@ -1106,6 +1106,31 @@
     var pr = v.play && v.play();
     if (pr && pr.catch) pr.catch(function () { /* sin reproducción automática: queda la imagen */ });
   }
+  /* El carril de carga: cada estado tiene su viajero (celular, bolsa que se llena, moto, listo) y unas frases
+     de lo que se está haciendo que van pasando solas mientras la pantalla está a la vista */
+  var FRASES = {
+    POR_CONFIRMAR: ['La tienda recibió su pedido', 'Revisando que todo esté disponible', 'En un momento se lo confirmamos'],
+    POR_ALISTAR: ['Buscando sus productos en la bodega', 'Contando las cantidades', 'Empacando con cuidado', 'Revisando que no falte nada'],
+    EN_CAMINO: ['Su pedido va en la moto', 'Rumbo a su dirección', 'Ya casi llega'],
+    ENTREGADO: ['¡Gracias por su compra!'],
+  };
+  var frase = 0, relojFrases = null;
+  function pintarCarga() {
+    var c = $('fCarga'), lista = FRASES[pedido.estado];
+    c.hidden = !lista;
+    if (!lista) { clearInterval(relojFrases); relojFrases = null; return; }
+    if (c.dataset.estado !== pedido.estado) { c.dataset.estado = pedido.estado; frase = 0; }
+    $('fHaciendo').textContent = lista[frase % lista.length];
+    if (relojFrases || QUIETO || lista.length < 2) return;
+    relojFrases = setInterval(function () {
+      var l = FRASES[pedido && pedido.estado];
+      if (!l || $('final').hidden || document.hidden) { clearInterval(relojFrases); relojFrases = null; return; }
+      frase++;
+      var h = $('fHaciendo');
+      h.textContent = l[frase % l.length];
+      h.classList.remove('entra'); void h.offsetWidth; h.classList.add('entra');
+    }, 3200);
+  }
   /* Lo que pidió y lo que ha pasado, como texto (del CRM) */
   var HORA = new Intl.DateTimeFormat('es-CO', { hour: 'numeric', minute: '2-digit' });
   function pintarSeguimiento() {
@@ -1128,6 +1153,7 @@
   function pintarFinal() {
     $('fIcono').textContent = ICONOS[pedido.estado] || '⏳';
     intentar(pintarEscena);
+    intentar(pintarCarga);
     intentar(pintarSeguimiento);
     $('fTitulo').textContent = pedido.titulo || 'Pedido por confirmar';
     $('fDetalle').textContent = pedido.detalle || '';

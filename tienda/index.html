@@ -268,12 +268,26 @@
 
   <!-- 4. Pedido por confirmar: se actualiza solo con lo que pase en la tienda -->
   <section class="final" id="final" hidden>
-    <!-- La escena del estado: un video corto en bucle (hecho con Higgsfield), sin sonido; sin video, el ícono -->
+    <!-- El fondo del estado: un video corto en bucle (hecho con Higgsfield), sin sonido, que se funde con la
+         pantalla; sin video, el color de la marca y el ícono. Encima, el carril de carga de cada estado. -->
     <div class="escena" id="fEscena" aria-hidden="true">
       <video id="fVideo" muted loop playsinline preload="none" disablepictureinpicture hidden></video>
       <div class="sello-estado" id="fIcono">⏳</div>
     </div>
     <h3 id="fTitulo">Pedido por confirmar</h3>
+    <div class="carga" id="fCarga" aria-hidden="true">
+      <div class="carril">
+        <i class="linea"></i>
+        <span class="viajero">
+          <svg class="v-cel" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+          <svg class="v-bolsa" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+          <svg class="v-moto" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17h6l3-6h3l2 6M12 17l-2-6H7M15 11l-1-3h-2"/></svg>
+          <svg class="v-listo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+          <b class="caen"><i></i><i></i><i></i><i></i></b>
+        </span>
+      </div>
+      <p class="haciendo" id="fHaciendo"></p>
+    </div>
     <p id="fDetalle"></p>
     <p class="cod">Pedido <b id="fCodigo"></b> · <span id="fPago"></span></p>
     <ol class="pasos-pedido" id="fPasos">
