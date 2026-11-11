@@ -9,7 +9,7 @@
   var PORTAL = RAIZ + 'mi-cuenta/';
   /* Mis pedidos, Mis datos y el detalle se ven SIEMPRE como ventana encima de
      la tienda (pedido del dueño): la tienda queda de fondo y una X la devuelve. */
-  var EN_VENTANA = ['pedidos', 'datos', 'pedido'];
+  var EN_VENTANA = ['pedidos', 'datos', 'pedido', 'cupones'];
   var enMarco = false;
   try { enMarco = window.self !== window.top && window.top.location.origin === location.origin; } catch (e) { enMarco = false; }
   var pagina = document.body ? document.body.dataset.pagina : '';
@@ -129,10 +129,13 @@
       hola.appendChild(el('b', '', (yo.nombre || '').split(' ')[0] || 'cliente'));
       panel.appendChild(hola);
       [['Mis pedidos', PORTAL + 'pedidos/', 'Compras de la tienda y del mostrador'],
+       ['Cupones', PORTAL + 'cupones/', 'Lo que la tienda le regala'],
        ['Mis datos', PORTAL + 'datos/', 'Nombre y dirección de entrega']].forEach(function (o) {
         var a = el('a', 'opcion');
         a.href = o[1];
         a.appendChild(el('b', '', o[0]));
+        /* Con un cupón sin usar, «Cupones» lo dice con un punto rojo */
+        if (o[0] === 'Cupones' && Array.isArray(yo.cupones) && yo.cupones.length) a.querySelector('b').appendChild(el('span', 'hay', String(yo.cupones.length)));
         a.appendChild(el('small', '', o[2]));
         panel.appendChild(a);
       });

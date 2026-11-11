@@ -192,7 +192,22 @@
     var n = 0, s = 0;
     Object.keys(canasta).forEach(function (id) { n += canasta[id]; s += canasta[id] * precioDe(por[id], canasta[id]); });
     var d = s === 0 || s >= cat.domicilio.gratis_desde ? 0 : cat.domicilio.tarifa;
-    return { n: n, s: s, d: d, t: s + d };
+    /* Con el cupón del primer domicilio, el pedido que pagaría domicilio no lo paga (el CRM hace la misma cuenta) */
+    var cupon = d > 0 ? cuponDomicilio() : '';
+    if (cupon) d = 0;
+    return { n: n, s: s, d: d, t: s + d, cupon: cupon };
+  }
+  /* El código del primer cupón de domicilio que le queda a quien entró, o '' */
+  function cuponDomicilio() {
+    var l = cuenta && Array.isArray(cuenta.cupones) ? cuenta.cupones : [];
+    for (var i = 0; i < l.length; i++) {
+      if (l[i] && l[i].tipo === 'primer_domicilio' && typeof l[i].codigo === 'string' && l[i].codigo) return l[i].codigo;
+    }
+    return '';
+  }
+  /* El cupón ya se usó (o la tienda no lo aceptó): sale de esta pantalla */
+  function soltarCupon(codigo) {
+    if (cuenta && Array.isArray(cuenta.cupones)) cuenta.cupones = cuenta.cupones.filter(function (c) { return !c || c.codigo !== codigo; });
   }
   function cambiar(id, d) { poner(id, (canasta[id] || 0) + d); }
   function poner(id, n) {
@@ -922,11 +937,16 @@
     var indicaciones = P.unirIndicaciones ? intentar(function () { return P.unirIndicaciones(enlaceUbicacion, d.extra, MAX_INDICACIONES); }) : d.extra;
     if (typeof indicaciones !== 'string') indicaciones = d.extra;
     ocupado($('enviar'), true, 'Enviando su pedido…');
-    llamar('', 'POST', {
+    var cuerpo = {
       nombre: d.nombre, celular: d.celular,
       barrio: d.barrio, direccion: d.direccion, indicaciones: indicaciones,
       lineas: lineas
-    }).then(function (r) {
+    };
+    var cupon = cuentas().cupon;
+    if (cupon) cuerpo.cupon = cupon;
+    llamar('', 'POST', cuerpo).then(function (r) {
+      /* Se mandó el cupón: o lo gastó este pedido o ya no servía; en los dos casos no se vuelve a ofrecer */
+      if (cupon) soltarCupon(cupon);
       pedido = r;
       guardarPedido(pedido);
       /* El pedido ya está en la tienda: la canasta queda vacía para la próxima y lo PRIMERO es el paso de pago.
@@ -1144,7 +1164,8 @@
     $('n').hidden = vacia; $('n').textContent = c.n;
     intentar(function () { pintarAbajo(c, gratis); });
     $('dom').textContent = vacia ? '$0' : (c.d ? pesos(c.d) : 'Gratis');
-    $('falta').textContent = !vacia && c.s < gratis ? '· gratis si agrega ' + pesos(gratis - c.s) : '';
+    $('falta').textContent = c.cupon ? '· con su cupón' : (!vacia && c.s < gratis ? '· gratis si agrega ' + pesos(gratis - c.s) : '');
+    $('dom').classList.toggle('con-cupon', !!c.cupon);
     $('tot').textContent = pesos(c.t);
     $('seguir').disabled = vacia;
     $('tot2').textContent = pesos(c.t);
@@ -1181,6 +1202,7 @@
     if (!vacia) {
       t.append('Lleva ', el('b', null, pesos(c.s)), ' · ');
       if (llego) t.append(el('b', 'si', 'domicilio gratis'));
+      else if (c.cupon) t.append(el('b', 'si', 'domicilio gratis con su cupón'));
       else t.append('faltan ', el('b', null, pesos(falta)), ' para domicilio gratis');
     }
     $('flotaTubo').style.width = avance + '%';

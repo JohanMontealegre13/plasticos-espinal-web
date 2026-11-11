@@ -75,3 +75,11 @@ html.en-ventana .cab,html.en-ventana .pie{display:none}
 html.en-ventana body{background:#fff}
 html.en-ventana .portal{padding-top:18px}
 html.en-ventana .portal h1,html.en-ventana .portal .sub{padding-right:120px}
+
+/* Cupones: una tarjeta con el corte de cupón (borde punteado) y el código grande */
+.cupon{display:grid;gap:4px;padding:16px 18px;border:2px dashed var(--rojo);border-radius:var(--r);background:#fff7f6}
+.cupon .titulo{font-family:var(--display);font-weight:400;font-size:20px;color:var(--noche)}
+.cupon .detalle{color:var(--texto2)}
+.cupon .codigo{justify-self:start;margin-top:6px;padding:4px 12px;border-radius:8px;background:var(--noche);color:#fff;font-size:17px;letter-spacing:2px}
+.cupon .solo{color:var(--texto2);font-size:13px}
+.menu-cuenta .hay{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:8px;padding:0 6px;border-radius:99px;background:var(--rojo);color:#fff;font-family:var(--cuerpo,inherit);font-size:12px;font-weight:800;vertical-align:2px}

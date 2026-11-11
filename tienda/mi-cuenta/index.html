@@ -9,10 +9,10 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=26">
-  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=6">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=27">
+  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=7">
   <link rel="stylesheet" href="/tienda/mi-cuenta/entrada.css?v=1">
-  <script src="/tienda/mi-cuenta/cuenta.js?v=5" defer></script>
+  <script src="/tienda/mi-cuenta/cuenta.js?v=6" defer></script>
 </head>
 <!-- La entrada de la tienda: nadie entra sin cuenta. Sin sesión, toda la tienda llega aquí
      (functions/_middleware.js). cuenta.js muestra una sola de estas pantallas a la vez. -->
@@ -42,6 +42,7 @@
       <label for="nombre">Nombre completo<input id="nombre" autocomplete="name" required maxlength="120" placeholder="Ana Pérez"></label>
       <label for="documento">Cédula o NIT<input id="documento" inputmode="numeric" autocomplete="off" required maxlength="20" placeholder="1105678901"></label>
       <label for="celular">Celular con WhatsApp<input id="celular" type="tel" inputmode="tel" autocomplete="tel" required placeholder="318 355 5246"></label>
+      <label for="correo">Correo<input id="correo" type="email" inputmode="email" autocomplete="email" required maxlength="120" placeholder="ana@correo.com"><small>Ahí le llega el cupón de su primer domicilio gratis.</small></label>
       <p class="por-que"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg><span>Le mandamos un código por WhatsApp para confirmar que el número es suyo.</span></p>
       <p class="errores" id="e-crear" role="alert" hidden></p>
       <div class="empuja">

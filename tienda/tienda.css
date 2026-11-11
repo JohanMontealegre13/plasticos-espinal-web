@@ -669,3 +669,6 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
   .rayita,.abajo-btn,.abajo-btn .ico,.abajo-canasta,.abajo-canasta .adentro,.flota .tubo i,.yo,.cab,.buscar,.mas,.enviar,.ultima-btn,.cat img{transition:none}
   .flota,.tostada,.salta,.esqueleto li::before,.grilla.entra > li,[data-ctrl].abre .cant,[data-ctrl].cambia .cant input,.panel,.velo,.panel .datos,.panel .pago,.menu-cuenta{animation:none}
 }
+
+/* Domicilio gratis por el cupón: en verde, como lo que la tienda regala */
+#dom.con-cupon{color:var(--verde)}
