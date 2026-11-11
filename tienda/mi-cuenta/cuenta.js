@@ -210,7 +210,9 @@
       if (n.length < 3) return 'Escriba su nombre completo.';
       if (doc.length < 5) return 'Escriba su número de documento.';
       if (cel.length !== 10 || cel[0] !== '3') return 'Escriba su celular de 10 dígitos.';
-      return { nombre: n, documento: doc, celular: cel };
+      var correo = $('correo').value.trim().toLowerCase();
+      if (!correoValido(correo)) return 'Escriba su correo: ahí le llega el cupón de su primer domicilio gratis.';
+      return { nombre: n, documento: doc, celular: cel, correo: correo };
     }, function (d) { return pedirCodigo('registro', d); });
 
     formulario('f-olvide', 'e-olvide', function () {
@@ -267,6 +269,27 @@
     caja.appendChild(v);
   }
 
+  /* El pedido de la tienda que va en camino (el que guardó este celular al pedirlo): arriba de todo, y al
+     tocarlo se ve su seguimiento en la tienda. Se borra solo cuando el pedido termina. */
+  var EN_CURSO = { POR_CONFIRMAR: 'Confirmando', POR_ALISTAR: 'Preparándose', EN_CAMINO: 'En camino' };
+  function intentarEnCurso() {
+    var p;
+    try { p = JSON.parse(localStorage.getItem('pe-pedido-v1')); } catch (e) { p = null; }
+    if (!p || !p.codigo || p.final || !p.medio) return;
+    var b = el('button', 'compra en-curso');
+    b.type = 'button';
+    var izq = el('span');
+    izq.appendChild(el('span', 'chip vivo', EN_CURSO[p.estado] || 'En curso'));
+    izq.appendChild(el('span', 'det', 'Pedido ' + p.codigo + ' · ' + (p.titulo || 'Pedido por confirmar')));
+    b.appendChild(izq);
+    b.appendChild(el('b', '', 'Ver ›'));
+    b.addEventListener('click', function () {
+      if (window.parent !== window) window.parent.postMessage({ cuenta: 'cerrar', pedido: true }, location.origin);
+      else location.href = RAIZ;
+    });
+    $('lista').appendChild(b);
+  }
+
   /* ---------- Mis pedidos ---------- */
   function pedidos() {
     var caja = $('lista');
@@ -277,6 +300,7 @@
     }).catch(function (err) { caja.textContent = err.message; });
     function pintar(j) {
       caja.textContent = '';
+      intentarEnCurso();
       if (!j.pedidos.length) {
         var v = el('div', 'vacio');
         v.appendChild(el('b', '', 'Aún no vemos compras a su nombre.'));
@@ -348,17 +372,53 @@
     }, function (err) { caja.textContent = err.message; });
   }
 
+  /* El mismo filtro del CRM (cupones.correo_valido): algo@algo.dominio, sin espacios */
+  function correoValido(c) { return c.length <= 120 && /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(c); }
+
+  /* ---------- Cupones ---------- */
+  function cupones() {
+    var caja = $('lista');
+    pedir('yo').then(function (yo) {
+      $('hola').textContent = 'Hola, ' + ((yo.nombre || '').split(' ')[0] || 'cliente');
+      caja.textContent = '';
+      var lista = Array.isArray(yo.cupones) ? yo.cupones : [];
+      if (!lista.length) {
+        var v = el('div', 'vacio');
+        v.appendChild(el('b', '', 'Por ahora no tiene cupones.'));
+        v.appendChild(el('p', 'ayuda', yo.correo
+          ? 'Cuando tengamos uno para usted, le llega al correo y aparece aquí.'
+          : 'Ponga su correo en Mis datos y le llega el de su primer domicilio gratis.'));
+        if (!yo.correo) { var a = el('a', 'boton', 'Ir a Mis datos'); a.href = BASE + 'datos/'; v.appendChild(a); }
+        caja.appendChild(v);
+        return;
+      }
+      var ul = el('ul', 'lista');
+      lista.forEach(function (c) {
+        var li = el('li', 'cupon');
+        li.appendChild(el('b', 'titulo', c.titulo || 'Cupón'));
+        li.appendChild(el('span', 'detalle', c.detalle || ''));
+        li.appendChild(el('code', 'codigo', c.codigo || ''));
+        li.appendChild(el('small', 'solo', 'Se usa solo al pedir: no tiene que escribirlo.'));
+        ul.appendChild(li);
+      });
+      caja.appendChild(ul);
+    }, function (err) { caja.textContent = err.message; });
+  }
+
   /* ---------- Mis datos ---------- */
   var EDITABLES = ['nombre', 'barrio', 'direccion', 'indicaciones'];
 
   function datos() {
-    var f = $('f-datos'), e = $('e-datos'), ok = $('ok-datos');
+    var f = $('f-datos'), e = $('e-datos'), ok = $('ok-datos'), sinCorreo = false;
     function llenar(yo) {
       if (yo.estado === 'por_confirmar') { $('cargando').hidden = true; return enRevision(f.parentNode.insertBefore(el('div'), f)); }
       EDITABLES.forEach(function (c) { $(c).value = yo[c] || ''; });
       $('v-doc').textContent = (yo.tipo_documento + ' ' + yo.documento).trim();
       $('v-cel').textContent = yo.celular || '—';
       $('v-correo').textContent = yo.correo || '—';
+      /* Una cuenta de antes, sin correo: lo pone aquí (y le llega el cupón). Con correo, ya no se cambia aquí */
+      $('c-correo').hidden = !!yo.correo;
+      sinCorreo = !yo.correo;
       $('v-muni').textContent = yo.municipio;
       f.hidden = false; $('cargando').hidden = true;
     }
@@ -370,6 +430,11 @@
       EDITABLES.forEach(function (c) { d[c] = $(c).value.replace(/\s+/g, ' ').trim(); });
       if (d.nombre.length < 3) return error(e, 'Escriba su nombre completo.');
       if (!d.barrio || !d.direccion) return error(e, 'Escriba el barrio y la dirección de entrega.');
+      var correo = $('correo').value.trim().toLowerCase();
+      if (sinCorreo && correo) {
+        if (!correoValido(correo)) return error(e, 'Revise el correo.');
+        d.correo = correo;
+      }
       error(e, '');
       var b = f.querySelector('button');
       enviando(b, true);
@@ -382,7 +447,7 @@
     });
   }
 
-  var paginas = { entrar: entrar, pedidos: pedidos, pedido: pedido, datos: datos };
+  var paginas = { entrar: entrar, pedidos: pedidos, pedido: pedido, datos: datos, cupones: cupones };
   function iniciar() {
     if ('aLaTienda' in document.documentElement.dataset) return;   /* menu.js ya la manda a la tienda */
     var p = paginas[document.body.dataset.pagina];

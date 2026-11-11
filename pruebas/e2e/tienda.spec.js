@@ -2,7 +2,7 @@
    Las pruebas de cada función nueva viven en su propio archivo. */
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { abrirTienda, vigilar, llenarDatos, abrirCanasta } from './ayudas.js';
+import { abrirTienda, vigilar, llenarDatos, abrirCanasta, CUENTA } from './ayudas.js';
 
 test('pinta los productos del CRM y el agotado no se puede agregar', async ({ page }) => {
   const v = vigilar(page);
@@ -207,5 +207,62 @@ test.describe('canasta', () => {
     expect(Object.keys(datos).sort()).toEqual(['barrio', 'celular', 'direccion', 'indicaciones', 'nombre']);
     expect(JSON.stringify(enviados[0])).not.toMatch(/precio|total/i);
     await expect(page.locator('#n')).toBeHidden();                /* la canasta queda vacía para el próximo pedido */
+  });
+});
+
+/* ---------- El cupón del primer domicilio gratis (llega en «yo»; el CRM lo vuelve a revisar al pedir) ---------- */
+
+test.describe('cupón del primer domicilio', () => {
+  const CUPON = { codigo: 'GRATIS-AB23CD', tipo: 'primer_domicilio', titulo: 'Primer domicilio gratis', detalle: 'No paga el domicilio de su próximo pedido.' };
+  const conCupon = { ...CUENTA, cupones: [CUPON] };
+
+  test('con el cupón, el pedido que pagaría domicilio no lo paga y lo manda al CRM', async ({ page }) => {
+    const v = vigilar(page);
+    /** @type {any[]} */
+    const enviados = [];
+    await page.route('**/tienda/mi-cuenta/api/tienda/pedido', async (r) => {
+      enviados.push(r.request().postDataJSON());
+      await r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 'secreto-de-prueba-123', total: 9800, domicilio: 0, cupon: CUPON.codigo } });
+    });
+    await abrirTienda(page, { cuenta: conCupon });
+    await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+    await abrirCanasta(page);
+    await expect(page.locator('#dom')).toHaveText('Gratis');
+    await expect(page.locator('#falta')).toHaveText('· con su cupón');
+    await expect(page.locator('#tot')).toHaveText('$9.800');
+    await page.locator('#seguir').click();
+    await llenarDatos(page);
+    await page.locator('#enviar').click();
+    await expect(page.locator('#pago')).toBeVisible();
+    expect(enviados[0].cupon).toBe(CUPON.codigo);
+    /* Ya se usó: el próximo pedido vuelve a pagar domicilio */
+    await page.evaluate(() => { location.hash = ''; });
+    await page.locator('#cerrar').click();
+    await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+    await abrirCanasta(page);
+    await expect(page.locator('#dom')).toHaveText('$4.000');
+    v.sinProblemas();
+  });
+
+  test('con domicilio gratis por valor, el cupón no viaja (queda para otro pedido)', async ({ page }) => {
+    /** @type {any[]} */
+    const enviados = [];
+    await page.route('**/tienda/mi-cuenta/api/tienda/pedido', async (r) => {
+      enviados.push(r.request().postDataJSON());
+      await r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 'secreto-de-prueba-123', total: 56600 } });
+    });
+    await abrirTienda(page, { cuenta: conCupon });
+    await page.locator('#verTodo').click();
+    for (const n of ['Bolsa kraft #6 x100 und', 'Detergente en polvo 1 kg', 'Contenedor icopor J1 x25 und', 'Servilleta 25x25 x300 und', 'Tenedor plástico x100 und']) {
+      await page.getByRole('button', { name: `Agregar ${n} a la canasta` }).click();
+    }
+    await abrirCanasta(page);
+    await expect(page.locator('#dom')).toHaveText('Gratis');
+    await expect(page.locator('#falta')).toHaveText('');
+    await page.locator('#seguir').click();
+    await llenarDatos(page);
+    await page.locator('#enviar').click();
+    await expect(page.locator('#pago')).toBeVisible();
+    expect(enviados[0]).not.toHaveProperty('cupon');
   });
 });

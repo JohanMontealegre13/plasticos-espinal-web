@@ -21,7 +21,7 @@ const SIN_SESION = sinSesion();
  * el catálogo sin precios. Entrar pide la contraseña buena; crear cuenta y «olvidé» pasan por el
  * código del WhatsApp (123456) antes de poner la contraseña.
  * @param {import('@playwright/test').Page} page
- * @param {{ sesion?: boolean, estado?: string, modo?: string }} [o]
+ * @param {{ sesion?: boolean, estado?: string, modo?: string, yo?: any }} [o]
  *   estado: cómo queda la cuenta al poner la contraseña (por omisión 'activa');
  *   modo: cómo se prueba el celular (por omisión 'enviar_codigo'; 'cliente_escribe' = él nos manda el código).
  */
@@ -57,7 +57,7 @@ async function api(page, o = {}) {
     }
     if (ruta === 'clave') { sesion = true; return r.fulfill({ json: { ok: true, nombre: 'Ana Pérez', estado: o.estado || 'activa' } }); }
     if (!sesion) return r.fulfill({ status: 401, json: { ok: false, error: 'Entre otra vez.' } });
-    if (ruta === 'yo' || ruta === 'datos') return r.fulfill({ json: YO });
+    if (ruta === 'yo' || ruta === 'datos') return r.fulfill({ json: o.yo || YO });
     if (ruta === 'pedidos') return r.fulfill({ json: PEDIDOS });
     if (ruta === 'pedidos/12') return r.fulfill({ json: PEDIDO });
     return r.fulfill({ status: 404, json: { ok: false, error: 'No existe.' } });
@@ -258,6 +258,7 @@ async function pedirCodigo(page) {
   await page.fill('#nombre', '  Ana   Pérez ');
   await page.fill('#documento', '1.105.678.901');
   await page.fill('#celular', '318 355 5246');
+  await page.fill('#correo', '  Ana@Correo.CO ');
   await page.getByRole('button', { name: 'Enviarme el código' }).click();
 }
 
@@ -266,7 +267,7 @@ test('crear cuenta: nombre, cédula y celular, el código del WhatsApp, la contr
   const llamadas = await api(page);
   const pestana = paginasDeLaPestana(page);
   await pedirCodigo(page);
-  expect(llamadas.cuerpos.find((c) => c.ruta === 'registro').cuerpo).toEqual({ nombre: 'Ana Pérez', documento: '1105678901', celular: '3183555246' });
+  expect(llamadas.cuerpos.find((c) => c.ruta === 'registro').cuerpo).toEqual({ nombre: 'Ana Pérez', documento: '1105678901', celular: '3183555246', correo: 'ana@correo.co' });
   await expect(page.locator('#f-codigo')).toBeVisible();
   await expect(page.locator('#s-verificar')).toHaveText('Lo mandamos al WhatsApp 318 *** 5246. Vence en 10 minutos.');
   await expect(page.locator('#codigo')).toBeFocused();
@@ -318,6 +319,13 @@ test('crear cuenta valida cada dato antes de pedir el código', async ({ page })
   await page.fill('#celular', '6012345678');
   await seguir.click();
   await expect(page.locator('#e-crear')).toHaveText('Escriba su celular de 10 dígitos.');
+  await page.fill('#celular', '3183555246');
+  /* El correo es obligatorio: ahí le llega el cupón del primer domicilio */
+  for (const malo of ['', 'ana', 'ana@correo', 'a b@correo.co']) {
+    await page.fill('#correo', malo);
+    await seguir.click();
+    await expect(page.locator('#e-crear')).toHaveText('Escriba su correo: ahí le llega el cupón de su primer domicilio gratis.');
+  }
   expect(llamadas).not.toContain('POST registro');
 });
 
@@ -424,6 +432,59 @@ test('«Mis datos» pinta lo del CRM como texto y guarda por el intermediario', 
   expect(llamadas).toContain('POST datos');
   expect(await page.evaluate(() => localStorage.getItem('pe-cliente-v1'))).toBeNull();
   v.sinProblemas();
+});
+
+test('«Mis datos» con correo no lo deja cambiar ni lo manda al guardar', async ({ page }) => {
+  await api(page, { sesion: true });
+  await abrirEnVentana(page, 'datos/');
+  const m = marco(page);
+  await expect(m.locator('#v-correo')).toHaveText('ana@ejemplo.com');
+  await expect(m.locator('#c-correo')).toBeHidden();
+  const guardar = page.waitForRequest('**/tienda/mi-cuenta/api/datos');
+  await m.locator('#f-datos button').first().click();
+  expect((await guardar).postDataJSON()).not.toHaveProperty('correo');
+});
+
+test('una cuenta de antes, sin correo, lo pone en «Mis datos» y lo manda', async ({ page }) => {
+  const v = vigilar(page);
+  await api(page, { sesion: true, yo: { ...YO, correo: '' } });
+  await abrirEnVentana(page, 'datos/');
+  const m = marco(page);
+  await expect(m.locator('#c-correo')).toBeVisible();
+  await m.locator('#correo').fill('malo');
+  await m.locator('#f-datos button').first().click();
+  await expect(m.locator('#e-datos')).toHaveText('Revise el correo.');
+  await m.locator('#correo').fill(' Ana@Nuevo.co ');
+  const guardar = page.waitForRequest('**/tienda/mi-cuenta/api/datos');
+  await m.locator('#f-datos button').first().click();
+  expect((await guardar).postDataJSON()).toMatchObject({ correo: 'ana@nuevo.co' });
+  v.sinProblemas();
+});
+
+const CUPON = { codigo: 'GRATIS-AB23CD', tipo: 'primer_domicilio', titulo: 'Primer domicilio gratis', detalle: 'No paga el domicilio de su próximo pedido.' };
+
+test('«Cupones» sale en el menú con cuántos tiene y los muestra como texto', async ({ page }) => {
+  const v = vigilar(page);
+  await api(page, { sesion: true, yo: { ...YO, cupones: [{ ...CUPON, titulo: '<b>Primer</b> domicilio gratis' }] } });
+  await page.goto('/tienda/');
+  await page.locator('.cab .btn-cuenta').click();
+  const opcion = page.locator('#menu-cuenta').getByRole('link', { name: /Cupones/ });
+  await expect(opcion).toBeVisible();
+  await expect(opcion.locator('.hay')).toHaveText('1');
+  await opcion.click();
+  const m = marco(page);
+  await expect(m.locator('.cupon .titulo')).toHaveText('<b>Primer</b> domicilio gratis');
+  await expect(m.locator('.cupon .codigo')).toHaveText('GRATIS-AB23CD');
+  await expect(m.locator('.cupon')).toContainText('no tiene que escribirlo');
+  v.sinProblemas();
+});
+
+test('sin cupones, «Cupones» lo dice; sin correo, lleva a «Mis datos»', async ({ page }) => {
+  await api(page, { sesion: true, yo: { ...YO, correo: '', cupones: [] } });
+  await abrirEnVentana(page, 'cupones/');
+  const m = marco(page);
+  await expect(m.locator('.vacio')).toContainText('Por ahora no tiene cupones.');
+  await expect(m.getByRole('link', { name: 'Ir a Mis datos' })).toHaveAttribute('href', '/tienda/mi-cuenta/datos/');
 });
 
 test('si la sesión se vence con la ventana de Mi cuenta abierta, se va la página entera a la entrada', async ({ page }) => {

@@ -9,10 +9,10 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=25">
-  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=6">
-  <script src="/tienda/mi-cuenta/menu.js?v=5" defer></script>
-  <script src="/tienda/mi-cuenta/cuenta.js?v=5" defer></script>
+  <link rel="stylesheet" href="/tienda/tienda.css?v=27">
+  <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=7">
+  <script src="/tienda/mi-cuenta/menu.js?v=6" defer></script>
+  <script src="/tienda/mi-cuenta/cuenta.js?v=7" defer></script>
 </head>
 <body data-pagina="datos">
 <header class="cab"><div class="envolver">
@@ -28,6 +28,7 @@
     <label for="nombre">Nombre completo o del negocio<input id="nombre" autocomplete="name" required maxlength="120"></label>
     <label for="barrio">Barrio<input id="barrio" required maxlength="80" autocomplete="off"></label>
     <label for="direccion">Dirección y detalle<input id="direccion" autocomplete="address-line1" required maxlength="200"></label>
+    <label for="correo" id="c-correo" hidden>Correo<input id="correo" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="ana@correo.com"><small>Póngalo y le llega el cupón de su primer domicilio gratis.</small></label>
     <label for="indicaciones">Indicaciones para el domiciliario (opcional)<input id="indicaciones" maxlength="200" placeholder="Portón verde, llamar al llegar…"></label>
     <p class="errores" id="e-datos" role="alert" hidden></p>
     <p class="aviso" id="ok-datos" role="status" hidden>Listo, guardamos sus datos.</p>

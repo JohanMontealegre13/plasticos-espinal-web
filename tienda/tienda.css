@@ -63,14 +63,8 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 .cat[aria-pressed="true"] img{box-shadow:0 0 0 3px var(--azul)}
 .cat[aria-pressed="true"]{color:var(--azul)}
 
-/* portada */
-.portada{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-block:14px 8px}
-.banner{position:relative;overflow:hidden;border-radius:20px;background:var(--azul);color:#fff;padding:clamp(22px,4vw,40px);display:grid;gap:14px;align-content:center;min-height:250px}
-.banner::after{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;border:38px solid rgba(255,255,255,.08)}
-.banner .chip{justify-self:start;background:var(--amarillo);color:var(--noche);font-weight:800;font-size:13px;padding:4px 10px;border-radius:99px}
-.banner h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,4.4vw,46px);line-height:1.02;max-width:15ch}
-.banner p{max-width:38ch;color:#dfe6ff}
-.banner .acc{justify-self:start;border:0;border-radius:99px;background:#fff;color:var(--azul);font-weight:800;padding:12px 22px}
+/* Solo para lectores de pantalla (el título de la tienda: no hay portada) */
+.solo-lector{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* beneficios */
 .benef{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-block:18px}
@@ -166,7 +160,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
   /* la rayita amarilla ocupa un tercio de la pastilla y se corre a la sección abierta (data-en lo pone tienda.js) */
   .rayita{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 3);border-radius:26px;background:var(--amarillo);transform:translateX(100%);transition:transform .45s var(--resorte)}
   .pastilla[data-en="buscar"] .rayita{transform:translateX(0)}
-  .pastilla[data-en="pedidos"] .rayita{transform:translateX(200%)}
+  .pastilla[data-en="favoritos"] .rayita{transform:translateX(200%)}
   /* la canasta: círculo amarillo con un aro que se llena hacia el domicilio gratis (--avance) y se pone verde al llegar */
   .abajo-canasta{position:relative;flex:none;width:64px;height:64px;padding:4px;border:0;border-radius:50%;background:conic-gradient(#f5a524 var(--avance,0%),#dfe4f0 0);box-shadow:0 10px 24px rgba(14,26,71,.28);transition:--avance .6s var(--suelto)}
   .abajo-canasta.gratis{background:conic-gradient(#1fae5b var(--avance,0%),#dfe4f0 0)}
@@ -350,6 +344,7 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .llave{width:100%;display:grid;justify-items:center;gap:4px;padding:12px;border:2px dashed var(--linea);border-radius:var(--r);background:var(--suave)}
 .llave > span{font-size:13px;color:var(--texto2);font-weight:700}
 .llave > b{font-family:var(--display);font-weight:400;font-size:26px;letter-spacing:.06em;color:var(--noche)}
+.llave > .titular{font-size:14px;font-weight:700;color:var(--verde)}
 /* En el computador la llave es la segunda opción: una sola línea, para que el botón quede cerca */
 .pqr:not(.celular) .llave{grid-auto-flow:column;align-items:center;justify-content:center;gap:10px;padding:8px 12px}
 .pqr:not(.celular) .llave > b{font-size:18px}
@@ -405,6 +400,9 @@ html{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 /* orden de la vitrina y «pídalo por WhatsApp» cuando la búsqueda no encuentra nada */
 .sec-cab{flex-wrap:wrap}
+/* «Ver todo» al lado del título de la vitrina */
+.sec-cab .ver-todo{min-height:44px;border:0;background:none;padding:0 4px;color:var(--azul);font:800 15px var(--font);cursor:pointer}
+.sec-cab .ver-todo::after{content:" ›"}
 .sec-cab .orden{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--texto2)}
 /* 16px: así el iPhone no acerca la pantalla al tocar la lista */
 .sec-cab .orden select{min-height:44px;max-width:100%;padding:0 12px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--texto);font:600 16px var(--font);cursor:pointer}
@@ -511,7 +509,7 @@ html.con-ficha{overflow:hidden}
 .mini-foto{position:relative;display:block}
 .mini-foto .sello{position:absolute;left:6px;top:6px;background:#5b6478;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px}
 
-/* «Pedir lo de la última vez» (debajo de la portada) y el aviso de lo que hoy no está (arriba de la canasta).
+/* «Pedir lo de la última vez» (arriba de la vitrina) y el aviso de lo que hoy no está (arriba de la canasta).
    El aviso lleva su id porque mi-cuenta/cuenta.css también tiene un .aviso, verde */
 .ultima{padding-block:6px 2px}
 .ultima-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border:2px solid var(--verde);border-radius:99px;background:#fff;color:var(--verde);font-weight:800}
@@ -595,11 +593,10 @@ html.con-ficha{overflow:hidden}
   .buscar{padding:0 12px 0 16px;border-color:transparent;background:var(--suave);transition:border-color .2s,background .2s}
   .buscar:focus-within{border-color:var(--azul);background:#fff}
   .buscar button{display:none}
-  .banner{min-height:0;padding:20px;gap:10px}
 }
-/* Buscando: quedan solo los resultados, pegados a la cabecera. Categorías, portada y lo demás vuelven al borrar
+/* Buscando: quedan solo los resultados, pegados a la cabecera. Categorías y lo demás vuelven al borrar
    la búsqueda (tienda.js pone la clase en <html>) */
-.buscando .cats,.buscando .portada,.buscando .ultima,.buscando .benef,.buscando .como{display:none}
+.buscando .cats,.buscando .ultima,.buscando .benef,.buscando .como{display:none}
 
 /* Mientras llega el catálogo: tarjetas grises con un brillo que pasa, en el lugar de los productos */
 .esqueleto{margin-bottom:14px}
@@ -619,8 +616,8 @@ html.con-ficha{overflow:hidden}
 .grilla.entra > li:nth-child(n+7){animation-delay:.24s}
 
 /* Lo que se toca responde: se hunde un poco bajo el dedo */
-.mas,.enviar,.banner .acc,.ultima-btn,.cat img{transition:transform .15s}
-.mas:active:not(:disabled),.enviar:active:not(:disabled),.banner .acc:active,.ultima-btn:active{transform:scale(.96)}
+.mas,.enviar,.ultima-btn,.cat img{transition:transform .15s}
+.mas:active:not(:disabled),.enviar:active:not(:disabled),.ultima-btn:active{transform:scale(.96)}
 .cat:active img{transform:scale(.93)}
 /* Al agregar: el botón se abre en − n + con un rebote, y al cambiar la cantidad el número late (clases de tienda.js) */
 [data-ctrl].abre .cant{animation:brota .35s var(--resorte)}
@@ -647,7 +644,98 @@ html.con-ficha{overflow:hidden}
 .confeti{position:fixed;inset:0;z-index:89;overflow:hidden;pointer-events:none}
 .confeti i{position:absolute;left:50%;top:38%;width:8px;height:12px;border-radius:2px}
 
+/* Favoritos (abajo): la vitrina con lo guardado, sola y pegada a la cabecera, como buscando */
+.en-favoritos .cats,.en-favoritos .ultima,.en-favoritos .benef,.en-favoritos .como{display:none}
+
+/* Las fotos nunca quedan quietas (pedido del dueño, 11-nov-2026): un brillo les pasa por encima, cada tarjeta a
+   su tiempo. Va con background-position y no con transform: un transform que corre siempre le quitaría al
+   navegador el ancla con la que deja quieta la vitrina. Las de varias fotos además pasan solas (tienda.js). */
+.prod .foto::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.5) 50%,transparent 62%) no-repeat;background-size:260% 100%;background-position:160% 0;animation:destello 2.6s ease-in-out infinite}
+#grilla > li:nth-child(4n+2) .prod .foto::after{animation-delay:.65s}
+#grilla > li:nth-child(4n+3) .prod .foto::after{animation-delay:1.3s}
+#grilla > li:nth-child(4n+4) .prod .foto::after{animation-delay:1.95s}
+/* con la ficha o la canasta encima no se ve la vitrina: el brillo se apaga */
+html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .foto::after{animation:none}
+@keyframes destello{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
+
+/* Al agregar un producto: un chulo verde que brota en el botón, con un aro y un «+1» que sube (tienda.js) */
+.agregado{position:fixed;z-index:88;pointer-events:none;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--verde);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 0 rgba(15,122,67,.45)}
+.agregado svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;animation:chulo .35s .1s ease-out forwards}
+@keyframes chulo{to{stroke-dashoffset:0}}
+.mas-uno{position:fixed;z-index:88;pointer-events:none;margin:0;transform:translate(-50%,-50%);font:800 18px var(--font);color:var(--verde);text-shadow:0 1px 0 #fff}
+
 @media (prefers-reduced-motion:reduce){
-  .rayita,.abajo-btn,.abajo-btn .ico,.abajo-canasta,.abajo-canasta .adentro,.flota .tubo i,.yo,.cab,.buscar,.mas,.enviar,.banner .acc,.ultima-btn,.cat img{transition:none}
+  .prod .foto::after{animation:none;background:none}
+  .rayita,.abajo-btn,.abajo-btn .ico,.abajo-canasta,.abajo-canasta .adentro,.flota .tubo i,.yo,.cab,.buscar,.mas,.enviar,.ultima-btn,.cat img{transition:none}
   .flota,.tostada,.salta,.esqueleto li::before,.grilla.entra > li,[data-ctrl].abre .cant,[data-ctrl].cambia .cant input,.panel,.velo,.panel .datos,.panel .pago,.menu-cuenta{animation:none}
 }
+
+/* Domicilio gratis por el cupón: en verde, como lo que la tienda regala */
+#dom.con-cupon{color:var(--verde)}
+
+/* Seguimiento del pedido: el video de fondo se funde con la hoja (de borde a borde, se desvanece hacia abajo
+   y se acerca despacio); el título queda encima de lo desvanecido. Sin video: el color de la marca. */
+.final{position:relative}
+.escena{width:calc(100% + 40px);margin:-8px -20px -70px;height:min(62vw,300px);flex:none;overflow:hidden;position:relative;display:grid;place-items:center;
+  background:radial-gradient(120% 90% at 50% 20%,var(--azul),var(--noche));
+  -webkit-mask-image:linear-gradient(#000 45%,rgba(0,0,0,.55) 70%,transparent);mask-image:linear-gradient(#000 45%,rgba(0,0,0,.55) 70%,transparent)}
+.escena video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;animation:acercar 16s ease-in-out infinite alternate}
+.escena video[hidden]{display:none}
+.escena .sello-estado{background:rgba(255,255,255,.14);color:#fff;margin-bottom:60px}
+.escena .sello-estado[hidden]{display:none}
+@keyframes acercar{from{transform:scale(1.02)}to{transform:scale(1.14) translateY(-2%)}}
+.final h3{position:relative}
+/* El carril de carga */
+.carga{width:100%;max-width:420px;display:grid;gap:6px}
+.carga[hidden]{display:none}
+.carril{position:relative;height:58px;--paso:15%}
+.carga[data-estado="POR_ALISTAR"] .carril{--paso:45%}
+.carga[data-estado="EN_CAMINO"] .carril{--paso:76%}
+.carga[data-estado="ENTREGADO"] .carril{--paso:100%}
+.carril .linea{position:absolute;left:0;right:0;bottom:8px;height:10px;border-radius:99px;background:var(--suave);overflow:hidden}
+.carril .linea::before,.carril .linea::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--paso);border-radius:99px;transition:width 1.2s cubic-bezier(.3,1.3,.5,1)}
+.carril .linea::before{background:linear-gradient(90deg,var(--azul),var(--rojo))}
+.carril .linea::after{background:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 7px,transparent 7px 14px);background-size:40px 100%;animation:rayas .9s linear infinite}
+.carga[data-estado="ENTREGADO"] .linea::after{animation:none;opacity:0}
+@keyframes rayas{to{background-position:40px 0}}
+.viajero{position:absolute;bottom:20px;left:clamp(0px,calc(var(--paso) - 20px),calc(100% - 40px));width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 6px 16px rgba(14,26,71,.2);display:grid;place-items:center;transition:left 1.2s cubic-bezier(.3,1.3,.5,1);animation:flotar 1.6s ease-in-out infinite}
+.viajero svg{width:24px;height:24px;fill:none;stroke:var(--noche);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:none;grid-area:1/1}
+.carga[data-estado="POR_CONFIRMAR"] .v-cel,.carga[data-estado="POR_ALISTAR"] .v-bolsa,.carga[data-estado="EN_CAMINO"] .v-moto,.carga[data-estado="ENTREGADO"] .v-listo{display:block}
+.carga[data-estado="ENTREGADO"] .v-listo{stroke:var(--verde)}
+@keyframes flotar{50%{transform:translateY(-4px)}}
+.carga[data-estado="EN_CAMINO"] .viajero{animation:rodar 1.8s ease-in-out infinite}
+@keyframes rodar{0%,100%{transform:translateX(-6px) rotate(-2deg)}50%{transform:translateX(6px) translateY(-2px) rotate(2deg)}}
+/* El celular late como si sonara */
+.carga[data-estado="POR_CONFIRMAR"] .viajero::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--azul);animation:onda 1.6s ease-out infinite}
+@keyframes onda{from{transform:scale(1);opacity:.8}to{transform:scale(1.9);opacity:0}}
+/* La bolsa se llena: caen productos de colores; al entregar, salen como confeti */
+.caen{position:absolute;inset:0;pointer-events:none;display:none}
+.carga[data-estado="POR_ALISTAR"] .caen,.carga[data-estado="ENTREGADO"] .caen{display:block}
+.caen i{position:absolute;left:50%;top:-22px;width:9px;height:9px;margin-left:-4.5px;border-radius:3px;background:var(--azul);opacity:0;animation:caer 1.6s ease-in infinite}
+.caen i:nth-child(2){background:var(--rojo);animation-delay:.4s;border-radius:50%}
+.caen i:nth-child(3){background:var(--amarillo);animation-delay:.8s}
+.caen i:nth-child(4){background:var(--verde);animation-delay:1.2s;border-radius:50%}
+@keyframes caer{0%{transform:translate(var(--x,0),-14px) rotate(0);opacity:0}25%{opacity:1}80%{opacity:1}100%{transform:translate(0,26px) rotate(160deg);opacity:0}}
+.caen i:nth-child(1){--x:-10px}.caen i:nth-child(2){--x:8px}.caen i:nth-child(3){--x:-4px}.caen i:nth-child(4){--x:12px}
+.carga[data-estado="ENTREGADO"] .caen i{animation:confeti 1.4s ease-out 1 both}
+@keyframes confeti{0%{transform:translate(0,30px) scale(.4);opacity:0}30%{opacity:1}100%{transform:translate(calc(var(--x) * 4),-26px) rotate(260deg);opacity:0}}
+.haciendo{font-weight:700;color:var(--noche);min-height:1.4em}
+.haciendo.entra{animation:frase .5s ease-out both}
+@keyframes frase{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .escena video,.viajero,.carril .linea::after,.viajero::after,.caen i,.haciendo.entra{animation:none!important}
+  .caen{display:none!important}
+}
+.seguimiento{width:100%;text-align:left;display:grid;gap:8px;border-top:1px solid var(--linea);padding-top:12px}
+.seguimiento h4{font-size:14px;color:var(--texto2);margin:4px 0 0}
+.lo-pedido,.novedades{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.lo-pedido li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:15px}
+.lo-pedido .lo-cant{font-variant-numeric:tabular-nums}
+.novedades li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;font-size:15px;position:relative;padding-left:14px}
+.novedades li::before{content:"";position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:50%;background:var(--verde)}
+.novedades time{color:var(--texto2);font-variant-numeric:tabular-nums}
+.novedades li.nueva{animation:novedad .6s ease-out both}
+@keyframes novedad{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.novedades li.nueva{animation:none}}
+/* Con el carril a la vista, los pasos quedan como nombres debajo (la barra ya la pinta el carril) */
+.final .carga:not([hidden]) ~ .pasos-pedido li::before{display:none}

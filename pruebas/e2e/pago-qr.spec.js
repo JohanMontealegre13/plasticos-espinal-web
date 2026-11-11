@@ -94,3 +94,32 @@ test('sin llave en catalogo.json, el celular sigue con el código y los pasos de
   await expect(page.locator('#guardarQr')).toBeHidden();
   v.sinProblemas();
 });
+
+test('la llave dice a nombre de quién le sale al cliente en su banco; sin titular no se inventa', async ({ page }) => {
+  await page.route('**/tienda/mi-cuenta/api/tienda/pedido', (r) => r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 's', total: 13800 } }));
+  await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
+  await abrirTienda(page, { sitio: (s) => { s.pago = { qr: '/tienda/img/qr-breb-bancolombia.png', llave: LLAVE, titular: 'Plásticos Espinal' }; } });
+  await page.getByRole('button', { name: PRODUCTO }).click();
+  await abrirCanasta(page);
+  await page.locator('#seguir').click();
+  await llenarDatos(page);
+  await page.locator('#enviar').click();
+  await page.locator('.medio[data-medio="qr"]').click();
+  await expect(page.locator('#qrTitular')).toHaveText('Le sale a nombre de Plásticos Espinal');
+});
+
+test('sin titular la línea no sale', async ({ page }) => {
+  await hastaElQr(page);
+  await expect(page.locator('#qrTitular')).toBeHidden();
+});
+
+test('la franja del pedido se ve unos segundos al volver a la tienda y se va', async ({ page }) => {
+  await page.clock.install();
+  await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
+  await page.addInitScript((p) => { localStorage.setItem('pe-pedido-v1', JSON.stringify(p)); }, PEDIDO);
+  await abrirTienda(page);
+  await expect(page.locator('#avisoPedido')).toBeVisible();
+  await expect(page.locator('#avisoTexto')).toHaveText('PE-ABCDE · Pedido por confirmar');
+  await page.clock.runFor(11000);
+  await expect(page.locator('#avisoPedido')).toBeHidden();
+});
