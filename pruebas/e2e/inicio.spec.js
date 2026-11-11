@@ -72,6 +72,24 @@ test('la portada ancha: tres láminas con su foto, la cinta roja y azul, y el ca
   v.sinProblemas();
 });
 
+test('la portada cambia de lámina cada 3 s, también con el mouse encima, y se detiene con la pausa', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  const puntos = page.locator('#inicio .carrusel__punto');
+  await expect(puntos.nth(0)).toHaveAttribute('aria-current', 'true');
+  /* Johan (11-nov): «duran mucho, deben durar como 3 segundos». El mouse queda encima de la portada */
+  const caja = await page.locator('#inicio .carrusel__pista').boundingBox();
+  await page.mouse.move((caja?.x ?? 0) + (caja?.width ?? 0) * 0.75, (caja?.y ?? 0) + 40);
+  await page.clock.runFor(3200);
+  await expect(puntos.nth(1)).toHaveAttribute('aria-current', 'true');
+  await page.clock.runFor(3200);
+  await expect(puntos.nth(2)).toHaveAttribute('aria-current', 'true');
+  /* La pausa la deja quieta */
+  await page.locator('#inicio .carrusel__pausa').click();
+  await page.clock.runFor(9000);
+  await expect(puntos.nth(2)).toHaveAttribute('aria-current', 'true');
+});
+
 test('el punto de la etiqueta es verde y late como «en línea»; con «menos movimiento» queda quieto', async ({ page }) => {
   await page.goto('/');
   const punto = () => page.locator('.portada__etiqueta').evaluate((e) => {
@@ -125,16 +143,57 @@ test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede
   await expect(leida.locator('li.marca--wau')).toHaveCSS('background-color', 'rgb(102, 44, 144)');
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]')).toHaveCount(3);
   for (const img of await cinta.locator('img').all()) expect(await img.evaluate((i) => /** @type {HTMLImageElement} */ (i).naturalWidth)).toBeGreaterThan(0);
-  /* Corre sola y el botón la detiene y la vuelve a mover */
+  /* Corre sola (más rápido desde el 11-nov) y el botón la detiene y la vuelve a mover */
   const pista = cinta.locator('.marcas__pista');
-  await expect.poll(() => pista.evaluate((e) => getComputedStyle(e).animationName)).toBe('marcas-rodar');
+  await page.mouse.move(0, 0);
+  const corrido = () => pista.evaluate((e) => -new DOMMatrix(getComputedStyle(e).transform).m41);
+  const a = await corrido();
+  await page.waitForTimeout(1000);
+  expect(await corrido() - a, 'en un segundo la cinta corre al menos 40 px').toBeGreaterThan(40);
   const pausa = cinta.getByRole('button', { name: 'Pausar las marcas' });
   await pausa.click();
-  await expect(pista).toHaveCSS('animation-play-state', 'paused');
+  await page.mouse.move(0, 0);
+  const quieta = await corrido();
+  await page.waitForTimeout(500);
+  expect(await corrido()).toBe(quieta);
   await cinta.getByRole('button', { name: 'Seguir moviendo las marcas' }).click();
   await page.mouse.move(0, 0);
-  await expect(pista).toHaveCSS('animation-play-state', 'running');
+  await expect.poll(corrido).not.toBe(quieta);
   expect((await pausa.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  v.sinProblemas();
+});
+
+test('la cinta de marcas se arrastra a los lados con el mouse y sigue sola al soltarla', async ({ page }) => {
+  const v = vigilar(page);
+  await page.goto('/');
+  const cinta = page.locator('[data-marcas]');
+  await cinta.scrollIntoViewIfNeeded();
+  const pista = cinta.locator('.marcas__pista');
+  const vuelta = await pista.evaluate((e) => e.scrollWidth / 4);
+  const corrido = () => pista.evaluate((e) => -new DOMMatrix(getComputedStyle(e).transform).m41);
+  /* Distancia hacia adelante, contando la vuelta (la pista vuelve a empezar al correr una lista) */
+  const avance = (/** @type {number} */ de, /** @type {number} */ a) => ((((a - de) % vuelta) + vuelta * 1.5) % vuelta) - vuelta / 2;
+  const caja = await cinta.locator('.marcas__ventana').boundingBox();
+  if (!caja) throw new Error('sin ventana');
+  const y = caja.y + caja.height / 2;
+  const medio = caja.x + caja.width / 2;
+  for (const [hacia, signo] of /** @type {const} */ ([[-200, 1], [200, -1]])) {
+    await page.mouse.move(medio, y);
+    const antes = await corrido();
+    await page.mouse.down();
+    await page.mouse.move(medio + hacia / 2, y, { steps: 5 });
+    await page.mouse.move(medio + hacia, y, { steps: 5 });
+    const movido = avance(antes, await corrido());
+    await page.mouse.up();
+    /* Con el mouse encima no corre sola: lo movido es lo arrastrado */
+    expect(Math.abs(movido - signo * 200), `arrastrar ${hacia} px movió ${movido} px`).toBeLessThan(12);
+  }
+  await expect(cinta).not.toHaveClass(/esta-arrastrando/);
+  /* Al soltarla y quitar el mouse, sigue sola */
+  await page.mouse.move(0, 0);
+  const suelta = await corrido();
+  await expect.poll(corrido).not.toBe(suelta);
+  await expect(cinta.locator('.marcas__ventana')).toHaveCSS('cursor', 'grab');
   v.sinProblemas();
 });
 
@@ -264,16 +323,14 @@ test('simetría: el mosaico de negocios y las tarjetas de categoría no dejan fi
   expect(Math.max(...altos) - Math.min(...altos), `altos: ${altos.join(', ')}`).toBeLessThanOrEqual(1);
 });
 
-test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en celular, y cada foto carga', async ({ page }) => {
+test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al catálogo) y cada foto carga', async ({ page }) => {
   await page.goto('/');
-  await page.evaluate(() => document.fonts.ready);
   await page.locator('#catalogo .carrusel').scrollIntoViewIfNeeded();
-  const botones = await page.locator('.cat__boton').evaluateAll((els) => els.map((e) => ({
-    alto: Math.round(e.getBoundingClientRect().height), minimo: parseFloat(getComputedStyle(e).minHeight),
-  })));
-  expect(botones.length).toBeGreaterThan(0);
-  /* Partido en dos renglones mide más que su alto mínimo */
-  for (const b of botones) expect(b.alto).toBeLessThanOrEqual(b.minimo + 4);
+  /* Johan (11-nov): «quitémosle el ver productos a las categorías… la página está sobrecargada» */
+  await expect(page.locator('#catalogo .cat')).not.toHaveCount(0);
+  await expect(page.locator('#catalogo .cat__boton')).toHaveCount(0);
+  await expect(page.locator('#catalogo .carrusel__pista')).not.toContainText('Ver productos');
+  for (const href of await page.locator('#catalogo a.cat').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) expect(href).toMatch(/^\/productos\/\?/);
   /* Las escenas con productos de verdad (Higgsfield, 10-nov-2026) están puestas y existen */
   for (const nombre of ['cat-portacomidas', 'cat-bolsas-papel', 'cat-aluminio', 'sec-reposteria', 'sec-salsas', 'sec-heladeria']) {
     const img = page.locator(`img[src*="img/escenas/${nombre}-"]`);
@@ -290,7 +347,7 @@ test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA di
   await page.goto('/');
   const tarjetas = page.locator('#en-uso a.uso');
   await expect(tarjetas).toHaveCount(6);
-  await expect(page.locator('#en-uso h3')).toHaveText(['Platos hondos', 'Platos biodegradables', 'Bandejas', 'Vasos', 'Portacomidas', 'Bolsas de manija']);
+  await expect(page.locator('#en-uso h3')).toHaveText(['Platos', 'Platos biodegradables', 'Bandejas', 'Vasos', 'Portacomidas', 'Bolsas']);
   const datos = await tarjetas.evaluateAll((as) => as.map((a) => ({ href: a.getAttribute('href'), foto: /** @type {HTMLImageElement} */ (a.querySelector('img')).getAttribute('src') })));
   /* Johan: «no hay que repetir productos o fotos» */
   expect(new Set(datos.map((d) => d.foto)).size).toBe(6);
@@ -322,8 +379,18 @@ test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA di
 
 test('las tarjetas de «Así se ven en su negocio» abren su línea en el catálogo', async ({ page }) => {
   await page.goto('/');
-  await page.locator('#en-uso a.uso', { hasText: 'Platos hondos' }).click();
-  await expect(page).toHaveURL(/\/productos\/\?q=plato(%20|\+)hondo$/);
+  await page.locator('#en-uso a.uso', { has: page.getByRole('heading', { name: 'Platos', exact: true }) }).click();
+  await expect(page).toHaveURL(/\/productos\/\?categoria=platos$/);
+  await page.goBack();
+  await page.locator('#en-uso a.uso', { has: page.getByRole('heading', { name: 'Bolsas', exact: true }) }).click();
+  await expect(page).toHaveURL(/\/productos\/\?q=bolsa$/);
+});
+
+test('«Así se ven en su negocio» va claro y corto: solo el nombre y «Ver productos», sin frases', async ({ page }) => {
+  await page.goto('/');
+  /* Johan (11-nov): «lo que dice no me gusta… algo más claro y conciso» */
+  await expect(page.locator('#en-uso p')).toHaveCount(0);
+  for (const t of await page.locator('#en-uso a.uso').allInnerTexts()) expect(t.replace(/\s+/g, ' ').trim().split(' ').length).toBeLessThanOrEqual(4);
 });
 
 /* ---------- Ronda de color y detalles (10-nov-2026) ---------- */

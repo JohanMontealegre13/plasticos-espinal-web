@@ -159,6 +159,11 @@
 
     /* Avance solo */
     var apagado = menosMovimiento;
+    /* data-cada: cada cuántos milisegundos avanza (la portada va más rápido que las categorías).
+       data-sigue-con-raton: no se detiene con el mouse encima (la portada ocupa todo el ancho y el
+       mouse casi siempre queda sobre ella); se detiene con el foco, al tocarla o con la pausa. */
+    var cada = Number(raiz.dataset.cada) || 5000;
+    var sigueConRaton = raiz.hasAttribute('data-sigue-con-raton');
     var raton = false;   /* el mouse encima */
     var foco = false;    /* el foco del teclado adentro (cada uno pausa por su lado) */
     var visible = false;
@@ -166,11 +171,11 @@
     var parar = function () { if (reloj) { clearInterval(reloj); reloj = 0; } };
     var revisar = function () {
       parar();
-      if (apagado || raton || foco || !visible || document.hidden || paginas() < 2) return;
+      if (apagado || (raton && !sigueConRaton) || foco || !visible || document.hidden || paginas() < 2) return;
       reloj = window.setInterval(function () {
         var a = actual();
         irA(a >= paginas() - 1 ? 0 : a + 1);
-      }, 5000);
+      }, cada);
     };
     var apagar = function () {
       if (apagado) return;
@@ -229,18 +234,100 @@
 
   document.querySelectorAll('[data-carrusel]').forEach(function (el) { carrusel(/** @type {HTMLElement} */ (el)); });
 
-  /* 6. Cinta de marcas: corre sola por CSS; el botón la pausa y la vuelve a mover (lo exige
-        WCAG 2.2.2 para lo que se mueve más de 5 s). Con «menos movimiento» no corre ni sale el botón. */
-  var cinta = document.querySelector('[data-marcas]');
+  /* 6. Cinta de marcas: sin JS corre sola por CSS. Con JS la mueve principal.js para que también se
+        pueda arrastrar a los lados con el mouse o el dedo (y con la rueda de lado del trackpad);
+        al soltarla sigue sola desde donde quedó. Se detiene con el mouse encima, con el foco adentro
+        o con el botón de pausa (lo exige WCAG 2.2.2 para lo que se mueve más de 5 s). Con «menos
+        movimiento» no corre, no se arrastra ni sale el botón. */
+  var cinta = /** @type {HTMLElement | null} */ (document.querySelector('[data-marcas]'));
   var pausaCinta = document.getElementById('marcasPausa');
-  if (cinta && pausaCinta && !menosMovimiento) {
+  var ventanaCinta = cinta && /** @type {HTMLElement | null} */ (cinta.querySelector('.marcas__ventana'));
+  var pistaCinta = cinta && /** @type {HTMLElement | null} */ (cinta.querySelector('.marcas__pista'));
+  if (cinta && pausaCinta && ventanaCinta && pistaCinta && !menosMovimiento) {
+    var laCinta = cinta;
     var botonCinta = pausaCinta;
+    var ventanaM = ventanaCinta;
+    var pistaM = pistaCinta;
+    var VELOCIDAD = 70;   /* píxeles por segundo */
+    var corrido = 0;      /* cuánto ha corrido la pista hacia la izquierda */
+    var antes = 0;
+    var encima = false;
+    var adentro = false;
+    var quieta = false;
+    var enPantalla = !hayObservador;
+    var cuadroCinta = 0;
+    /** @type {{ id: number, x: number, desde: number } | null} */
+    var arrastre = null;
+    laCinta.classList.add('marcas--mano');
     botonCinta.hidden = false;
+
+    /* La pista lleva la lista cuatro veces: correr una lista entera deja todo igual que al empezar */
+    var ponerEn = function () {
+      var vuelta = pistaM.scrollWidth / 4;
+      if (vuelta > 0) corrido = ((corrido % vuelta) + vuelta) % vuelta;
+      pistaM.style.transform = 'translate3d(' + (-corrido).toFixed(1) + 'px, 0, 0)';
+    };
+    var avanzar = function (/** @type {number} */ t) {
+      cuadroCinta = 0;
+      var dt = antes ? Math.min(t - antes, 100) : 0;
+      antes = t;
+      if (!arrastre && !quieta && !encima && !adentro) corrido += VELOCIDAD * dt / 1000;
+      ponerEn();
+      seguir();
+    };
+    var seguir = function () {
+      if (cuadroCinta) return;
+      if (!enPantalla || document.hidden) { antes = 0; return; }
+      cuadroCinta = requestAnimationFrame(avanzar);
+    };
+
+    ventanaM.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      arrastre = { id: e.pointerId, x: e.clientX, desde: corrido };
+      ventanaM.setPointerCapture(e.pointerId);
+      laCinta.classList.add('esta-arrastrando');
+    });
+    ventanaM.addEventListener('pointermove', function (e) {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      corrido = arrastre.desde - (e.clientX - arrastre.x);
+      ponerEn();
+    });
+    var soltar = function (/** @type {PointerEvent} */ e) {
+      if (!arrastre || e.pointerId !== arrastre.id) return;
+      arrastre = null;
+      laCinta.classList.remove('esta-arrastrando');
+    };
+    ventanaM.addEventListener('pointerup', soltar);
+    ventanaM.addEventListener('pointercancel', soltar);
+    /* Las fotos de los logos no se arrastran solas (el navegador las sacaría de la página) */
+    ventanaM.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    ventanaM.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      corrido += e.deltaX;
+      ponerEn();
+    }, { passive: false });
+    ventanaM.addEventListener('mouseenter', function () { encima = true; });
+    ventanaM.addEventListener('mouseleave', function () { encima = false; });
+    /* El foco en la ventana (no en el botón de pausa: al seguir, el foco queda en él) */
+    ventanaM.addEventListener('focusin', function () { adentro = true; });
+    ventanaM.addEventListener('focusout', function (e) {
+      if (!ventanaM.contains(/** @type {Node} */ (e.relatedTarget))) adentro = false;
+    });
     botonCinta.addEventListener('click', function () {
-      var quieta = /** @type {Element} */ (cinta).classList.toggle('esta-pausada');
+      quieta = !quieta;
+      laCinta.classList.toggle('esta-pausada', quieta);
       botonCinta.setAttribute('aria-label', quieta ? 'Seguir moviendo las marcas' : 'Pausar las marcas');
       botonCinta.replaceChildren(icono(quieta ? 'i-seguir' : 'i-pausa'));
     });
+    document.addEventListener('visibilitychange', seguir);
+    if (hayObservador) {
+      new IntersectionObserver(function (entradas) {
+        enPantalla = entradas[0].isIntersecting;
+        seguir();
+      }).observe(ventanaM);
+    }
+    seguir();
   }
 
   /* 7. Que :active funcione al tocar en iOS */

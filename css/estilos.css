@@ -393,9 +393,15 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 100s linear infinite; }
+.marcas__pista { display: flex; width: max-content; animation: marcas-rodar 45s linear infinite; }
 .marcas__ventana:hover .marcas__pista, .marcas__ventana:focus-within .marcas__pista, .marcas.esta-pausada .marcas__pista { animation-play-state: paused; }
 @keyframes marcas-rodar { to { transform: translateX(-25%); } }
+/* Con JS la mueve principal.js: se arrastra a los lados con el mouse o el dedo (el dedo hacia
+   arriba o abajo sigue bajando la página) */
+.marcas--mano .marcas__pista { animation: none; will-change: transform; }
+.marcas--mano .marcas__ventana { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.marcas--mano.esta-arrastrando .marcas__ventana { cursor: grabbing; }
+.marcas--mano .marcas__lista img { -webkit-user-drag: none; pointer-events: none; }
 .marcas__lista { list-style: none; margin: 0; padding: 0 20px 0 0; display: flex; gap: 20px; flex: none; }
 .marcas__lista li {
   display: grid; place-items: center; height: 84px; padding: 0 30px;
@@ -471,7 +477,8 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 }
 .carrusel__punto:focus-visible { outline-offset: -6px; border-radius: var(--pill); }
 
-/* Tarjeta de categoría: foto arriba, pie azul con el nombre y el botón de contorno */
+/* Tarjeta de categoría: foto arriba y pie azul con el nombre. Sin botón: toda la tarjeta lleva al
+   catálogo (Johan, 11-nov: la página estaba «sobrecargada de ver productos») */
 .cat {
   position: relative; display: flex; flex-direction: column; width: 100%;
   border-radius: var(--radio-lg); overflow: hidden; background: var(--azul);
@@ -483,18 +490,9 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .cat__pie { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
 .cat h3 { color: #fff; font-size: 1.125rem; font-weight: 700; line-height: 1.25; }
 .cat p { font-size: var(--fs-chico); line-height: 1.4; color: #dfe6fb; }
-.cat__boton {
-  margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
-  min-height: 36px; padding: 0 14px; margin-block-start: 12px;
-  border: 2px solid rgba(255,255,255,.9); border-radius: var(--pill);
-  font-size: var(--fs-chico); font-weight: 700; color: #fff;
-  transition: background-color var(--t) var(--curva), color var(--t) var(--curva);
-}
-.cat__boton .icono { width: 16px; height: 16px; }
 @media (hover: hover) and (pointer: fine) {
   .cat:hover { transform: translateY(-4px); box-shadow: var(--elevada); }
   .cat:hover .cat__foto img { transform: scale(1.05); }
-  .cat:hover .cat__boton { background: #fff; color: var(--azul-osc); }
 }
 .cat:active { transform: translateY(1px); box-shadow: var(--dura-sm); }
 .cat:focus-visible { outline-offset: 2px; }
@@ -502,9 +500,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .cat__pie { padding: 12px 12px 14px; }
   .cat h3 { font-size: 1.0625rem; }
   .cat p { display: none; }
-  /* En celular la tarjeta mide media pantalla: sin la flecha y con menos borde, «Ver productos» cabe en un renglón */
-  .cat__boton { align-self: stretch; justify-content: center; padding-inline: 8px; font-size: .9375rem; }
-  .cat__boton .icono { display: none; }
 }
 /* 320 px: los títulos no se parten a media palabra (el de la portada ya se achica solo, arriba) */
 @media (max-width: 359px) {

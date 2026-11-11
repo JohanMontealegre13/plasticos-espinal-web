@@ -40,8 +40,8 @@
 
   <link rel="preload" href="fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=20">
-  <script src="js/principal.js?v=13" defer></script>
+  <link rel="stylesheet" href="css/estilos.css?v=21">
+  <script src="js/principal.js?v=14" defer></script>
 
   <script type="application/ld+json">
   {
@@ -155,7 +155,7 @@
          (sin amarillo: los colores de la marca son rojo y azul). El texto va en código, nunca en la
          imagen. Sin JS es una fila que se desliza; principal.js le pone puntos, pausa y avance solo. -->
     <section class="heroe" id="inicio" aria-labelledby="titulo-portada">
-      <div class="carrusel carrusel--heroe" data-carrusel>
+      <div class="carrusel carrusel--heroe" data-carrusel data-cada="3000" data-sigue-con-raton>
         <ul class="carrusel__pista" aria-label="Portada">
           <li class="lamina">
             <picture class="lamina__foto">
@@ -300,7 +300,6 @@
                 <div class="cat__pie">
                   <h3>Contenedores</h3>
                   <p>Con divisiones, para porciones y almuerzos.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -310,7 +309,6 @@
                 <div class="cat__pie">
                   <h3>Vasos</h3>
                   <p>De 3 a 22 oz, para bebidas frías y calientes.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -320,7 +318,6 @@
                 <div class="cat__pie">
                   <h3>Platos</h3>
                   <p>Planos, hondos y ovalados, de 12 a 26 cm.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -330,7 +327,6 @@
                 <div class="cat__pie">
                   <h3>Cubiertos</h3>
                   <p>Tenedores, cucharas y cuchillos, sueltos o en kit.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -340,7 +336,6 @@
                 <div class="cat__pie">
                   <h3>Bolsas</h3>
                   <p>De empaque, de basura y por kilo, todos los calibres.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -350,7 +345,6 @@
                 <div class="cat__pie">
                   <h3>Empaques</h3>
                   <p>Para domicilios, comidas rápidas y repostería.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -360,7 +354,6 @@
                 <div class="cat__pie">
                   <h3>Tapas y domos</h3>
                   <p>Planas, con orificio y domos para tortas y postres.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -370,7 +363,6 @@
                 <div class="cat__pie">
                   <h3>Bandejas</h3>
                   <p>Para carnes y frutas, y de aluminio para hornear.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -380,7 +372,6 @@
                 <div class="cat__pie">
                   <h3>Pitillos</h3>
                   <p>Biodegradables: rectos y flexibles, por bolsa.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -390,7 +381,6 @@
                 <div class="cat__pie">
                   <h3>Servilletas y más</h3>
                   <p>Servilletas, mezcladores, guantes y aseo.</p>
-                  <span class="cat__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
                 </div>
               </a>
             </li>
@@ -400,22 +390,21 @@
     </section>
 
     <!-- Así se ven en su negocio: una foto de IA por categoría, cada una distinta (Johan, 10-nov-2026).
-         Va escrita aquí, no la pinta el catálogo: se ve igual aunque el CRM no conteste. -->
+         Va escrita aquí, no la pinta el catálogo: se ve igual aunque el CRM no conteste. Solo el
+         nombre corto y «Ver productos», sin frases (Johan, 11-nov: «claro y conciso»). -->
     <section class="seccion" id="en-uso" aria-labelledby="titulo-en-uso">
       <div class="contenedor">
         <div class="titulo-fila" data-revela>
           <div>
             <h2 class="titulo" id="titulo-en-uso">Así se ven en su negocio</h2>
-            <p class="titulo-bajada">Toque una y vea todo lo que manejamos de esa línea.</p>
           </div>
         </div>
         <ul class="usos">
           <li data-revela>
-            <a class="uso" href="/productos/?q=plato%20hondo">
+            <a class="uso" href="/productos/?categoria=platos">
               <span class="uso__foto"><img src="img/en-uso/platos-hondos-360.webp" srcset="img/en-uso/platos-hondos-360.webp 360w, img/en-uso/platos-hondos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Sancocho servido en un plato hondo de icopor"></span>
               <div class="uso__pie">
-                <h3>Platos hondos</h3>
-                <p>Para la sopa, el sancocho y el caldo.</p>
+                <h3>Platos</h3>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
@@ -425,7 +414,6 @@
               <span class="uso__foto"><img src="img/en-uso/plato-biodegradable-360.webp" srcset="img/en-uso/plato-biodegradable-360.webp 360w, img/en-uso/plato-biodegradable-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Almuerzo con ensalada, verduras asadas y arroz en un plato biodegradable"></span>
               <div class="uso__pie">
                 <h3>Platos biodegradables</h3>
-                <p>Planos, para servir el almuerzo completo.</p>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
@@ -435,7 +423,6 @@
               <span class="uso__foto"><img src="img/en-uso/bandejas-360.webp" srcset="img/en-uso/bandejas-360.webp 360w, img/en-uso/bandejas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Pescado frito con patacones y arroz en una bandeja ovalada de icopor"></span>
               <div class="uso__pie">
                 <h3>Bandejas</h3>
-                <p>Ovaladas, para el pescado y el plato fuerte.</p>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
@@ -445,7 +432,6 @@
               <span class="uso__foto"><img src="img/en-uso/vasos-360.webp" srcset="img/en-uso/vasos-360.webp 360w, img/en-uso/vasos-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Tres jugos de colores en vasos transparentes"></span>
               <div class="uso__pie">
                 <h3>Vasos</h3>
-                <p>Para jugos, granizados y bebidas frías.</p>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
@@ -455,17 +441,15 @@
               <span class="uso__foto"><img src="img/en-uso/portacomidas-360.webp" srcset="img/en-uso/portacomidas-360.webp 360w, img/en-uso/portacomidas-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Portacomidas con ensalada y fruta"></span>
               <div class="uso__pie">
                 <h3>Portacomidas</h3>
-                <p>Para el domicilio y el almuerzo para llevar.</p>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
           </li>
           <li data-revela>
-            <a class="uso" href="/productos/?categoria=bolsas-manija">
+            <a class="uso" href="/productos/?q=bolsa">
               <span class="uso__foto"><img src="img/en-uso/bolsas-manija-360.webp" srcset="img/en-uso/bolsas-manija-360.webp 360w, img/en-uso/bolsas-manija-720.webp 720w" sizes="(min-width: 1100px) 360px, (min-width: 700px) 33vw, 50vw" width="720" height="540" loading="lazy" decoding="async" alt="Bolsa de manija con mangos y aguacates en una plaza de mercado"></span>
               <div class="uso__pie">
-                <h3>Bolsas de manija</h3>
-                <p>Del mercado a la tienda, en todos los tamaños.</p>
+                <h3>Bolsas</h3>
                 <span class="uso__boton">Ver productos<svg class="icono" aria-hidden="true"><use href="#i-flecha"/></svg></span>
               </div>
             </a>
