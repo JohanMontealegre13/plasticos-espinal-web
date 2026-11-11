@@ -269,6 +269,27 @@
     caja.appendChild(v);
   }
 
+  /* El pedido de la tienda que va en camino (el que guardó este celular al pedirlo): arriba de todo, y al
+     tocarlo se ve su seguimiento en la tienda. Se borra solo cuando el pedido termina. */
+  var EN_CURSO = { POR_CONFIRMAR: 'Confirmando', POR_ALISTAR: 'Preparándose', EN_CAMINO: 'En camino' };
+  function intentarEnCurso() {
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem('pe-pedido-v1')); } catch (e) { p = null; }
+    if (!p || !p.codigo || p.final || !p.medio) return;
+    var b = el('button', 'compra en-curso');
+    b.type = 'button';
+    var izq = el('span');
+    izq.appendChild(el('span', 'chip vivo', EN_CURSO[p.estado] || 'En curso'));
+    izq.appendChild(el('span', 'det', 'Pedido ' + p.codigo + ' · ' + (p.titulo || 'Pedido por confirmar')));
+    b.appendChild(izq);
+    b.appendChild(el('b', '', 'Ver ›'));
+    b.addEventListener('click', function () {
+      if (window.parent !== window) window.parent.postMessage({ cuenta: 'cerrar', pedido: true }, location.origin);
+      else location.href = RAIZ;
+    });
+    $('lista').appendChild(b);
+  }
+
   /* ---------- Mis pedidos ---------- */
   function pedidos() {
     var caja = $('lista');
@@ -279,6 +300,7 @@
     }).catch(function (err) { caja.textContent = err.message; });
     function pintar(j) {
       caja.textContent = '';
+      intentarEnCurso();
       if (!j.pedidos.length) {
         var v = el('div', 'vacio');
         v.appendChild(el('b', '', 'Aún no vemos compras a su nombre.'));

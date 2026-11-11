@@ -1088,8 +1088,47 @@
   /* ---------- Pedido por confirmar (se actualiza solo) ---------- */
   var ICONOS = { POR_CONFIRMAR: '⏳', POR_ALISTAR: '✅', EN_CAMINO: '🛵', ENTREGADO: '🎉', NO_ENTREGADO: '⚠️' };
   var ORDEN = ['POR_CONFIRMAR', 'POR_ALISTAR', 'EN_CAMINO', 'ENTREGADO'];
+  /* Un video corto por estado (Higgsfield, sin sonido, en bucle). Con menos movimiento pedido, sin datos
+     de sobra o si el video no carga, queda el ícono de siempre. */
+  var ESCENAS = { POR_CONFIRMAR: 'confirmando', POR_ALISTAR: 'alistando', EN_CAMINO: 'en-camino', ENTREGADO: 'entregado' };
+  function pintarEscena() {
+    var v = $('fVideo'), nombre = ESCENAS[pedido.estado];
+    var quieto = QUIETO || (navigator.connection && navigator.connection.saveData);
+    if (!nombre || quieto || !v.canPlayType || !v.canPlayType('video/mp4')) { v.hidden = true; v.removeAttribute('src'); $('fIcono').hidden = false; return; }
+    var src = '/tienda/img/pedido/' + nombre + '.mp4';
+    if (v.dataset.escena !== nombre) {
+      v.dataset.escena = nombre;
+      v.poster = '/tienda/img/pedido/' + nombre + '.webp';
+      v.src = src;
+      v.onerror = function () { v.hidden = true; $('fIcono').hidden = false; };
+    }
+    if (v.getAttribute('src') && !v.error) { v.hidden = false; $('fIcono').hidden = true; }
+    var pr = v.play && v.play();
+    if (pr && pr.catch) pr.catch(function () { /* sin reproducción automática: queda la imagen */ });
+  }
+  /* Lo que pidió y lo que ha pasado, como texto (del CRM) */
+  var HORA = new Intl.DateTimeFormat('es-CO', { hour: 'numeric', minute: '2-digit' });
+  function pintarSeguimiento() {
+    var lineas = Array.isArray(pedido.lineas) ? pedido.lineas : [], novedades = Array.isArray(pedido.novedades) ? pedido.novedades : [];
+    $('fSeguimiento').hidden = !lineas.length && !novedades.length;
+    var ul = $('fLineas'); ul.textContent = '';
+    lineas.forEach(function (l) {
+      var li = el('li');
+      li.append(el('b', 'lo-cant', formato.format(Number(l.cantidad) || 0) + ' ×'), el('span', null, String(l.nombre || '')));
+      ul.appendChild(li);
+    });
+    var ol = $('fNovedades'), antes = ol.children.length;
+    ol.textContent = '';
+    novedades.forEach(function (n, i) {
+      var li = el('li', i >= antes && antes > 0 ? 'nueva' : null), h = new Date(String(n.hora || ''));
+      li.append(el('time', null, isNaN(h) ? '' : HORA.format(h)), el('span', null, String(n.texto || '')));
+      ol.appendChild(li);
+    });
+  }
   function pintarFinal() {
     $('fIcono').textContent = ICONOS[pedido.estado] || '⏳';
+    intentar(pintarEscena);
+    intentar(pintarSeguimiento);
     $('fTitulo').textContent = pedido.titulo || 'Pedido por confirmar';
     $('fDetalle').textContent = pedido.detalle || '';
     $('fCodigo').textContent = pedido.codigo;
@@ -1436,6 +1475,8 @@
       cerrar();
     });
     $('avisoPedido').addEventListener('click', abrirPedido);
+    /* «Mis pedidos» (en su ventana) pide abrir el pedido en curso */
+    window.addEventListener('pe:abrir-pedido', function () { if (pedido && pedido.codigo) abrirPedido(); });
   }
 
   /* ---------- Carga ---------- */

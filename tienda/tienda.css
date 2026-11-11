@@ -672,3 +672,20 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 
 /* Domicilio gratis por el cupón: en verde, como lo que la tienda regala */
 #dom.con-cupon{color:var(--verde)}
+
+/* Seguimiento del pedido: la escena en video, lo que pidió y cada novedad */
+.escena{width:min(260px,70vw);height:min(260px,70vw);flex:none;border-radius:22px;overflow:hidden;background:var(--suave);display:grid;place-items:center;box-shadow:0 10px 26px rgba(14,26,71,.14)}
+.escena video{width:100%;height:100%;object-fit:cover;display:block}
+.escena video[hidden]{display:none}
+.escena .sello-estado[hidden]{display:none}
+.seguimiento{width:100%;text-align:left;display:grid;gap:8px;border-top:1px solid var(--linea);padding-top:12px}
+.seguimiento h4{font-size:14px;color:var(--texto2);margin:4px 0 0}
+.lo-pedido,.novedades{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.lo-pedido li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:15px}
+.lo-pedido .lo-cant{font-variant-numeric:tabular-nums}
+.novedades li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;font-size:15px;position:relative;padding-left:14px}
+.novedades li::before{content:"";position:absolute;left:0;top:7px;width:8px;height:8px;border-radius:50%;background:var(--verde)}
+.novedades time{color:var(--texto2);font-variant-numeric:tabular-nums}
+.novedades li.nueva{animation:novedad .6s ease-out both}
+@keyframes novedad{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.novedades li.nueva{animation:none}}

@@ -83,3 +83,7 @@ html.en-ventana .portal h1,html.en-ventana .portal .sub{padding-right:120px}
 .cupon .codigo{justify-self:start;margin-top:6px;padding:4px 12px;border-radius:8px;background:var(--noche);color:#fff;font-size:17px;letter-spacing:2px}
 .cupon .solo{color:var(--texto2);font-size:13px}
 .menu-cuenta .hay{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:8px;padding:0 6px;border-radius:99px;background:var(--rojo);color:#fff;font-family:var(--cuerpo,inherit);font-size:12px;font-weight:800;vertical-align:2px}
+.compra.en-curso{width:100%;font:inherit;text-align:left;background:#fff;border:2px solid var(--verde);cursor:pointer;margin-bottom:10px}
+.chip.vivo{background:var(--verde2);color:var(--verde)}
+.chip.vivo::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--verde);animation:latido 1.2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.chip.vivo::before{animation:none}}

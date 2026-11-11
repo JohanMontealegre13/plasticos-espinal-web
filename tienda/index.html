@@ -268,7 +268,11 @@
 
   <!-- 4. Pedido por confirmar: se actualiza solo con lo que pase en la tienda -->
   <section class="final" id="final" hidden>
-    <div class="sello-estado" id="fIcono" aria-hidden="true">⏳</div>
+    <!-- La escena del estado: un video corto en bucle (hecho con Higgsfield), sin sonido; sin video, el ícono -->
+    <div class="escena" id="fEscena" aria-hidden="true">
+      <video id="fVideo" muted loop playsinline preload="none" disablepictureinpicture hidden></video>
+      <div class="sello-estado" id="fIcono">⏳</div>
+    </div>
     <h3 id="fTitulo">Pedido por confirmar</h3>
     <p id="fDetalle"></p>
     <p class="cod">Pedido <b id="fCodigo"></b> · <span id="fPago"></span></p>
@@ -279,6 +283,12 @@
       <li data-paso="ENTREGADO">Entregado</li>
     </ol>
     <p class="motivo" id="fMotivo" hidden></p>
+    <div class="seguimiento" id="fSeguimiento" hidden>
+      <h4>Lo que pidió</h4>
+      <ul class="lo-pedido" id="fLineas"></ul>
+      <h4>Novedades</h4>
+      <ol class="novedades" id="fNovedades"></ol>
+    </div>
     <button class="enviar" type="button" id="otraCompra">Seguir comprando</button>
   </section>
 </aside>
