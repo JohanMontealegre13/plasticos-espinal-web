@@ -794,3 +794,19 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 .pag:disabled{opacity:.4;cursor:default}
 .pag-salto{padding:0 4px;color:var(--texto2)}
 @media (max-width:600px){.pag-ant,.pag-sig{font-size:0;padding:0}.pag-ant::before{content:"‹";font-size:20px}.pag-sig::before{content:"›";font-size:20px}}
+
+/* ---------- Dirección predeterminada (la de «Mis datos») y «Ubícame en el mapa» ---------- */
+.dir-guardada{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;border:2px solid var(--linea);border-radius:14px;background:var(--suave)}
+.dir-texto{display:grid;gap:2px;margin:0;min-width:0;overflow-wrap:anywhere}
+.dir-texto b{font-size:16px}
+.dir-texto span{font-size:14px;color:var(--texto2)}
+.dir-cambiar{flex:none;min-height:44px;padding:0 16px;border:2px solid var(--azul);border-radius:99px;background:#fff;color:var(--azul);font-weight:800;font-size:14px}
+.dir-campos{display:grid;gap:12px}
+.dir-campos[hidden]{display:none}
+.datos .dir-volver{justify-self:start;background:none;border:0;color:var(--azul);font-weight:700;padding:4px 0;min-height:44px}
+.datos .dir-uso{gap:4px}
+.datos .dir-uso legend{font-family:inherit;font-size:14px;font-weight:700;margin-bottom:2px}
+.datos .dir-uso .check{font-size:15px;color:var(--texto);align-items:center;min-height:40px}
+.ubicar-fila{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.ubicar-otro{min-height:44px;display:inline-flex;align-items:center;background:none;border:0;padding:0 4px;color:var(--azul);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:3px}
+.ubicar-otro[hidden]{display:none}

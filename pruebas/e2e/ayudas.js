@@ -108,6 +108,8 @@ export async function abrirTienda(page, op = {}) {
   await sitioDe(page, op.sitio);
   await page.route('**/tienda/mi-cuenta/api/tienda/catalogo', (r) => r.fulfill({ json: op.catalogo || CATALOGO_CRM }));
   await page.route('**/tienda/mi-cuenta/api/yo', (r) => r.fulfill({ json: op.cuenta || CUENTA }));
+  /* «Mis datos» (la tienda guarda ahí la dirección predeterminada): responde la cuenta con lo nuevo */
+  await page.route('**/tienda/mi-cuenta/api/datos', (r) => r.fulfill({ json: { ...(op.cuenta || CUENTA), ...r.request().postDataJSON(), ok: true } }));
   await page.route('**/tienda/mi-cuenta/api/tienda/foto/**', (r) => r.fulfill({ status: 404 }));
   if (op.hora) await page.clock.setFixedTime(op.hora);
   await page.goto(op.ruta || '/tienda/');

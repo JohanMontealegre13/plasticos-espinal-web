@@ -11,7 +11,7 @@
    su ficha (<dialog>) con dirección propia, #p=ID, para compartir. También en este
    celular: favoritos (el corazón), lo visto hace poco y el último pedido enviado,
    para pedirlo otra vez en un toque (PE.guardado: tienda/guardados.js). En los datos de
-   entrega, «Usar mi ubicación actual» suma el punto del GPS si cae en El Espinal
+   entrega, «Ubícame en el mapa» suma el punto del GPS si cae en El Espinal
    (tienda/ubicacion.js). En el celular tiene cara de app: abajo flota una pastilla con Buscar, Inicio y
    Pedidos y, aparte, la canasta en su círculo (cuántos lleva y un aro que se llena hacia el domicilio
    gratis); arriba, el círculo con la inicial de quien entró abre su cuenta. Lo que se mueve (la foto que
@@ -32,6 +32,7 @@
   var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
   var CATALOGO = '/tienda/mi-cuenta/api/tienda/catalogo';
   var YO = '/tienda/mi-cuenta/api/yo';   /* quien entró: sus datos de entrega guardados */
+  var DATOS = '/tienda/mi-cuenta/api/datos';   /* «Mis datos»: ahí queda la dirección predeterminada */
   var CADA = 5000;                     /* cada cuánto pregunta en qué va el pedido */
   var MAX_INDICACIONES = 300;          /* el CRM corta las indicaciones a esto: el enlace del mapa va primero */
   var PRECISION_MAX_M = 200;           /* un punto del GPS con más error que esto (en metros) no se adjunta: por antena o por internet
@@ -58,6 +59,7 @@
   var guardados = null;           /* { favoritos, vistos, ultimo }; null si guardados.js no cargó (sin corazones ni secciones) */
   var buscando = false;           /* hay algo escrito en el buscador: favoritos y vistos se esconden */
   var enlaceUbicacion = '';       /* enlace del mapa de ESTE pedido; solo en memoria, nunca en pe-cliente-v1 */
+  var dirPorGuardar = null;       /* los datos del pedido en curso cuya dirección queda como la de la cuenta */
   var busquedaGps = 0;            /* número de la búsqueda de ubicación en curso; subirlo descarta la respuesta que llegue tarde */
   var enBuscador = false;         /* el cursor está en el buscador: abajo se marca «Buscar» */
   var soloFavoritos = false;      /* «Favoritos» de abajo: la vitrina muestra solo lo guardado con el corazón */
@@ -1069,19 +1071,71 @@
     if (!c.documento || d.cuenta !== c.documento) d = {};
     $('d-nombre').value = d.nombre || c.nombre || '';
     $('d-cel').value = d.celular || c.celular || '';
-    $('d-barrio').value = d.barrio || c.barrio || '';
-    $('d-dir').value = d.direccion || c.direccion || '';
-    $('d-extra').value = d.extra || c.indicaciones || '';
     $('d-acepto').checked = !!d.acepto;
     $('errores').hidden = true;
+    if (dirDeCuenta()) modoDireccion(true);
+    else {
+      /* Sin dirección en la cuenta: la última que escribió esta cuenta aquí, y la primera que ponga queda como la suya */
+      $('d-barrio').value = d.barrio || c.barrio || '';
+      $('d-dir').value = d.direccion || c.direccion || '';
+      $('d-extra').value = d.extra || c.indicaciones || '';
+      modoDireccion(false);
+      $('usoGuardar').checked = true;
+    }
     vista('datos');
     /* Con todo ya puesto, el botón queda a la vista para pedir en un toque; si no, el primer dato que falta */
     var falta = ['d-nombre', 'd-cel', 'd-barrio', 'd-dir'].filter(function (id) { return !$(id).value; })[0];
     $(falta || 'enviar').focus();
   }
 
+  /* ---------- Dirección predeterminada ---------- */
+  /* La de la cuenta («Mis datos») es la predeterminada: sale lista, en una tarjeta. «Cambiar» abre los campos
+     y pregunta si la nueva es solo para este pedido o queda como la suya. Solo cuenta si pasaría la revisión
+     del formulario (así nunca queda un error escondido detrás de la tarjeta). */
+  function dirDeCuenta() {
+    var c = cuenta || {};
+    return String(c.barrio || '').trim().length >= 3 && String(c.direccion || '').trim().length >= 5 ? c : null;
+  }
+  function modoDireccion(guardada) {
+    var g = dirDeCuenta(), tarjeta = !!(guardada && g);
+    $('dirGuardada').hidden = !tarjeta;
+    $('dirCampos').hidden = tarjeta;
+    $('usarGuardada').hidden = tarjeta || !g;
+    $('dirUso').hidden = tarjeta || !cuenta;
+    if (!tarjeta) return;
+    $('d-barrio').value = g.barrio.trim();
+    $('d-dir').value = g.direccion.trim();
+    $('d-extra').value = String(g.indicaciones || '').trim();
+    $('dgDir').textContent = $('d-dir').value;
+    $('dgBarrio').textContent = $('d-barrio').value + ', El Espinal';
+    $('dgExtra').textContent = $('d-extra').value;
+    $('dgExtra').hidden = !$('d-extra').value;
+  }
+  function cambiarDireccion() {
+    modoDireccion(false);
+    $('usoPedido').checked = true;
+    $('d-dir').focus();
+  }
+  function usarGuardada() {
+    modoDireccion(true);
+    $('cambiarDir').focus();
+  }
+  /* «Guardarla como mi dirección»: queda en la cuenta, como si la hubiera puesto en «Mis datos». Se guarda solo si
+     el pedido llegó, y si no se puede no estorba: el pedido ya va con esa dirección. El nombre de la cuenta no cambia. */
+  function guardarDireccion(d) {
+    var nombre = String(cuenta.nombre || '').trim();
+    var cuerpo = { nombre: nombre.length >= 3 ? nombre : d.nombre, barrio: d.barrio, direccion: d.direccion, indicaciones: d.extra };
+    return fetch(DATOS, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(cuerpo) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || !j.ok) throw new Error('no'); return j; }); })
+      .then(function () {
+        if (!cuenta) return;
+        cuenta.barrio = cuerpo.barrio; cuenta.direccion = cuerpo.direccion; cuenta.indicaciones = cuerpo.indicaciones;
+      })
+      .catch(function () { /* queda la de antes; la puede cambiar en «Mis datos» */ });
+  }
+
   /* ---------- Ubicación de entrega (PE.dentroDeEntrega, tienda/ubicacion.js) ---------- */
-  /* «Usar mi ubicación actual» adjunta el punto del GPS a las indicaciones, solo si cae dentro del
+  /* «Ubícame en el mapa» adjunta el punto del GPS a las indicaciones, solo si cae dentro del
      radio de catalogo.json ("entrega"). Sin GPS en el navegador, sin "entrega" o sin ubicacion.js el
      botón no sale y todo sigue como siempre. Si el GPS se niega o no responde, se puede pedir igual.
      Un punto impreciso (coords.accuracy mayor que PRECISION_MAX_M) no se adjunta: se pide escribir la dirección.
@@ -1099,11 +1153,14 @@
     var boton = $('ubicar'), mia = ++busquedaGps, teniaFoco = document.activeElement === boton;
     enlaceUbicacion = '';
     boton.disabled = true;
+    botonesUbicacion('buscando');
     pintarUbicado('Buscando su ubicación…', 'buscando');
     function terminar(texto, estado) {
       pintarUbicado(texto, estado);
       boton.disabled = false;
-      if (teniaFoco && (!document.activeElement || document.activeElement === document.body)) boton.focus();
+      botonesUbicacion(estado);
+      if (teniaFoco && (!document.activeElement || document.activeElement === document.body ||
+        document.activeElement.hidden)) boton.focus();
     }
     function noPudo() {
       if (mia === busquedaGps) terminar('No pudimos tomar su ubicación. Escriba la dirección y siga.', 'error');
@@ -1120,6 +1177,7 @@
           return terminar('Esa ubicación queda fuera de El Espinal. Escriba la dirección donde lo recibe.', 'fuera');
         }
         enlaceUbicacion = enlace;
+        $('ubicarVer').href = enlace;
         terminar('Ubicación lista ✓', 'ok');
       }, noPudo, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
     } catch (e) { noPudo(); }
@@ -1129,6 +1187,18 @@
     enlaceUbicacion = ''; busquedaGps++;
     pintarUbicado('');
     $('ubicar').disabled = false;
+    botonesUbicacion('');
+  }
+  /* Mientras busca: «Cancelar». Con el punto listo: «Ver en el mapa» (para revisarlo) y «Quitar». */
+  function botonesUbicacion(estado) {
+    $('ubicarCancelar').hidden = estado !== 'buscando';
+    $('ubicarVer').hidden = estado !== 'ok';
+    $('ubicarQuitar').hidden = estado !== 'ok';
+  }
+  /* Cancelar la búsqueda o quitar el punto: el pedido sigue sin ubicación; la respuesta que llegue tarde se descarta */
+  function sinUbicacion() {
+    soltarUbicacion();
+    $('ubicar').focus();
   }
 
   /* ---------- Hablar con la tienda ---------- */
@@ -1178,6 +1248,7 @@
       pasoPago();
       intentar(function () { recordarUltimo(lineas); });   /* para «Pedir lo de la última vez»; solo si el pedido llegó */
       intentar(soltarUbicacion);
+      if (dirPorGuardar) { guardarDireccion(dirPorGuardar); dirPorGuardar = null; }
       intentar(pintar);
       intentar(pintarCanasta);
     }).catch(function (e) {
@@ -1704,6 +1775,10 @@
     $('vaciar').addEventListener('click', function () { canasta = {}; guardar(); pintar(); pintarCanasta(); cerrar(); });
     $('seguir').addEventListener('click', pasoDatos);
     $('ubicar').addEventListener('click', tomarUbicacion);
+    $('ubicarCancelar').addEventListener('click', sinUbicacion);
+    $('ubicarQuitar').addEventListener('click', sinUbicacion);
+    $('cambiarDir').addEventListener('click', cambiarDireccion);
+    $('usarGuardada').addEventListener('click', usarGuardada);
     $('volver').addEventListener('click', function () { vista('canasta'); });
     $('datos').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -1712,6 +1787,8 @@
       d.acepto = true;
       d.cuenta = cuenta ? cuenta.documento : '';   /* de quién es lo guardado en este celular */
       guardarDatos(d);
+      /* La dirección queda como la de la cuenta solo si lo escogió (y solo si el pedido llega) */
+      dirPorGuardar = cuenta && !$('dirCampos').hidden && !$('dirUso').hidden && $('usoGuardar').checked ? d : null;
       enviarPedido(d);
     });
     $('yaPague').addEventListener('click', function () { pagar({ medio: 'qr', pagado: true }, this, 'errQr'); });

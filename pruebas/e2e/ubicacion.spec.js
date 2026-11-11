@@ -6,7 +6,7 @@ import { abrirTienda, llenarDatos, vigilar, abrirCanasta } from './ayudas.js';
 
 const PRODUCTO = 'Agregar Contenedor icopor J1 x25 und a la canasta';
 const ENLACE = 'https://maps.google.com/?q=4.15000,-74.88500';
-const PROPOSITO = 'Solo la usamos para llevarle el pedido.';
+const PROPOSITO = 'Opcional. Solo la usamos para llevarle este pedido; no la guardamos.';
 const NO_PUDIMOS = 'No pudimos tomar su ubicación. Escriba la dirección y siga.';
 const FUERA = 'Esa ubicación queda fuera de El Espinal. Escriba la dirección donde lo recibe.';
 const IMPRECISA = 'Su ubicación salió imprecisa. Escriba la dirección o intente otra vez con el GPS encendido.';
@@ -31,7 +31,7 @@ async function hastaLosDatos(/** @type {import('@playwright/test').Page} */ page
 }
 
 /**
- * Cambia el GPS del navegador por uno de mentira. Cada toque de «Usar mi ubicación» toma la siguiente
+ * Cambia el GPS del navegador por uno de mentira. Cada toque de «Ubícame en el mapa» toma la siguiente
  * respuesta (la última se repite): { lat, lng } responde con ese punto (con `precision`, el radio de error
  * en metros que da el teléfono; si no, 10 m, como un GPS bueno), { codigo } con ese error del
  * navegador (1 permiso negado, 2 sin señal, 3 no respondió a tiempo) y 'espera' se queda esperando
@@ -401,7 +401,7 @@ test('el botón y su aviso: dicen para qué, miden 44 px o más y caben en la pa
   await hastaLosDatos(page);
   const boton = page.locator('#ubicar');
   await expect(boton).toBeVisible();
-  await expect(boton).toHaveText('📍 Usar mi ubicación actual');
+  await expect(boton).toHaveText('📍 Ubícame en el mapa');
   await expect(page.getByText(PROPOSITO)).toBeVisible();
   await expect(page.locator('#ubicado')).toHaveAttribute('role', 'status');
   const caja = await boton.boundingBox();
@@ -412,5 +412,51 @@ test('el botón y su aviso: dicen para qué, miden 44 px o más y caben en la pa
   /* el botón se puede alcanzar con el teclado */
   await boton.focus();
   await expect(boton).toBeFocused();
+  v.sinProblemas();
+});
+
+/* ---------- Cancelar, Quitar y ver el punto ---------- */
+
+test('mientras busca se puede cancelar: el pedido sale sin ubicación aunque el GPS responda después', async ({ page }) => {
+  const enviados = await simularPedido(page);
+  await gpsFalso(page, ['espera']);
+  await abrirTienda(page);
+  await hastaLosDatos(page);
+  await llenarDatos(page);
+  await expect(page.locator('#ubicarCancelar')).toBeHidden();
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicarCancelar')).toBeVisible();
+  await page.locator('#ubicarCancelar').click();
+  await expect(page.locator('#ubicado')).toHaveText('');
+  await expect(page.locator('#ubicarCancelar')).toBeHidden();
+  await expect(page.locator('#ubicar')).toBeEnabled();
+  await expect(page.locator('#ubicar')).toBeFocused();
+  await page.evaluate(() => /** @type {any} */ (window).__gpsResponder({ lat: 4.15, lng: -74.885 }));
+  await expect(page.locator('#ubicado')).toHaveText('');
+  await page.locator('#enviar').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  expect(enviados[0].indicaciones).toBe('');
+});
+
+test('con el punto listo se puede ver en el mapa y quitar', async ({ page }) => {
+  const v = vigilar(page);
+  const enviados = await simularPedido(page);
+  await gpsFalso(page, [{ lat: 4.15, lng: -74.885 }]);
+  await abrirTienda(page);
+  await hastaLosDatos(page);
+  await llenarDatos(page);
+  await expect(page.locator('#ubicar')).toHaveText('📍 Ubícame en el mapa');
+  await page.locator('#ubicar').click();
+  await expect(page.locator('#ubicado')).toHaveText('Ubicación lista ✓');
+  await expect(page.locator('#ubicarVer')).toHaveAttribute('href', ENLACE);
+  await expect(page.locator('#ubicarVer')).toHaveAttribute('target', '_blank');
+  await page.locator('#ubicarQuitar').click();
+  await expect(page.locator('#ubicado')).toHaveText('');
+  await expect(page.locator('#ubicarVer')).toBeHidden();
+  await expect(page.locator('#ubicarQuitar')).toBeHidden();
+  await page.locator('#enviar').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  expect(enviados[0].indicaciones).toBe('');
+  expect(await page.evaluate(() => localStorage.getItem('pe-cliente-v1') || '')).not.toContain('maps');
   v.sinProblemas();
 });

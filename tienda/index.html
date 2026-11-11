@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=29">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=30">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=30" defer></script>
+  <script src="/tienda/tienda.js?v=31" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=7">
   <script src="/tienda/mi-cuenta/menu.js?v=6" defer></script>
 </head>
@@ -217,16 +217,36 @@
     </fieldset>
     <fieldset>
       <legend>Dónde se lo llevamos</legend>
-      <label for="d-barrio">Barrio (El Espinal)<input id="d-barrio" name="barrio" list="barrios" required maxlength="80" autocomplete="off" placeholder="Escriba y elija su barrio"></label>
-      <datalist id="barrios"></datalist>
-      <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="address-line1" required maxlength="160" placeholder="Calle, número y casa o local"></label>
-      <!-- Ubicación con el GPS (solo se muestra si el navegador la da y catalogo.json trae "entrega") -->
-      <div class="ubicar" id="ubicarCaja" hidden>
-        <button class="ubicar-btn" id="ubicar" type="button">📍 Usar mi ubicación actual</button>
-        <small id="ubicado" role="status"></small>
-        <small>Solo la usamos para llevarle el pedido.</small>
+      <!-- La dirección de la cuenta («Mis datos») es la predeterminada: sale lista y se cambia con «Cambiar» -->
+      <div class="dir-guardada" id="dirGuardada" hidden>
+        <p class="dir-texto"><b id="dgDir"></b><span id="dgBarrio"></span><small id="dgExtra"></small></p>
+        <button class="dir-cambiar" id="cambiarDir" type="button">Cambiar</button>
       </div>
-      <label for="d-extra">Indicaciones (opcional)<textarea id="d-extra" name="extra" rows="2" maxlength="300" placeholder="Algo que ayude a encontrarlo"></textarea></label>
+      <div class="dir-campos" id="dirCampos">
+        <button class="dir-volver" id="usarGuardada" type="button" hidden>‹ Usar mi dirección guardada</button>
+        <label for="d-barrio">Barrio (El Espinal)<input id="d-barrio" name="barrio" list="barrios" required maxlength="80" autocomplete="off" placeholder="Escriba y elija su barrio"></label>
+        <datalist id="barrios"></datalist>
+        <label for="d-dir">Dirección y detalle<input id="d-dir" name="direccion" autocomplete="address-line1" required maxlength="160" placeholder="Calle, número y casa o local"></label>
+        <label for="d-extra">Indicaciones (opcional)<textarea id="d-extra" name="extra" rows="2" maxlength="300" placeholder="Algo que ayude a encontrarlo"></textarea></label>
+        <!-- Solo con cuenta: esta dirección es para este pedido o queda como la de siempre -->
+        <fieldset class="dir-uso" id="dirUso" hidden>
+          <legend>Esta dirección es</legend>
+          <label class="check" for="usoPedido"><input id="usoPedido" name="dir-uso" type="radio" value="pedido"> <span>Solo para este pedido</span></label>
+          <label class="check" for="usoGuardar"><input id="usoGuardar" name="dir-uso" type="radio" value="guardar"> <span>Guardarla como mi dirección</span></label>
+        </fieldset>
+      </div>
+      <!-- «Ubícame en el mapa»: opcional, solo para este pedido (el punto no se guarda). Sale solo si el
+           navegador da el GPS y catalogo.json trae "entrega" -->
+      <div class="ubicar" id="ubicarCaja" hidden>
+        <div class="ubicar-fila">
+          <button class="ubicar-btn" id="ubicar" type="button">📍 Ubícame en el mapa</button>
+          <button class="ubicar-otro" id="ubicarCancelar" type="button" hidden>Cancelar</button>
+          <a class="ubicar-otro" id="ubicarVer" href="#" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
+          <button class="ubicar-otro" id="ubicarQuitar" type="button" hidden>Quitar</button>
+        </div>
+        <small id="ubicado" role="status"></small>
+        <small>Opcional. Solo la usamos para llevarle este pedido; no la guardamos.</small>
+      </div>
     </fieldset>
     <label class="check" for="d-acepto"><input id="d-acepto" name="acepto" type="checkbox" required> <span>Autorizo a Plásticos Espinal a usar mis datos para entregar mis pedidos, según la <a href="privacidad/" target="_blank" rel="noopener">política de datos</a>.</span></label>
     <p class="errores" id="errores" role="alert" hidden></p>
