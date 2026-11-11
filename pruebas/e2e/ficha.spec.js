@@ -97,7 +97,7 @@ test('con la ficha cerrada no hay botones repetidos en la página', async ({ pag
   await abrirTienda(page, { ruta: '/tienda/#p=141' });
   await page.locator('#fichaCerrar').click();
   await expect(page.locator('#ficha')).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toHaveCount(1);
+  await expect(page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' })).toHaveCount(1);
 });
 
 test('entrando por el enlace, ✕ cierra la ficha y la tienda queda donde está', async ({ page }) => {

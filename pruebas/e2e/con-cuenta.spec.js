@@ -18,7 +18,7 @@ const linea = (/** @type {import('@playwright/test').Page} */ page, /** @type {s
 
 /** @param {import('@playwright/test').Page} page */
 async function hastaLosDatos(page) {
-  await page.getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await expect(page.locator('#datos')).toBeVisible();
@@ -29,8 +29,8 @@ async function hastaLosDatos(page) {
 test('la canasta cobra el precio por cantidad: al llegar al corte baja cada unidad y lo dice', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page, { catalogo: conEscalones() });
-  await page.getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
-  await page.getByRole('button', { name: `Agregar ${TENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${TENEDOR} a la canasta` }).click();
   await abrirCanasta(page);
   const cantidad = page.locator('#items').getByLabel(`Cantidad de ${CONTENEDOR}`);
   /* Dos: todavía al precio de una unidad, sin aviso */
@@ -67,7 +67,7 @@ test('el umbral del domicilio gratis se mide con lo que de verdad se cobra, no c
   const c = conEscalones();
   c.productos.find((/** @type {any} */ p) => p.id === 141).escalones = [{ desde: 1, precio: 9800 }, { desde: 6, precio: 8000 }];
   await abrirTienda(page, { catalogo: c });
-  await page.getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
   await abrirCanasta(page);
   const cantidad = page.locator('#items').getByLabel(`Cantidad de ${CONTENEDOR}`);
   await cantidad.fill('6');                                                /* 6 × 8.000 = 48.000: no llega a 50.000 (6 × 9.800 sí) */
@@ -99,8 +99,8 @@ test('un precio por cantidad dañado o más caro no se anuncia ni se cobra de m�
   await expect(page.locator('#ficha')).toContainText(CONTENEDOR);
   await expect(page.locator('#escalonesCaja')).toBeHidden();
   await page.locator('#fichaCerrar').click();
-  await page.getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
-  await page.getByRole('button', { name: `Agregar ${TENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${CONTENEDOR} a la canasta` }).click();
+  await page.locator('#grilla').getByRole('button', { name: `Agregar ${TENEDOR} a la canasta` }).click();
   await abrirCanasta(page);
   const cantidad = page.locator('#items').getByLabel(`Cantidad de ${CONTENEDOR}`);
   await cantidad.fill('5');
