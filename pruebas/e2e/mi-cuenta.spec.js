@@ -234,7 +234,7 @@ for (const [caso, volver] of [
   ['otro sitio', 'https://malo.example/tienda/'],
   ['otro sitio sin protocolo', '//malo.example/tienda/'],
   ['una ruta que termina en otro sitio', '/tienda/..//malo.example/'],
-  ['la página principal', '/productos/'],
+  ['la página principal', '/terminos/'],
   ['la misma entrada', '/tienda/mi-cuenta/'],
 ]) {
   test(`una dirección de vuelta a ${caso} no se obedece: al entrar va al inicio de la tienda`, async ({ page }) => {
