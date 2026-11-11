@@ -16,9 +16,9 @@ celular, decisión rápida, quieren cotizar y pedir sin fricción.
 
 Sitio público de una sola página que presenta a Plásticos Espinal como distribuidora de
 desechables y plásticos (marcas Darnel, Carvajal, Ajover, Wau,
-Acme León, El Sol, entre otras, y la línea biodegradable). El éxito es una conversión: el visitante entiende el catálogo y escribe
-por WhatsApp con un pedido o cotización. No es tienda transaccional; es vitrina + puente a
-WhatsApp.
+Acme León, El Sol, entre otras, y la línea biodegradable). El éxito es una conversión: el visitante entiende el catálogo y pide en la tienda en
+línea (tienda.plasticosespinal.com). Desde el 11-nov-2026 (Johan) todo botón de pedir lleva a la
+tienda; WhatsApp queda como soporte para dudas y preguntas.
 
 ## Brand Personality
 
@@ -44,7 +44,7 @@ es comprar (catálogo en línea al día, pedido fácil, respuesta rápida).
 
 ## Design Principles
 
-1. WhatsApp-first: cada sección empuja a un `wa.me` con mensaje pre-llenado y contexto.
+1. Tienda primero: pedir lleva a https://tienda.plasticosespinal.com/ (la ficha del catálogo, al mismo producto con `#p=ID`). WhatsApp, con mensaje pre-llenado, solo para dudas.
 2. Mostrar, no solo decir: la festividad San Pedro se ve (paleta del logo, franja
    roja/amarilla), no solo se menciona en el texto.
 3. Identidad del logo como sistema: azul profundo, azul vivo, rojo y amarillo son los

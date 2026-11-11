@@ -213,10 +213,15 @@ test('Regresión (bd6b77c): los botones dicen «Pida», no «Encargue»', () => 
   for (const p of paginas()) assert.doesNotMatch(leer(p), /encargue/i, p);
 });
 
-test('Regresión (d9a07ee): la tienda en pruebas sigue escondida (sin enlaces desde lo público)', () => {
-  for (const p of [...PUBLICAS, 'sitemap.xml', 'robots.txt', 'site.webmanifest']) {
-    assert.doesNotMatch(leer(p), /\/tienda|tienda\.html|tienda\//i, `${p} enlaza a la tienda escondida`);
+test('lo público lleva a la tienda solo por su subdominio (lanzada 10-nov-2026; Johan, 11-nov: pedir va a la tienda)', () => {
+  /* Antes (d9a07ee) la tienda en pruebas iba escondida. Desde el 11-nov los botones de pedir van a
+     https://tienda.plasticosespinal.com/; nunca a la ruta vieja /tienda ni a tienda.html */
+  for (const p of PUBLICAS) {
+    const sinSubdominio = leer(p).replace(/https:\/\/tienda\.plasticosespinal\.com\/[^"'\s]*/g, '');
+    assert.doesNotMatch(sinSubdominio, /\/tienda|tienda\.html|tienda\//i, `${p} enlaza a la tienda por una ruta vieja`);
   }
+  assert.match(leer('index.html'), /href="https:\/\/tienda\.plasticosespinal\.com\/"/);
+  for (const p of ['sitemap.xml', 'robots.txt', 'site.webmanifest']) assert.doesNotMatch(leer(p), /\/tienda|tienda\.html|tienda\//i, p);
   assert.match(leer('tienda/index.html'), /<meta name="robots" content="noindex, nofollow">/);
 });
 
