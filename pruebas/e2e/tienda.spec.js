@@ -7,7 +7,6 @@ import { abrirTienda, vigilar, llenarDatos, abrirCanasta, CUENTA } from './ayuda
 test('pinta los productos del CRM y el agotado no se puede agregar', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page);
-  await page.locator('#verTodo').click();
   await expect(page.locator('#grilla li')).toHaveCount(8);
   await expect(page.locator('#grilla li', { hasText: 'Plato 23 cm' }).getByRole('button', { name: 'Agotado' })).toBeDisabled();
   v.sinProblemas();
@@ -15,7 +14,7 @@ test('pinta los productos del CRM y el agotado no se puede agregar', async ({ pa
 
 test('bajo $50.000 cobra $4.000 de domicilio', async ({ page }) => {
   await abrirTienda(page);
-  await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+  await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
   await abrirCanasta(page);
   await expect(page.locator('#dom')).toHaveText('$4.000');
   await expect(page.locator('#tot')).toHaveText('$13.800');
@@ -23,9 +22,8 @@ test('bajo $50.000 cobra $4.000 de domicilio', async ({ page }) => {
 
 test('desde $50.000 en productos el domicilio es gratis', async ({ page }) => {
   await abrirTienda(page);
-  await page.locator('#verTodo').click();
   for (const n of ['Bolsa kraft #6 x100 und', 'Detergente en polvo 1 kg', 'Contenedor icopor J1 x25 und', 'Servilleta 25x25 x300 und', 'Tenedor plástico x100 und']) {
-    await page.getByRole('button', { name: `Agregar ${n} a la canasta` }).click();
+    await page.locator('#grilla').getByRole('button', { name: `Agregar ${n} a la canasta` }).click();
   }   /* 18.900 + 12.500 + 9.800 + 9.200 + 6.200 = 56.600 */
   await abrirCanasta(page);
   await expect(page.locator('#dom')).toHaveText('Gratis');
@@ -99,7 +97,6 @@ test.describe('canasta', () => {
 
   test('Regresión (68a745b): el umbral cuenta solo los productos, no el domicilio', async ({ page }) => {
     await abrirTienda(page, { catalogo: conPrecios({ 305: 47000 }) });
-    await page.locator('#verTodo').click();
     await agregar(page, 'Bolsa kraft #6 x100 und');             /* 47.000 + 4.000 = 51.000, igual paga domicilio */
     await abrirCanasta(page);
     await expect(page.locator('#dom')).toHaveText('$4.000');
@@ -225,7 +222,7 @@ test.describe('cupón del primer domicilio', () => {
       await r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 'secreto-de-prueba-123', total: 9800, domicilio: 0, cupon: CUPON.codigo } });
     });
     await abrirTienda(page, { cuenta: conCupon });
-    await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+    await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
     await abrirCanasta(page);
     await expect(page.locator('#dom')).toHaveText('Gratis');
     await expect(page.locator('#falta')).toHaveText('· con su cupón');
@@ -238,7 +235,7 @@ test.describe('cupón del primer domicilio', () => {
     /* Ya se usó: el próximo pedido vuelve a pagar domicilio */
     await page.evaluate(() => { location.hash = ''; });
     await page.locator('#cerrar').click();
-    await page.getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
+    await page.locator('#grilla').getByRole('button', { name: 'Agregar Contenedor icopor J1 x25 und a la canasta' }).click();
     await abrirCanasta(page);
     await expect(page.locator('#dom')).toHaveText('$4.000');
     v.sinProblemas();
@@ -252,9 +249,8 @@ test.describe('cupón del primer domicilio', () => {
       await r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 'secreto-de-prueba-123', total: 56600 } });
     });
     await abrirTienda(page, { cuenta: conCupon });
-    await page.locator('#verTodo').click();
     for (const n of ['Bolsa kraft #6 x100 und', 'Detergente en polvo 1 kg', 'Contenedor icopor J1 x25 und', 'Servilleta 25x25 x300 und', 'Tenedor plástico x100 und']) {
-      await page.getByRole('button', { name: `Agregar ${n} a la canasta` }).click();
+      await page.locator('#grilla').getByRole('button', { name: `Agregar ${n} a la canasta` }).click();
     }
     await abrirCanasta(page);
     await expect(page.locator('#dom')).toHaveText('Gratis');

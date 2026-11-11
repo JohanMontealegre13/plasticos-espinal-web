@@ -25,7 +25,7 @@ async function simularCrm(/** @type {import('@playwright/test').Page} */ page) {
 
 /** Canasta → datos → «Seguir al pago»: el pedido llega al CRM y se ve el paso de pago, una sola vez. */
 async function pedir(/** @type {import('@playwright/test').Page} */ page, /** @type {any[]} */ enviados) {
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
@@ -56,7 +56,7 @@ for (const [que, sitio, franja] of DANADOS) {
     await page.addInitScript((p) => { if (!localStorage.getItem('pe-pedido-v1')) localStorage.setItem('pe-pedido-v1', JSON.stringify(p)); }, PEDIDO);
     await abrirTienda(page, { hora: HORA, ruta: '/tienda/#p=141', sitio: /** @type {any} */ (sitio) });
     await expect(page.locator('#estado')).toHaveText('');
-    await expect(page.locator('#grilla li')).toHaveCount(3);
+    await expect(page.locator('#grilla li')).toHaveCount(8);
     await expect(page.locator('#franjaLlegada')).toHaveText(/** @type {string} */ (franja));
     await expect(page.locator('#avisoPedido')).toBeVisible();
     await expect(page.locator('#ficha')).toBeVisible();
@@ -96,7 +96,7 @@ test('si repintar la tienda falla justo después de que el CRM recibió el pedid
     });
   });
   await abrirTienda(page);
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);

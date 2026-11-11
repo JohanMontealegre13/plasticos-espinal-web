@@ -24,7 +24,6 @@ function conPromo(/** @type {any} */ promo, /** @type {any[]} */ escalones = [])
 test('la tarjeta y la ficha muestran el sello, el precio tachado y hasta cuándo va', async ({ page }) => {
   const v = vigilar(page);
   await abrirTienda(page, { catalogo: conPromo({}), hora: HORA });
-  await page.locator('#verTodo').click();
   const t = tarjeta(page, J1);
   await expect(t.locator('.sello.promo')).toHaveText('-20 %');
   await expect(t.locator('.precio .ahora')).toHaveText('$7.840');
@@ -41,7 +40,6 @@ test('la tarjeta y la ficha muestran el sello, el precio tachado y hasta cuándo
 
 test('el último día dice cuánto falta, y no antes', async ({ page }) => {
   await abrirTienda(page, { catalogo: conPromo({ hasta: '2026-11-12' }), hora: HORA });
-  await page.locator('#verTodo').click();
   const fin = tarjeta(page, J1).locator('.fin-promo');
   await expect(fin).toHaveText('Termina en 8 h 59 min');
   await expect(fin).toHaveClass(/ultimo-dia/);
@@ -49,7 +47,6 @@ test('el último día dice cuánto falta, y no antes', async ({ page }) => {
 
 test('la que ya terminó no se anuncia ni se cobra, aunque el catálogo viejo la traiga', async ({ page }) => {
   await abrirTienda(page, { catalogo: conPromo({ hasta: '2026-11-11' }), hora: HORA });
-  await page.locator('#verTodo').click();
   const t = tarjeta(page, J1);
   await expect(t.locator('.precio')).toHaveText('$9.800');
   await expect(t.locator('.sello.promo, .fin-promo')).toHaveCount(0);
@@ -57,7 +54,6 @@ test('la que ya terminó no se anuncia ni se cobra, aunque el catálogo viejo la
 
 test('la canasta cobra la promoción hasta el tope y lo demás a precio normal', async ({ page }) => {
   await abrirTienda(page, { catalogo: conPromo({ tope: 2 }), hora: HORA });
-  await page.locator('#verTodo').click();
   for (let i = 0; i < 3; i++) await agregarUno(page);
   await abrirCanasta(page);
   const linea = page.locator('#items li', { hasText: J1 });
@@ -67,7 +63,6 @@ test('la canasta cobra la promoción hasta el tope y lo demás a precio normal',
 
 test('sin tope, la promoción gana al precio por cantidad y la ficha no lo ofrece', async ({ page }) => {
   await abrirTienda(page, { catalogo: conPromo({}, [{ desde: 2, precio: 7000 }]), hora: HORA });
-  await page.locator('#verTodo').click();
   for (let i = 0; i < 3; i++) await agregarUno(page);
   await abrirCanasta(page);
   await expect(page.locator('#items li', { hasText: J1 }).locator('.v')).toHaveText('$23.520');   /* 3 × 7.840 */
@@ -79,7 +74,6 @@ test('una promoción dañada no rompe la tienda: se ve el precio normal', async 
   const v = vigilar(page);
   const catalogo = conPromo({ precio: 'barato', hasta: 'mañana' });
   await abrirTienda(page, { catalogo, hora: HORA });
-  await page.locator('#verTodo').click();
   await expect(tarjeta(page, J1).locator('.precio')).toHaveText('$9.800');
   v.sinProblemas();
 });

@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=28">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=29">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=29" defer></script>
+  <script src="/tienda/tienda.js?v=30" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=7">
   <script src="/tienda/mi-cuenta/menu.js?v=6" defer></script>
 </head>
@@ -27,8 +27,10 @@
   <span>Pague con <b>Bre-B</b> o efectivo</span>
 </div></div>
 
-<header class="cab"><div class="envolver">
-  <a class="logo" href="./"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"><span><b>TIENDA</b>en línea</span></a>
+<header class="cab cab-tienda"><div class="envolver">
+  <!-- Solo el logo (pedido del dueño, 11-nov-2026): «Tienda en línea» va en el pie; en el celular ni el logo, para que
+       arriba quede solo el buscador y la cuenta -->
+  <a class="logo" href="./"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"></a>
   <label class="buscar"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" enterkeyhint="search" placeholder="¿Qué necesita hoy? vasos, bolsas, contenedores…" aria-label="Buscar productos"><button type="button" id="btnq">Buscar</button></label>
   <!-- La cuenta: un círculo con la inicial de quien entró (tienda.js la pone); al tocarlo sale su menú (mi-cuenta/menu.js) -->
   <a class="btn-cuenta" href="mi-cuenta/" aria-label="Mi cuenta"><span class="yo" id="yo" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span><span class="txt">Mi cuenta</span></a>
@@ -39,8 +41,6 @@
 
 <main class="envolver">
   <p class="aviso-ficha" id="avisoFicha" role="status"></p>
-  <nav class="cats" id="cats" aria-label="Categorías"></nav>
-
   <!-- Sin portada (pedido del dueño, 11-nov-2026): la tienda abre directo en los productos. El título queda para
        lectores de pantalla y buscadores. -->
   <h1 class="solo-lector">Tienda en línea de Plásticos Espinal</h1>
@@ -57,9 +57,21 @@
     <ul class="mini-lista"></ul>
   </section>
 
+  <!-- Lo más pedido: 4 a la vez, que cambian solos cada 5 s (pedido del dueño, 11-nov-2026). Se para al pasar el
+       mouse, al entrar con el teclado o con «Pausar»; con «menos movimiento» no cambia solo. -->
+  <section class="sec rota" id="masPedido" aria-labelledby="masPedidoTit" hidden>
+    <div class="sec-cab"><h2 id="masPedidoTit">Lo más pedido</h2>
+      <div class="rota-ctrl" id="rotaCtrl" hidden>
+        <span class="rota-puntos" id="rotaPuntos"></span>
+        <button class="rota-pausa" type="button" id="rotaPausa" aria-pressed="false" aria-label="Pausar lo más pedido"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pausa" d="M8 5v14M16 5v14"/><path class="sigue" d="M7 5l12 7-12 7z"/></svg></button>
+      </div>
+    </div>
+    <ul class="grilla rotan" id="rotan"></ul>
+  </section>
+
+  <!-- Todo el catálogo, con las categorías como filtros (ya no hay fila de categorías arriba) -->
   <section class="sec" id="vitrina">
-    <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2>
-      <button class="ver-todo" type="button" id="verTodo">Ver todo</button>
+    <div class="sec-cab"><h2 id="tituloVitrina">Todos los productos</h2>
       <label class="orden" for="orden">Ordenar por <select id="orden">
         <option value="pedidos">Más pedidos</option>
         <option value="menor">Menor precio</option>
@@ -67,6 +79,7 @@
         <option value="nombre">Nombre A-Z</option>
       </select></label>
     </div>
+    <div class="chips" id="cats" role="group" aria-label="Filtrar por categoría"></div>
     <!-- Buscando o en una categoría: cuántos productos hay y el filtro puesto, que se quita con su ✕ -->
     <p class="filtro-linea" id="filtroLinea" hidden><span id="conteo"></span><a href="#" class="filtro-puesto" id="limpiar" hidden><span id="limpiarTexto"></span><span class="x" aria-hidden="true">✕</span></a></p>
     <p class="estado" id="estado" role="status">Cargando productos…</p>
@@ -86,7 +99,7 @@
   <section class="sec como">
     <div class="sec-cab"><h2>Así de fácil</h2></div>
     <div class="pasos">
-      <div class="paso"><b>Arme su canasta</b><p>Busque o elija por categoría. Ve el precio de una vez.</p></div>
+      <div class="paso"><b>Arme su canasta</b><p>Busque o filtre por categoría. Ve el precio de una vez.</p></div>
       <div class="paso"><b>Toque «Pedir ya»</b><p>El pedido llega de una vez a la tienda y le confirmamos por WhatsApp.</p></div>
       <div class="paso"><b>Pague y reciba</b><p>Con el QR Bre-B o en efectivo. Llega en menos de 1 hora.</p></div>
     </div>
@@ -94,8 +107,8 @@
 </main>
 
 <footer class="pie"><div class="envolver">
-  <div><img src="/tienda/img/logo-negativo-noche.svg" alt="Plásticos Espinal" width="210" height="80"><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
-  <div><h4>Tienda</h4><a href="#cats">Categorías</a><a href="#vitrina">Lo más pedido</a></div>
+  <div class="pie-marca"><a class="pie-logo" href="./"><img src="/tienda/img/logo-color.svg" alt="Plásticos Espinal" width="210" height="80"></a><p class="pie-tienda">Tienda en línea</p><p>Una tienda de Plásticos Espinal, distribuidora de desechables en El Espinal desde hace 24 años.</p></div>
+  <div><h4>Tienda</h4><a href="#masPedido">Lo más pedido</a><a href="#vitrina">Todos los productos</a></div>
   <div><h4>Plásticos Espinal</h4><a href="https://www.plasticosespinal.com/">Quiénes somos</a><span>Calle 7 #5-25, Centro, El Espinal</span></div>
   <div><h4>Ayuda</h4><a href="mi-cuenta/">Mi cuenta</a><a href="https://wa.me/573183555246" target="_blank" rel="noopener">WhatsApp 318 355 5246</a><a href="terminos/">Términos, cambios y retracto</a><a href="privacidad/">Política de datos</a></div>
   <p class="vendedor" data-vendedor-linea hidden></p>

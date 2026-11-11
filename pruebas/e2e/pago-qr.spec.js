@@ -13,7 +13,7 @@ async function hastaElQr(/** @type {import('@playwright/test').Page} */ page, /*
   await page.route('**/tienda/mi-cuenta/api/tienda/pedido', (r) => r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 's', total: 13800 } }));
   await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
   await abrirTienda(page, { sitio: (s) => { s.pago = { qr: '/tienda/img/qr-breb-bancolombia.png', llave: LLAVE }; }, ...op });
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
@@ -99,7 +99,7 @@ test('la llave dice a nombre de quién le sale al cliente en su banco; sin titul
   await page.route('**/tienda/mi-cuenta/api/tienda/pedido', (r) => r.fulfill({ json: { ok: true, codigo: 'PE-ABCDE', secreto: 's', total: 13800 } }));
   await page.route('**/tienda/mi-cuenta/api/tienda/pedido/*', (r) => r.fulfill({ json: { ok: true, ...PEDIDO } }));
   await abrirTienda(page, { sitio: (s) => { s.pago = { qr: '/tienda/img/qr-breb-bancolombia.png', llave: LLAVE, titular: 'Plásticos Espinal' }; } });
-  await page.getByRole('button', { name: PRODUCTO }).click();
+  await page.locator('#grilla').getByRole('button', { name: PRODUCTO }).click();
   await abrirCanasta(page);
   await page.locator('#seguir').click();
   await llenarDatos(page);
