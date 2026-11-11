@@ -739,3 +739,21 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 @media (prefers-reduced-motion:reduce){.novedades li.nueva{animation:none}}
 /* Con el carril a la vista, los pasos quedan como nombres debajo (la barra ya la pinta el carril) */
 .final .carga:not([hidden]) ~ .pasos-pedido li::before{display:none}
+
+/* ---------- Promociones (las manda el CRM: precio, normal tachado, hasta cuándo) ---------- */
+.prod .sello.promo,.ficha-promo .sello.promo{background:var(--amarillo);color:var(--noche)}
+.precio.con-promo,.ficha-precio.con-promo{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.precio.con-promo .ahora,.ficha-precio.con-promo .ahora{color:var(--rojo)}
+.precio.con-promo .antes,.ficha-precio.con-promo .antes{font-family:var(--font);font-size:.62em;font-weight:500;color:var(--texto2)}
+.prod .fin-promo{font-size:12px;font-weight:700;color:var(--texto2)}
+.fin-promo.ultimo-dia{color:var(--rojo);font-variant-numeric:tabular-nums}
+.ficha-promo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;font-size:14px;font-weight:700}
+.ficha-promo .sello.promo{position:static;font-size:13px;font-weight:800;padding:3px 10px;border-radius:99px}
+.ficha-promo .fin-promo{color:var(--texto2)}
+.ficha-promo .fin-promo.ultimo-dia{color:var(--rojo)}
+.ficha-promo .tope-promo{flex-basis:100%;font-weight:500;color:var(--texto2)}
+.cada-uno.promo{color:var(--rojo);font-weight:700}
+@media (prefers-reduced-motion:no-preference){
+  .fin-promo.ultimo-dia::before{content:"";display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--rojo);vertical-align:1px;animation:latir 1.2s ease-in-out infinite}
+}
+@keyframes latir{50%{opacity:.25}}
