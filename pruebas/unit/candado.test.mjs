@@ -119,11 +119,26 @@ test('en la página principal la API del portal no se redirige: pasa a su funci�
 });
 
 test('lo que no es tienda en la página principal pasa sin tocar', async () => {
-  for (const ruta of ['/', '/index.html', '/productos/', '/terminos/', '/api/catalogo', '/robots.txt']) {
+  for (const ruta of ['/', '/index.html', '/terminos/', '/robots.txt']) {
     const { paso, archivo } = await pedir(WEB + ruta);
     assert.equal(paso, true, ruta);
     assert.equal(archivo, null, `${ruta} se sirvió de la tienda en la página principal`);
   }
+});
+
+test('el catálogo viejo /productos/ se va con 301 a la tienda; la ficha ?p=ID, al mismo producto (#p=ID)', async () => {
+  for (const host of [WEB, 'https://plasticosespinal.com', PREVIA]) {
+    for (const [ruta, destino] of [['/productos', '/'], ['/productos/', '/'], ['/productos/index.html', '/'], ['/productos/?categoria=vasos', '/'],
+      ['/productos/?p=141', '/#p=141'], ['/productos/?categoria=vasos&p=7', '/#p=7'], ['/productos/?p=<script>', '/'], ['/productos/?p=12abc', '/']]) {
+      const { r, paso } = await pedir(host + ruta);
+      assert.equal(paso, false, host + ruta);
+      assert.equal(r.status, 301, host + ruta);
+      assert.equal(r.headers.get('Location'), TIENDA + destino, host + ruta);
+    }
+  }
+  /* Lo que solo empieza parecido no se toca */
+  const { paso } = await pedir(WEB + '/productos-nuevos.html');
+  assert.equal(paso, true);
 });
 
 test('un POST a /tienda/ no se redirige en ningún dominio (un 301 perdería el cuerpo)', async () => {
@@ -262,7 +277,7 @@ test('la contraseña de prueba ya no existe: nada en la puerta pone ni compara g
 test('_routes.json despierta el middleware en las páginas de la tienda y en nada más de sobra', () => {
   const rutas = JSON.parse(leer('_routes.json'));
   assert.equal(rutas.version, 1);
-  for (const r of ['/', '/tienda/*', '/api/*', '/mi-cuenta/*', '/terminos/*', '/privacidad/*', '/robots.txt']) assert.ok(rutas.include.includes(r), `falta ${r}`);
+  for (const r of ['/', '/tienda/*', '/productos', '/productos/*', '/mi-cuenta/*', '/terminos/*', '/privacidad/*', '/robots.txt']) assert.ok(rutas.include.includes(r), `falta ${r}`);
   assert.ok(!rutas.include.includes('/*'), 'con /* cada foto y cada letra gastaría una petición del plan gratis');
   for (const r of ['/fonts/*', '/img/*', '/css/*', '/js/*']) assert.ok(!rutas.include.includes(r), `${r} no necesita el middleware`);
 });

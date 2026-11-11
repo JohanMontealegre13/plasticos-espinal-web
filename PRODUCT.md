@@ -44,7 +44,7 @@ es comprar (catálogo en línea al día, pedido fácil, respuesta rápida).
 
 ## Design Principles
 
-1. Tienda primero: pedir lleva a https://tienda.plasticosespinal.com/ (la ficha del catálogo, al mismo producto con `#p=ID`). WhatsApp, con mensaje pre-llenado, solo para dudas.
+1. Tienda primero: pedir lleva a https://tienda.plasticosespinal.com/. La página no tiene catálogo propio (el viejo /productos/ redirige a la tienda, cada ficha al mismo producto con `#p=ID`). WhatsApp, con mensaje pre-llenado, solo para dudas.
 2. Mostrar, no solo decir: la festividad San Pedro se ve (paleta del logo, franja
    roja/amarilla), no solo se menciona en el texto.
 3. Identidad del logo como sistema: azul profundo, azul vivo, rojo y amarillo son los
@@ -59,7 +59,7 @@ eliminado por decisión del dueño): lienzo azul noche
 (#0e1a47), tipografía de afiche Archivo Black + Archivo (self-hosted), sombras
 duras de imprenta, stickers rotados, cintas tricolor, boletos troquelados,
 papel picado en la sección eco, notas con cinta adhesiva en reseñas.
-Secciones: portada, marquesina de contorno, catálogo (tarjetas → WhatsApp),
+Secciones: portada, marquesina de contorno, categorías (ventana → tienda),
 sectores, eco, nosotros, reseñas (⚠️ testimonios de muestra, reemplazar por
 reales), FAQ (JSON-LD FAQPage), contacto.
 Seguridad: CSP con hash del script inline, `_headers` + `.htaccess` + `security.txt`.
