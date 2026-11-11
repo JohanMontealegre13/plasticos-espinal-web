@@ -57,6 +57,20 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 
 /* categorías: pastillas que filtran el catálogo (se corren de lado en el celular) */
 .chips{display:flex;gap:8px;overflow-x:auto;margin:-2px -16px 14px;padding:2px 16px;scrollbar-width:none}
+/* Filtros en cascada: una pastilla por nivel con su título arriba y la lista adentro */
+.nivel{flex:none;position:relative;display:grid;gap:0;min-width:150px;max-width:240px;padding:6px 38px 6px 16px;border:2px solid var(--linea);border-radius:16px;background:#fff;cursor:pointer}
+.nivel::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;border-right:2.5px solid var(--azul);border-bottom:2.5px solid var(--azul);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.nivel-tit{font-size:12px;font-weight:700;color:var(--texto2);line-height:1.2}
+.nivel select{appearance:none;-webkit-appearance:none;width:100%;min-height:26px;padding:0;border:0;background:none;color:var(--texto);font:800 15px var(--font);text-overflow:ellipsis;cursor:pointer}
+.nivel select:focus{outline:none}
+.nivel:focus-within{border-color:var(--azul);box-shadow:0 0 0 3px rgba(36,83,216,.18)}
+.nivel:hover{border-color:var(--azul)}
+.nivel.puesto{background:var(--azul);border-color:var(--azul)}
+.nivel.puesto .nivel-tit{color:#d6defc}
+.nivel.puesto select{color:#fff}
+.nivel.puesto select option{color:var(--texto)}
+.nivel.puesto::after{border-color:#fff}
+@media (min-width:761px){.chips{flex-wrap:wrap;overflow:visible}}
 .chips::-webkit-scrollbar{display:none}
 .cat{flex:none;min-height:44px;padding:0 18px;border:2px solid var(--linea);border-radius:99px;background:#fff;color:var(--texto);font:700 15px var(--font);white-space:nowrap;cursor:pointer}
 .cat:hover{border-color:var(--azul);color:var(--azul)}
@@ -149,31 +163,40 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,26px);l
 
 /* Abajo, en el celular: la pastilla de secciones (Buscar, Inicio, Pedidos) y, aparte, la canasta en su círculo.
    Flotan sobre la tienda y nada de ancho completo toca el borde de abajo: en el iPhone Safari pinta su barra con
-   el color de lo que toque ese borde, y una franja pegada ahí se veía cortada. En el computador no salen. */
+   el color de lo que toque ese borde, y una franja pegada ahí se veía cortada. */
 @property --avance{syntax:"<percentage>";inherits:false;initial-value:0%}
-.abajo,.flota{display:none}
+.flota{display:none}
+.abajo{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;pointer-events:none}
+.abajo > *{pointer-events:auto}
+.pastilla{position:relative;flex:1 1 auto;min-width:0;height:64px;padding:6px;border-radius:32px;background:var(--noche);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));box-shadow:0 10px 24px rgba(14,26,71,.32)}
+.abajo-btn{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 2px;border:0;border-radius:26px;background:none;color:#c9d1ee;font:inherit;font-size:11.5px;font-weight:700;line-height:1.1;text-decoration:none;transition:color .25s}
+.abajo-btn > span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.abajo-btn .ico{width:23px;height:23px;transition:transform .2s var(--resorte)}
+.abajo-btn:active .ico{transform:scale(.86)}
+.abajo-btn[aria-current]{color:var(--noche)}
+.abajo-btn:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+/* la rayita amarilla ocupa un tercio de la pastilla y se corre a la sección abierta (data-en lo pone tienda.js) */
+.rayita{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 3);border-radius:26px;background:var(--amarillo);transform:translateX(100%);transition:transform .45s var(--resorte)}
+.pastilla[data-en="buscar"] .rayita{transform:translateX(0)}
+.pastilla[data-en="favoritos"] .rayita{transform:translateX(200%)}
+/* la canasta: círculo amarillo con un aro que se llena hacia el domicilio gratis (--avance) y se pone verde al llegar */
+.abajo-canasta{position:relative;flex:none;width:64px;height:64px;padding:4px;border:0;border-radius:50%;background:conic-gradient(#f5a524 var(--avance,0%),#dfe4f0 0);box-shadow:0 10px 24px rgba(14,26,71,.28);transition:--avance .6s var(--suelto)}
+.abajo-canasta.gratis{background:conic-gradient(#1fae5b var(--avance,0%),#dfe4f0 0)}
+.abajo-canasta .adentro{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--amarillo);color:var(--noche);transition:transform .15s}
+.abajo-canasta:active .adentro{transform:scale(.93)}
+.abajo-canasta .ico{width:26px;height:26px;stroke-width:2.2}
+.abajo-canasta .n{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border:2px solid #fff;border-radius:11px;background:var(--rojo);color:#fff;font-size:12.5px;font-weight:800;line-height:1;display:grid;place-items:center}
+.abajo-canasta:focus-visible{outline:3px solid var(--azul);outline-offset:3px}
+/* En el computador la misma barra flota centrada abajo, del ancho de un celular (pedido del dueño, 11-nov-2026) */
+@media (min-width:761px){
+  .abajo{left:50%;right:auto;bottom:18px;width:420px;transform:translateX(-50%)}
+  .abajo-btn{cursor:pointer}
+  .abajo-btn:not([aria-current]):hover{color:#fff}
+  .abajo-canasta{cursor:pointer}
+  /* que la barra no tape el final del pie */
+  body:has(.abajo) .pie{padding-bottom:104px}
+}
 @media (max-width:760px){
-  .abajo{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;pointer-events:none}
-  .abajo > *{pointer-events:auto}
-  .pastilla{position:relative;flex:1 1 auto;min-width:0;height:64px;padding:6px;border-radius:32px;background:var(--noche);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));box-shadow:0 10px 24px rgba(14,26,71,.32)}
-  .abajo-btn{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 2px;border:0;border-radius:26px;background:none;color:#c9d1ee;font:inherit;font-size:11.5px;font-weight:700;line-height:1.1;text-decoration:none;transition:color .25s}
-  .abajo-btn > span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .abajo-btn .ico{width:23px;height:23px;transition:transform .2s var(--resorte)}
-  .abajo-btn:active .ico{transform:scale(.86)}
-  .abajo-btn[aria-current]{color:var(--noche)}
-  .abajo-btn:focus-visible{outline:3px solid #fff;outline-offset:-3px}
-  /* la rayita amarilla ocupa un tercio de la pastilla y se corre a la sección abierta (data-en lo pone tienda.js) */
-  .rayita{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 3);border-radius:26px;background:var(--amarillo);transform:translateX(100%);transition:transform .45s var(--resorte)}
-  .pastilla[data-en="buscar"] .rayita{transform:translateX(0)}
-  .pastilla[data-en="favoritos"] .rayita{transform:translateX(200%)}
-  /* la canasta: círculo amarillo con un aro que se llena hacia el domicilio gratis (--avance) y se pone verde al llegar */
-  .abajo-canasta{position:relative;flex:none;width:64px;height:64px;padding:4px;border:0;border-radius:50%;background:conic-gradient(#f5a524 var(--avance,0%),#dfe4f0 0);box-shadow:0 10px 24px rgba(14,26,71,.28);transition:--avance .6s var(--suelto)}
-  .abajo-canasta.gratis{background:conic-gradient(#1fae5b var(--avance,0%),#dfe4f0 0)}
-  .abajo-canasta .adentro{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--amarillo);color:var(--noche);transition:transform .15s}
-  .abajo-canasta:active .adentro{transform:scale(.93)}
-  .abajo-canasta .ico{width:26px;height:26px;stroke-width:2.2}
-  .abajo-canasta .n{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border:2px solid #fff;border-radius:11px;background:var(--rojo);color:#fff;font-size:12.5px;font-weight:800;line-height:1;display:grid;place-items:center}
-  .abajo-canasta:focus-visible{outline:3px solid var(--azul);outline-offset:3px}
   /* la tira del domicilio gratis: sale encima de la pastilla con algo en la canasta, y al tocarla abre la canasta */
   .flota{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:29;display:grid;gap:6px;padding:9px 12px 10px;border:1px solid var(--linea);border-radius:16px;background:#fff;color:var(--texto2);font:inherit;font-size:12.5px;line-height:1.3;text-align:left;box-shadow:0 8px 20px rgba(14,26,71,.16);animation:sube-tira .45s var(--resorte)}
   .flota b{color:var(--texto)}
@@ -810,3 +833,15 @@ html:has(#ficha[open]) .prod .foto::after,html:has(#panel:not([hidden])) .prod .
 .ubicar-fila{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
 .ubicar-otro{min-height:44px;display:inline-flex;align-items:center;background:none;border:0;padding:0 4px;color:var(--azul);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:3px}
 .ubicar-otro[hidden]{display:none}
+
+/* Volver a la página web: siempre a la vista, en la franja de arriba (pedido del dueño, 11-nov-2026) */
+.franja .a-la-web{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 12px;border:1.5px solid rgba(255,255,255,.55);border-radius:99px;color:#fff;font-weight:800;font-size:13px;text-decoration:none;white-space:nowrap}
+.franja .a-la-web:focus-visible{outline:3px solid var(--amarillo);outline-offset:2px}
+@media (hover:hover){.franja .a-la-web:hover{background:#fff;color:var(--noche)}}
+@media (min-width:761px){.franja .envolver{position:relative}.franja .a-la-web{position:absolute;left:20px;top:50%;transform:translateY(-50%)}}
+@media (max-width:760px){.franja .envolver{justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:10px;text-align:left}.franja .a-la-web{order:2;flex:none;min-height:32px}}
+/* En el celular los filtros van de a dos por fila: se ven todos sin correr de lado */
+@media (max-width:760px){
+  html:not(.buscando):not(.en-favoritos) .chips:has(.nivel){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin-inline:0;padding-inline:0}
+  .chips .nivel{min-width:0;max-width:none}
+}

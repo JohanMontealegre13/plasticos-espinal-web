@@ -165,14 +165,14 @@ test.describe('canasta', () => {
     expect(await page.evaluate(() => /** @type {any} */ (window).__xss)).toBeUndefined();
   });
 
-  test('cada botón de categoría muestra solo productos de esa categoría', async ({ page }) => {
+  test('cada categoría del filtro muestra solo productos de esa categoría', async ({ page }) => {
     const v = vigilar(page);
     const catalogo = catalogoCrm();
     await abrirTienda(page, { catalogo });
     for (const c of catalogo.categorias) {
       const esperados = catalogo.productos.filter((/** @type {any} */ p) => p.categoria === c.id).map((/** @type {any} */ p) => p.nombre).sort();
-      await page.locator(`#cats [data-cat="${c.id}"]`).click();
-      await expect(page.locator(`#cats [data-cat="${c.id}"]`)).toHaveAttribute('aria-pressed', 'true');
+      await page.locator('#f-cat').selectOption(c.id);
+      await expect(page.locator('#f-cat')).toHaveValue(c.id);
       await expect(page.locator('#grilla li')).toHaveCount(esperados.length);
       const vistos = (await page.locator('#grilla li .nombre').allTextContents()).map((t) => t.trim()).sort();
       expect(vistos).toEqual(esperados);

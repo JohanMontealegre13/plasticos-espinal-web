@@ -50,7 +50,7 @@
   var por = {};                   /* id -> producto */
   var cats = {};                  /* id -> categoría */
   var canasta = leer();           /* { id: cantidad } */
-  var filtro = { cat: '', q: '' };
+  var filtro = { cat: '', q: '' };   /* y, si se escogen, tipo, marca, medida y color (NIVELES) */
   var pedido = leerPedido();     /* { codigo, secreto, estado… } o null */
   var reloj = null, relojQr = null;
   var franjaBase = null, conHora = false;   /* franja de arriba: lo que trae el HTML y si ya dice la hora */
@@ -332,22 +332,99 @@
     return w;
   }
 
-  /* ---------- Filtros por categoría, lo más pedido y el catálogo ---------- */
-  /* Las categorías son filtros del catálogo (pedido del dueño, 11-nov-2026): «Todos» y una pastilla por
-     categoría que tenga productos. data-cat="" es «Todos». */
+  /* ---------- Filtros del catálogo, lo más pedido y el catálogo ---------- */
+  /* Filtros en cascada (pedido del dueño, 11-nov-2026): una lista por nivel (categoría, tipo, marca, medida y
+     color). Cada uno ofrece solo lo que queda con los de antes puestos, con cuántos productos hay, y al cambiar uno
+     se sueltan los que siguen. Un nivel sale si tiene de dónde escoger (dos valores o más) o si ya tiene uno puesto.
+     Los valores salen de lo que manda el CRM: la categoría, «tipo» (lo que es, de la ficha guiada) y los detalles. */
+  var NIVELES = [
+    { clave: 'cat', titulo: 'Categoría', todos: 'Todas' },
+    { clave: 'tipo', titulo: 'Tipo', todos: 'Todos' },
+    { clave: 'marca', titulo: 'Marca', todos: 'Todas' },
+    { clave: 'medida', titulo: 'Medida', todos: 'Todas' },
+    { clave: 'color', titulo: 'Color', todos: 'Todos' }
+  ];
+  /* El valor de un producto en un nivel: [llave para comparar, texto para mostrar]; '' si no tiene */
+  function valorNivel(p, clave) {
+    if (clave === 'cat') return p.categoria && cats[p.categoria] ? [p.categoria, cats[p.categoria].nombre] : ['', ''];
+    var v;
+    if (clave === 'tipo') v = typeof p.tipo === 'string' ? p.tipo : '';
+    else {
+      var d = (Array.isArray(p.detalles) ? p.detalles : []).filter(function (x) { return x && norm(String(x.nombre || '')) === clave; })[0];
+      v = d ? String(d.valor || '') : '';
+    }
+    v = v.replace(/\s+/g, ' ').trim();
+    if (!v) return ['', ''];
+    return [norm(v), v.charAt(0).toUpperCase() + v.slice(1)];
+  }
+  /* ¿Pasa el producto los niveles puestos antes de `hasta` (todos si no se dice)? */
+  function pasaNiveles(p, hasta) {
+    for (var i = 0; i < NIVELES.length && NIVELES[i].clave !== hasta; i++) {
+      var k = NIVELES[i].clave;
+      if (filtro[k] && valorNivel(p, k)[0] !== filtro[k]) return false;
+    }
+    return true;
+  }
+  /* Lo que se puede escoger en un nivel: [{llave, texto, n}], ordenado (las medidas, por su número) */
+  function opcionesNivel(clave) {
+    var vistos = {};
+    cat.productos.forEach(function (p) {
+      if (!pasaNiveles(p, clave)) return;
+      var v = valorNivel(p, clave);
+      if (!v[0]) return;
+      if (!vistos[v[0]]) vistos[v[0]] = { llave: v[0], texto: v[1], n: 0 };
+      vistos[v[0]].n++;
+    });
+    return Object.keys(vistos).map(function (k) { return vistos[k]; }).sort(function (a, b) {
+      return a.texto.localeCompare(b.texto, 'es', { numeric: true, sensitivity: 'base' });
+    });
+  }
   function pintarCategorias() {
     var caja = $('cats');
-    var chip = function (id, nombre) {
-      var b = el('button', 'cat', nombre);
-      b.type = 'button';
-      b.setAttribute('aria-pressed', String(id === filtro.cat));
-      b.dataset.cat = id;
-      caja.appendChild(b);
-    };
-    chip('', 'Todos');
-    cat.categorias.forEach(function (c) {
-      if (cat.productos.some(function (p) { return p.categoria === c.id; })) chip(c.id, c.nombre);
+    caja.textContent = '';
+    NIVELES.forEach(function (nv) {
+      var ops = opcionesNivel(nv.clave), puesto = filtro[nv.clave] || '';
+      /* lo puesto ya no está (otro catálogo): se suelta */
+      if (puesto && !ops.some(function (o) { return o.llave === puesto; })) { filtro[nv.clave] = ''; puesto = ''; }
+      if (ops.length < 2 && !puesto) return;
+      var lab = el('label', 'nivel' + (puesto ? ' puesto' : ''));
+      lab.appendChild(el('span', 'nivel-tit', nv.titulo));
+      var sel = el('select');
+      sel.id = 'f-' + nv.clave;
+      sel.dataset.nivel = nv.clave;
+      var todos = el('option', '', nv.todos);
+      todos.value = '';
+      sel.appendChild(todos);
+      ops.forEach(function (o) {
+        var op = el('option', '', o.texto + ' (' + o.n + ')');
+        op.value = o.llave;
+        sel.appendChild(op);
+      });
+      sel.value = puesto;
+      lab.appendChild(sel);
+      caja.appendChild(lab);
     });
+  }
+  /* Cambió un nivel: queda ese, se sueltan los que siguen */
+  function cambiarNivel(clave, valor) {
+    var suelta = false;
+    NIVELES.forEach(function (nv) {
+      if (suelta) filtro[nv.clave] = '';
+      if (nv.clave === clave) { filtro[clave] = valor; suelta = true; }
+    });
+    soloFavoritos = false;
+    filtro.q = ''; $('q').value = '';
+    pintar();
+    var nuevo = $('f-' + clave);
+    if (nuevo) nuevo.focus();
+  }
+  function hayNiveles() { return NIVELES.some(function (nv) { return !!filtro[nv.clave]; }); }
+  /* Lo puesto en los niveles, para la línea del filtro: «Aluminio · Molde · 16 oz» */
+  function textoNiveles() {
+    return NIVELES.filter(function (nv) { return filtro[nv.clave]; }).map(function (nv) {
+      var o = opcionesNivel(nv.clave).filter(function (x) { return x.llave === filtro[nv.clave]; })[0];
+      return o ? o.texto : '';
+    }).filter(Boolean).join(' · ');
   }
 
   /* Qué se ve y en qué orden. Buscando con «Más pedidos» manda lo más parecido a lo escrito
@@ -359,7 +436,7 @@
       var favs = guardados ? idsDe(guardados.favoritos).filter(function (id) { return por[id]; }).map(function (id) { return por[id]; }) : [];
       return { lista: favs, consulta: '', buscando: false };
     }
-    var base = cat.productos.filter(function (p) { return !filtro.cat || p.categoria === filtro.cat; });
+    var base = cat.productos.filter(function (p) { return pasaNiveles(p); });
     if (!PE.buscar || !PE.ordenar || !PE.palabrasBuscadas) {
       /* buscar.js no cargó: la tienda sigue, con la búsqueda simple de antes y sin orden */
       var q = norm(consulta);
@@ -454,7 +531,7 @@
     /* Las tarjetas entran con movimiento cuando cambia lo que se ve (categoría, orden, entrar o salir de la
        búsqueda), no con cada letra que se escribe. Al abrir la tienda no: mientras cargan las letras y las
        fotos de arriba, una animación ahí le quita al navegador el ancla con la que deja quieta la vitrina */
-    var con = [filtro.cat, $('orden').value, buscando, soloFavoritos, filtro.q.trim()].join('|');
+    var con = [NIVELES.map(function (nv) { return filtro[nv.clave] || ''; }).join(','), $('orden').value, buscando, soloFavoritos, filtro.q.trim()].join('|');
     g.classList.remove('entra');
     if (pintadoCon !== null && con !== pintadoCon && !QUIETO) { void g.offsetWidth; g.classList.add('entra'); }
     /* cambió lo que se ve: vuelve a la primera página */
@@ -462,9 +539,10 @@
     pintadoCon = con;
     var titulo = soloFavoritos ? 'Sus favoritos' : filtro.cat ? (cats[filtro.cat] || {}).nombre
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : 'Todos los productos');
+    intentar(pintarCategorias);
     $('tituloVitrina').textContent = titulo;
     /* Con filtro: cuántos productos hay y el filtro puesto, que se quita con su ✕ (deja ver todo) */
-    var conFiltro = !!(filtro.cat || r.buscando), puesto = filtro.cat ? titulo : '«' + r.consulta.trim() + '»';
+    var conFiltro = !!(hayNiveles() || r.buscando), puesto = hayNiveles() ? textoNiveles() : '«' + r.consulta.trim() + '»';
     $('filtroLinea').hidden = !conFiltro;
     $('limpiar').hidden = !conFiltro;
     /* sin resultados no se cuenta: el aviso de «No lo encontramos» ya lo dice */
@@ -472,7 +550,6 @@
     $('limpiarTexto').textContent = conFiltro ? puesto : '';
     $('limpiar').setAttribute('aria-label', conFiltro ? 'Quitar ' + puesto + ' y ver todos los productos' : 'Ver todos los productos');
     $('avisoFicha').textContent = '';
-    document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
     $('estado').textContent = lista.length ? ''
       : (soloFavoritos ? 'Toque el corazón de un producto y lo encuentra aquí.' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.');
     /* Buscó y no hay nada: el pedido se lo llevamos nosotros, con lo que escribió */
@@ -1734,6 +1811,11 @@
   function pintarYo() {
     var n = cuenta && typeof cuenta.nombre === 'string' ? cuenta.nombre.trim() : '';
     if (n) $('yo').textContent = Array.from(n)[0].toUpperCase();
+    /* La foto de perfil, si puso una, la pinta mi-cuenta/menu.js (cargue antes o después de esto) */
+    if (cuenta) {
+      window.PE_YO = cuenta;
+      intentar(function () { document.dispatchEvent(new CustomEvent('pe:yo', { detail: cuenta })); });
+    }
   }
 
   function eventos() {
@@ -1756,6 +1838,10 @@
     });
     $('ultimaVez').addEventListener('click', pedirLoDeLaUltimaVez);
     $('limpiar').addEventListener('click', function (e) { e.preventDefault(); verTodo(); });
+    $('cats').addEventListener('change', function (e) {
+      var sel = e.target.closest('select[data-nivel]');
+      if (sel) cambiarNivel(sel.dataset.nivel, sel.value);
+    });
     $('q').addEventListener('input', function () { soloFavoritos = false; filtro = { cat: '', q: this.value }; pintar(); });
     $('orden').addEventListener('change', pintar);
     /* Enter o «Buscar»: a los resultados (buscando están arriba del todo); en el celular Enter además guarda el

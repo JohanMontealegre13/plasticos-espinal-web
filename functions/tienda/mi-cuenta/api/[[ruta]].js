@@ -22,6 +22,8 @@
      manda el secreto en X-Pedido-Secreto para ver en qué va.
    - Y la foto de cada producto de la tienda (tienda/foto/<archivo>): el CRM
      solo entrega la de lo que se vende allá; aquí pasa tal cual, como imagen.
+   - Y la foto de perfil de quien entró (foto/<archivo>): el CRM solo se la da
+     a su dueño, y aquí pasa igual, sin guardarse en ningún caché compartido.
 
    Variables de Cloudflare Pages:
      PORTAL_CLAVE  (secreto, obligatorio)
@@ -48,6 +50,10 @@ const RUTAS = [
   [/^pedidos\/\d{1,9}$/, 'GET'],
   [/^pedidos\/\d{1,9}\/recibo\.pdf$/, 'GET'],
   [/^datos$/, 'POST'],
+  /* Foto de perfil: ponerla, quitarla y verla (solo su dueño; el nombre cambia con cada foto) */
+  [/^foto$/, 'POST'],
+  [/^foto\/quitar$/, 'POST'],
+  [/^foto\/[0-9a-f]{32}\.jpg$/, 'GET'],
   /* Catálogo real del CRM: precio y si hay o no (nunca cuántas) */
   [/^tienda\/catalogo$/, 'GET'],
   /* Foto del producto: el nombre lo pone el CRM y cambia con cada foto */
@@ -144,7 +150,7 @@ export async function onRequest({ request, env, params }) {
   }
 
   /* La foto pasa tal cual; si el CRM no la da, no existe */
-  if (ruta.startsWith('tienda/foto/')) {
+  if (ruta.startsWith('tienda/foto/') || (ruta.startsWith('foto/') && request.method === 'GET')) {
     const tipo = respuesta.headers.get('Content-Type') || '';
     if (!respuesta.ok || !tipo.startsWith('image/')) return json({ ok: false, error: 'No existe.' }, 404);
     return new Response(respuesta.body, {

@@ -185,6 +185,34 @@ test('el secreto del pedido solo pasa al CRM en las rutas de la tienda, y solo s
   assert.equal(await conSecreto('tienda/pedido/PE-AB2C3', 'tiene espacios y "comillas" 1234'), undefined);
 });
 
+test('la foto de perfil se pone, se quita y se ve solo con la sesión; pasa como imagen y nunca en un caché compartido', async () => {
+  const sesion = 'pe_sesion=token-de-ana';
+  const ARCHIVO = 'foto/' + 'b'.repeat(32) + '.jpg';
+  respuestaCrm = async () => new Response('\xff\xd8\xff', { headers: { 'Content-Type': 'image/jpeg' } });
+  const foto = await pedir(ARCHIVO, { galleta: sesion });
+  assert.equal(foto.r.status, 200);
+  assert.equal(foto.r.headers.get('Content-Type'), 'image/jpeg');
+  assert.match(foto.r.headers.get('Cache-Control') || '', /^private/);
+  assert.equal(llamadas[0].url, `${CRM}/cuenta/api/${ARCHIVO}`);
+  assert.equal(llamadas[0].init.headers['X-Cuenta-Token'], 'token-de-ana');
+
+  respuestaCrm = async () => Response.json({ ok: false, error: 'No existe.' }, { status: 404 });
+  assert.equal((await pedir(ARCHIVO, { galleta: sesion })).r.status, 404);
+
+  respuestaCrm = async () => Response.json({ ok: true, foto: 'c'.repeat(32) + '.jpg' });
+  const puesta = await pedir('foto', { metodo: 'POST', cuerpo: { imagen: 'data:image/jpeg;base64,AAAA' }, galleta: sesion, origen: SITIO });
+  assert.equal(puesta.r.status, 200);
+  assert.equal(JSON.parse(llamadas.at(-1).init.body).imagen, 'data:image/jpeg;base64,AAAA');
+  assert.equal((await pedir('foto/quitar', { metodo: 'POST', cuerpo: {}, galleta: sesion, origen: SITIO })).r.status, 200);
+
+  llamadas = [];
+  assert.equal((await pedir('foto/../crm.jpg', { galleta: sesion })).r.status, 404);
+  assert.equal((await pedir('foto/' + 'b'.repeat(32) + '.png', { galleta: sesion })).r.status, 404, 'solo la JPEG que escribe el CRM');
+  assert.equal((await pedir('foto', { galleta: sesion })).r.status, 404, 'GET de foto no existe');
+  assert.equal((await pedir('foto', { metodo: 'POST', cuerpo: {}, galleta: sesion, origen: 'https://otro.com' })).r.status, 403);
+  assert.equal(llamadas.length, 0);
+});
+
 test('la foto de un producto pasa como imagen; si el CRM no da una imagen, no existe', async () => {
   const ARCHIVO_FOTO = 'tienda/foto/' + 'a'.repeat(32) + '.webp';
   respuestaCrm = async () => new Response('RIFF....WEBP', { headers: { 'Content-Type': 'image/webp' } });
