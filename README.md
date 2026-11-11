@@ -213,11 +213,19 @@ los pares principales de la paleta. Probado en escritorio y móvil.
   lo que hay» (salen de las características del CRM, solo cuando hay de dónde
   escoger; en celular y tableta van detrás del botón «Filtros»), orden y la
   ficha de cada producto (`?p=ID`): fotos, pestañas de descripción,
-  características y domicilio, y parecidos. El inicio muestra los productos por
-  categoría en pestañas («Productos de la bodega»), en una rejilla quieta (nada
-  que deslizar de lado: 8 en computador, 6 en celular) y
-  las tarjetas de categoría llevan a `/productos/?categoria=…` (si el CRM llama
-  distinto la categoría, se busca por el nombre). Todo lo pinta `js/catalogo.js`.
+  características y domicilio, y parecidos. Las tarjetas de categoría del
+  inicio llevan a `/productos/?categoria=…` (si el CRM llama distinto la
+  categoría, se busca por el nombre). El catálogo lo pinta `js/catalogo.js`; el
+  inicio no lo carga.
+- «Así se ven en su negocio» (inicio, 11-nov-2026, pedido de Johan): seis líneas
+  fijas en HTML (platos hondos, platos biodegradables, bandejas, vasos,
+  portacomidas y bolsas de manija), cada una con UNA foto en uso sin repetir
+  (`img/en-uso/`, recortadas de la segunda foto del CRM) y un enlace a su
+  búsqueda o categoría del catálogo. Al pasar el mouse la tarjeta sube, la foto
+  se acerca y aparece una barra amarilla; con movimiento reducido no se mueve.
+- Medidor de visitas: Cloudflare Web Analytics (sin galletas). La CSP deja pasar
+  su guion (`static.cloudflareinsights.com`) y su envío (`cloudflareinsights.com`);
+  se enciende en el panel de Cloudflare Pages, no en el código.
 - **Familias de categorías**: el CRM a veces parte una en varias («Aluminio» y
   «Papel Aluminio», «Vasos» y «Vasos Gold», «Bolsas Manija»…). La que tiene
   todas sus palabras dentro de otra se la lleva, así la pestaña muestra todos

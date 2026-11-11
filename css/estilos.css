@@ -508,6 +508,66 @@ a.contacto-corto { border-radius: var(--radio-sm); }
   .sector h3 { font-size: .9375rem; }
 }
 
+/* ---------- 11b. Así se ven en su negocio: una foto de IA por línea ---------- */
+/* Misma tarjeta que las categorías (foto arriba, pie azul), en rejilla quieta: 2 columnas en
+   celular y 3 desde tableta. Al pasar el mouse la foto se acerca y una franja amarilla corre
+   bajo la foto (idea tomada de tiendas grandes; el color es el de la marca). */
+.usos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--hueco); grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+@media (min-width: 700px) { .usos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.usos > li { display: flex; }
+.uso {
+  position: relative; display: flex; flex-direction: column; width: 100%;
+  border-radius: var(--radio-lg); overflow: hidden; background: var(--azul);
+  box-shadow: var(--dura-sm); color: #fff; text-decoration: none;
+  transition: transform var(--t-2) var(--salida), box-shadow var(--t-2) var(--curva);
+}
+.uso__foto { position: relative; overflow: hidden; background: var(--tinte-azul); }
+.uso__foto img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .7s var(--salida); }
+.uso__foto::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--amarillo);
+  transform: scaleX(0); transform-origin: left; transition: transform .45s var(--salida);
+}
+.uso__pie { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.uso h3 { color: #fff; font-size: 1.1875rem; font-weight: 700; line-height: 1.25; }
+.uso p { font-size: var(--fs-chico); line-height: 1.4; color: #dfe6fb; }
+/* El botón va siempre abajo, aunque el título ocupe dos renglones */
+.uso__pie > :nth-last-child(2) { margin-bottom: 12px; }
+.uso__boton {
+  margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 14px;
+  border: 2px solid rgba(255,255,255,.9); border-radius: var(--pill);
+  font-size: var(--fs-chico); font-weight: 700; color: #fff;
+  transition: background-color var(--t) var(--curva), color var(--t) var(--curva);
+}
+.uso__boton .icono { width: 16px; height: 16px; transition: transform var(--t) var(--curva); }
+@media (hover: hover) and (pointer: fine) {
+  .uso:hover { transform: translateY(-6px); box-shadow: var(--elevada); }
+  .uso:hover .uso__foto img { transform: scale(1.08); }
+  .uso:hover .uso__foto::after { transform: scaleX(1); }
+  .uso:hover .uso__boton { background: #fff; color: var(--azul-osc); }
+  .uso:hover .uso__boton .icono { transform: translateX(3px); }
+}
+.uso:focus-visible .uso__foto::after { transform: scaleX(1); }
+.uso:active { transform: translateY(1px); box-shadow: var(--dura-sm); }
+.uso:focus-visible { outline-offset: 2px; }
+/* Al bajar, las tarjetas aparecen una tras otra */
+.usos > li:nth-child(2) { --retraso: 80ms; }
+.usos > li:nth-child(3) { --retraso: 160ms; }
+.usos > li:nth-child(4) { --retraso: 60ms; }
+.usos > li:nth-child(5) { --retraso: 140ms; }
+.usos > li:nth-child(6) { --retraso: 220ms; }
+@media (max-width: 559px) {
+  .uso__pie { padding: 12px 12px 14px; }
+  .uso h3 { font-size: 1.0625rem; }
+  .uso p { display: none; }
+  .uso__boton { align-self: stretch; justify-content: center; padding-inline: 8px; font-size: .9375rem; }
+  .uso__boton .icono { display: none; }
+}
+@media (max-width: 359px) { .uso h3 { font-size: .9375rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .uso, .uso__foto img, .uso__foto::after { transition: none; }
+}
+
 /* ---------- 12. Mosaico por tipo de negocio ---------- */
 /* Celular y tableta: dos columnas en espejo (alta | dos bajas, dos bajas | alta).
    Computador: cuatro columnas (alta | dos | dos | alta). Siempre parejo, sin filas cojas. */
@@ -880,12 +940,6 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .pestana-cat__n { font-size: .8125rem; font-weight: 700; padding: 1px 7px; border-radius: var(--pill); background: var(--tinte-azul); color: var(--azul-osc); }
 .pestana-cat[aria-pressed="true"] .pestana-cat__n { background: rgba(255,255,255,.2); color: #fff; }
 .pestanas__panel:focus-visible { outline-offset: 4px; border-radius: var(--radio); }
-.pestanas__todos { margin-top: 8px; }
-
-/* Inicio: «Lo más pedido» dentro de Compre por categoría */
-.destacados { margin-top: clamp(40px, 5vw, 64px); }
-.destacados__titulo { font-family: var(--display); font-weight: 400; font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem); line-height: 1.15; }
-.destacados__titulo::after { content: ""; display: block; width: 48px; height: 4px; margin-top: 10px; border-radius: 4px; background: var(--amarillo); }
 
 /* /productos/ */
 .catalogo__cabeza { display: grid; gap: 16px; margin-bottom: 20px; }

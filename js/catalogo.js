@@ -1,12 +1,11 @@
 /* Plásticos Espinal · catálogo público (sin precios: decisión de Johan, 9-nov-2026).
-   Lo usan dos páginas:
-   · /productos/ ([data-catalogo]): categorías como pestañas, buscador, filtros plegables
-     (marca, medida, color, contenido y lo que hay), orden y la ficha de cada producto (?p=ID)
-     con fotos, pestañas de descripción y características, y productos parecidos.
-   · el inicio ([data-pestanas]): «Productos de la bodega» en pestañas por categoría.
+   Lo usa /productos/ ([data-catalogo]): categorías como pestañas, buscador, filtros plegables
+   (marca, medida, color, contenido y lo que hay), orden y la ficha de cada producto (?p=ID)
+   con fotos, pestañas de descripción y características, y productos parecidos.
+   El inicio ya no lo carga: sus tarjetas «Así se ven en su negocio» van escritas en index.html
+   (Johan, 10-nov-2026), así que el inicio no depende del CRM.
    Los datos salen de /api/catalogo (functions/api/catalogo.js, que habla con el CRM). Cada
-   producto se pide por WhatsApp. Si el catálogo no carga, la página lo dice y ofrece WhatsApp;
-   en el inicio la sección simplemente no aparece. Sin este archivo, el inicio se ve completo. */
+   producto se pide por WhatsApp. Si el catálogo no carga, la página lo dice y ofrece WhatsApp. */
 (function () {
   'use strict';
 
@@ -147,7 +146,7 @@
   /** @param {number} id */
   function urlFicha(id) { return '/productos/?p=' + id; }
 
-  /* ---------- Tarjeta de producto (catálogo, inicio y parecidos) ---------- */
+  /* ---------- Tarjeta de producto (catálogo y parecidos) ---------- */
   /** @param {Producto} p @param {{ compacta?: boolean, alAbrir?: (p: Producto) => void }} [op] */
   function tarjeta(p, op) {
     op = op || {};
@@ -201,7 +200,7 @@
     return s;
   }
 
-  /* ---------- Pestañas accesibles (inicio y ficha) ---------- */
+  /* ---------- Pestañas accesibles (ficha) ---------- */
   /** Patrón de pestañas WAI-ARIA: clic, flechas, Inicio y Fin cambian de pestaña. Las pestañas
    * escondidas (hidden) se saltan. @param {HTMLElement} lista el [role=tablist] */
   function pestanas(lista) {
@@ -248,45 +247,6 @@
         || (modo === 'nombre' ? 0 : Number(!!b.p.destacado) - Number(!!a.p.destacado))
         || a.p.nombre.localeCompare(b.p.nombre, 'es') || (a.i - b.i);
     }).map(function (x) { return x.p; });
-  }
-
-  /* ======================================================================
-     Inicio: «Productos de la bodega» en pestañas por categoría
-     ====================================================================== */
-  function inicio() {
-    var caja = /** @type {HTMLElement} */ (document.querySelector('[data-pestanas]'));
-    if (!caja) return;
-    cargar().then(function () {
-      /* Las categorías con más productos, hasta 5; en cada una, primero lo más pedido */
-      var elegidas = cat.categorias.slice().sort(function (a, b) { return b.n - a.n; }).slice(0, 5);
-      if (!elegidas.length) return;
-      var lista = $('pestanasLista'), paneles = $('pestanasPaneles');
-      elegidas.forEach(function (c, i) {
-        var tab = /** @type {HTMLButtonElement} */ (el('button', 'pestana', c.nombre));
-        tab.type = 'button'; tab.id = 'pestana-' + i;
-        tab.setAttribute('role', 'tab');
-        tab.setAttribute('aria-controls', 'panel-' + i);
-        lista.appendChild(tab);
-        var panel = el('div', 'pestanas__panel');
-        panel.id = 'panel-' + i;
-        panel.setAttribute('role', 'tabpanel');
-        panel.setAttribute('aria-labelledby', tab.id);
-        panel.tabIndex = 0;
-        /* Rejilla quieta (nada que deslizar de lado: con el mouse no se podía): 6 en celular y
-           tableta, 8 en computador, y el enlace lleva a todos los de la categoría */
-        var ul = el('ul', 'rejilla-prod rejilla-prod--corta');
-        ordenar(cat.productos.filter(function (p) { return p.categoria === c.id; }), 'pedidos').slice(0, 8)
-          .forEach(function (p) { ul.appendChild(tarjeta(p, { compacta: true })); });
-        var texto = c.n > 6 ? 'Ver los ' + c.n + ' productos de ' : 'Ver todos los productos de ';
-        var todos = /** @type {HTMLAnchorElement} */ (el('a', 'enlace-terciario pestanas__todos', texto + c.nombre.toLowerCase()));
-        todos.href = '/productos/?categoria=' + c.slug;
-        todos.appendChild(icono('i-flecha', 'icono'));
-        panel.append(ul, todos);
-        paneles.appendChild(panel);
-      });
-      pestanas(lista);
-      caja.hidden = false;
-    }).catch(function () { /* sin catálogo, el inicio sigue completo sin esta sección */ });
   }
 
   /* ======================================================================
@@ -672,6 +632,5 @@
     });
   }
 
-  inicio();
   catalogo();
 })();

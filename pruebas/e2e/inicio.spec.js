@@ -246,6 +246,48 @@ test('tarjetas de categoría: «Ver productos» cabe en un renglón, también en
   }
 });
 
+test('«Así se ven en su negocio»: seis líneas, cada una con su foto de IA distinta y su enlace al catálogo, aun sin CRM', async ({ page }) => {
+  const v = vigilar(page);
+  /* El inicio ya no pide el catálogo: si lo pidiera y fallara, igual tiene que verse */
+  await page.route('**/api/catalogo', (r) => r.fulfill({ status: 503, body: '' }));
+  await page.goto('/');
+  const tarjetas = page.locator('#en-uso a.uso');
+  await expect(tarjetas).toHaveCount(6);
+  await expect(page.locator('#en-uso h3')).toHaveText(['Platos hondos', 'Platos biodegradables', 'Bandejas', 'Vasos', 'Portacomidas', 'Bolsas de manija']);
+  const datos = await tarjetas.evaluateAll((as) => as.map((a) => ({ href: a.getAttribute('href'), foto: /** @type {HTMLImageElement} */ (a.querySelector('img')).getAttribute('src') })));
+  /* Johan: «no hay que repetir productos o fotos» */
+  expect(new Set(datos.map((d) => d.foto)).size).toBe(6);
+  for (const d of datos) {
+    expect(d.href).toMatch(/^\/productos\/\?(categoria=[a-z-]+|q=[a-z%0-9]+)$/);
+    expect(d.foto).toMatch(/^img\/en-uso\/[a-z-]+-360\.webp$/);
+  }
+  for (let i = 0; i < 6; i++) {
+    const img = tarjetas.nth(i).locator('img');
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
+    expect(await img.getAttribute('alt')).toBeTruthy();
+  }
+  /* Ya no queda la sección vieja de pestañas ni el script del catálogo en el inicio */
+  await expect(page.locator('#destacados')).toHaveCount(0);
+  await expect(page.locator('script[src*="catalogo.js"]')).toHaveCount(0);
+  /* Sin precios, y «Ver productos» en un renglón */
+  await expect(page.locator('#en-uso')).not.toContainText('$');
+  const botones = await page.locator('.uso__boton').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height - parseFloat(getComputedStyle(e).minHeight)));
+  for (const b of botones) expect(b).toBeLessThanOrEqual(4);
+  /* Columnas parejas: las seis miden lo mismo de alto */
+  const altos = await tarjetas.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+  expect(new Set(altos).size).toBe(1);
+  const ancho = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(ancho, 'la página se desborda de lado').toBeLessThanOrEqual(0);
+  v.sinProblemas();
+});
+
+test('las tarjetas de «Así se ven en su negocio» abren su línea en el catálogo', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#en-uso a.uso', { hasText: 'Platos hondos' }).click();
+  await expect(page).toHaveURL(/\/productos\/\?q=plato(%20|\+)hondo$/);
+});
+
 /* ---------- Ronda de color y detalles (10-nov-2026) ---------- */
 
 test('contacto explica cómo se pide en tres pasos numerados, sin sumar botones', async ({ page }) => {
@@ -278,7 +320,3 @@ test('la cinta de la marca abre la cabecera igual que abre el pie, y cada tarjet
   expect(filos).toEqual(['rgb(255, 201, 51)', 'rgb(15, 122, 67)', 'rgb(30, 73, 184)', 'rgb(196, 43, 28)']);
 });
 
-test('la bajada de los productos no promete lo que la ficha no trae', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('#destacados .titulo-bajada')).toHaveText('Toque uno para ver sus fotos, su medida y en qué viene.');
-});
