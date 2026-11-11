@@ -127,7 +127,7 @@ test('solo tres botones de WhatsApp (cabecera, portada y contacto), al número d
 
 /* Las marcas de la cinta, en su orden (confirmadas por Johan, 10-nov-2026; Casa Best sale el 11-nov: ya no es proveedor) */
 /* Darnel, Darnel BIO y Ajover van siempre pegados y en ese orden (Johan, 11-nov) */
-const MARCAS = ['Darnel', 'Darnel BIO', 'Ajover', 'El Sol', 'Prodía', 'Wau', 'Acme León', 'Frutaroma', 'Carvajal', 'House', 'Surtiplast', 'Vacán', 'Prodalum'];
+const MARCAS = ['Darnel', 'Darnel BIO', 'Ajover', 'El Sol', 'Prodía', 'Wau', 'Acme León', 'Frutaroma', 'LiquiPops', 'Carvajal', 'House', 'Surtiplast', 'Vacán', 'Prodalum'];
 
 test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede pausar y vuelve a correr', async ({ page }) => {
   const v = vigilar(page);
@@ -142,6 +142,7 @@ test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede
   /* El Sol y Wau llevan la tarjeta del color de su propio fondo */
   await expect(leida.locator('li.marca--sol')).toHaveCSS('background-color', 'rgb(254, 236, 4)');
   await expect(leida.locator('li.marca--wau')).toHaveCSS('background-color', 'rgb(102, 44, 144)');
+  await expect(leida.locator('li.marca--liquipops')).toHaveCSS('background-color', 'rgb(224, 65, 88)');
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]')).toHaveCount(3);
   for (const img of await cinta.locator('img').all()) expect(await img.evaluate((i) => /** @type {HTMLImageElement} */ (i).naturalWidth)).toBeGreaterThan(0);
   /* Corre sola (más rápido desde el 11-nov) y el botón la detiene y la vuelve a mover */

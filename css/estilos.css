@@ -374,7 +374,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 /* ---------- 10. Marcas ---------- */
 /* Cinta de marcas: cada logo en su tarjeta, con sus colores, avanzando sin parar. Los emblemas van
    más altos (.es-alta) y los letreros largos más bajos (.es-baja) para que pesen parecido; El Sol y
-   Wau llevan la tarjeta del color de su fondo. La pista
+   Wau (y LiquiPops) llevan la tarjeta del color de su fondo. La pista
    lleva la lista cuatro veces y corre un cuarto de su ancho: al terminar, la vuelta no se nota.
    Se detiene con el mouse encima, con el foco adentro o con el botón de pausa (principal.js). */
 .marcas { background: linear-gradient(180deg, var(--blanco), var(--tint)); padding-block: 26px 30px; border-block: 1px solid var(--linea); overflow: hidden; }
@@ -412,6 +412,7 @@ a.contacto-corto { border-radius: var(--radio-sm); }
 .marcas__lista img.es-baja { height: 42px; }
 .marcas__lista .marca--sol { background: #feec04; border-color: #feec04; }
 .marcas__lista .marca--wau { background: #662c90; border-color: #662c90; }
+.marcas__lista .marca--liquipops { background: #e04158; border-color: #e04158; }
 @media (max-width: 599px) {
   .marcas__lista { gap: 14px; padding-right: 14px; }
   .marcas__lista li { height: 68px; padding: 0 20px; }
