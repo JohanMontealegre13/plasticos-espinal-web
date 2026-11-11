@@ -261,6 +261,30 @@
     laCinta.classList.add('marcas--mano');
     botonCinta.hidden = false;
 
+    /* Fichas 3D: cada logo entra en una ficha con grosor y dorso (estilos.css, «Fichas 3D»). El logo
+       no se toca: se mueve la ficha entera. Cada ficha flota con su propio ritmo (--d). */
+    /** @param {string} clase */
+    var capa = function (clase) {
+      var d = document.createElement('div');
+      d.className = clase;
+      return d;
+    };
+    pistaM.querySelectorAll('.marcas__lista li').forEach(function (li, i) {
+      var logo = li.querySelector('img');
+      if (!logo) return;
+      var truco = capa('marca__truco');
+      var flota = capa('marca__flota');
+      var ficha = capa('marca__ficha');
+      var cara = capa('marca__cara');
+      cara.appendChild(logo);
+      ficha.append(capa('marca__canto'), capa('marca__canto'), capa('marca__dorso'), cara);
+      flota.appendChild(ficha);
+      truco.appendChild(flota);
+      li.replaceChildren(truco, capa('marca__piso'));
+      /** @type {HTMLElement} */ (li).style.setProperty('--d', (-((i % 14) * 0.73) % 5.5).toFixed(2) + 's');
+    });
+    laCinta.classList.add('marcas--3d');
+
     /* La pista lleva la lista cuatro veces: correr una lista entera deja todo igual que al empezar */
     var ponerEn = function () {
       var vuelta = pistaM.scrollWidth / 4;
@@ -320,10 +344,92 @@
       botonCinta.setAttribute('aria-label', quieta ? 'Seguir moviendo las marcas' : 'Pausar las marcas');
       botonCinta.replaceChildren(icono(quieta ? 'i-seguir' : 'i-pausa'));
     });
+    /* Con el mouse encima, la ficha se ladea hacia el puntero */
+    ventanaM.addEventListener('pointermove', function (e) {
+      if (arrastre || e.pointerType !== 'mouse') return;
+      var li = /** @type {Element} */ (e.target).closest('li');
+      var ficha = li && /** @type {HTMLElement | null} */ (li.querySelector('.marca__ficha'));
+      if (!li || !ficha) return;
+      var r = li.getBoundingClientRect();
+      ficha.style.setProperty('--ry', (((e.clientX - r.left) / r.width - 0.5) * 30).toFixed(1) + 'deg');
+      ficha.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - 0.5) * 24).toFixed(1) + 'deg');
+    });
+    ventanaM.addEventListener('pointerout', function (e) {
+      var li = /** @type {Element} */ (e.target).closest('li');
+      var ficha = li && /** @type {HTMLElement | null} */ (li.querySelector('.marca__ficha'));
+      if (!ficha) return;
+      ficha.style.removeProperty('--ry');
+      ficha.style.removeProperty('--rx');
+    });
+
+    /* Las «cosas raras» (Johan, 11-nov-2026: «que no todo se vea igual»). Cada 3 a 4,5 s sale UN
+       truco, sacado de una bolsa: no se repite ninguno hasta que salgan todos, y la bolsa se baraja
+       otra vez. Los de una ficha los hace una de las que se ven; los de grupo, todas las que se ven,
+       una tras otra (paso, en ms). Nada con la cinta pausada, con el mouse encima, arrastrándola,
+       con el foco adentro o fuera de la pantalla. La duración de cada uno va con su animación en
+       estilos.css («Los trucos»). */
+    /** @type {{ n: string, ms: number, grupo?: number, alReves?: boolean }[]} */
+    var TRUCOS = [
+      { n: 'voltereta', ms: 1300 }, { n: 'salto', ms: 900 }, { n: 'moneda', ms: 1400 },
+      { n: 'cohete', ms: 2200 }, { n: 'saludo', ms: 1100 }, { n: 'trompo', ms: 1200 },
+      { n: 'doble-salto', ms: 1300 }, { n: 'rebote', ms: 1900 }, { n: 'pendulo', ms: 1700 },
+      { n: 'latido', ms: 1000 }, { n: 'acercarse', ms: 1300 }, { n: 'hundirse', ms: 1600 },
+      { n: 'tambaleo', ms: 1000 }, { n: 'mira-atras', ms: 1600 }, { n: 'vuelta-canto', ms: 1000 },
+      { n: 'rueda', ms: 1900 }, { n: 'resorte', ms: 1300 }, { n: 'asomarse', ms: 1300 },
+      { n: 'temblor', ms: 700 }, { n: 'orbita', ms: 1400 }, { n: 'domino', ms: 1500 },
+      { n: 'no', ms: 1000 }, { n: 'si', ms: 1000 }, { n: 'mortal', ms: 1300 },
+      { n: 'brinco-lado', ms: 1100 }, { n: 'paracaidas', ms: 3000 },
+      /* De grupo */
+      { n: 'salto', ms: 900, grupo: 110 }, { n: 'salto', ms: 900, grupo: 110, alReves: true },
+      { n: 'domino', ms: 1500, grupo: 150 }, { n: 'si', ms: 1000, grupo: 0 },
+      { n: 'vuelta-canto', ms: 1000, grupo: 140 }, { n: 'trompo', ms: 1200, grupo: 90, alReves: true },
+    ];
+    /** @type {typeof TRUCOS} */
+    var bolsa = [];
+    var hacerTruco = function () {
+      window.setTimeout(hacerTruco, 3000 + Math.random() * 1500);
+      if (quieta || encima || adentro || arrastre || !enPantalla || document.hidden) return;
+      if (pistaM.querySelector('[class*="hace-"]')) return;
+      var caja = ventanaM.getBoundingClientRect();
+      var margen = caja.width * 0.1;
+      var visibles = /** @type {HTMLElement[]} */ (Array.prototype.filter.call(pistaM.querySelectorAll('li'), function (/** @type {Element} */ li) {
+        var r = li.getBoundingClientRect();
+        return r.left > caja.left + margen && r.right < caja.right - margen;
+      }));
+      if (!visibles.length) return;
+      if (!bolsa.length) {
+        bolsa = TRUCOS.slice();
+        for (var k = bolsa.length - 1; k > 0; k--) {
+          var j = Math.floor(Math.random() * (k + 1));
+          var t = bolsa[k]; bolsa[k] = bolsa[j]; bolsa[j] = t;
+        }
+      }
+      var truco = /** @type {typeof TRUCOS[number]} */ (bolsa.pop());
+      var fichas = truco.grupo === undefined ? [visibles[Math.floor(Math.random() * visibles.length)]] : visibles;
+      if (truco.alReves) fichas.reverse();
+      var clase = 'hace-' + truco.n;
+      fichas.forEach(function (li, orden) {
+        var retraso = (truco.grupo || 0) * orden;
+        var parte = li.querySelector('.marca__truco');
+        if (!parte) return;
+        li.style.setProperty('--dur', truco.ms + 'ms');
+        li.style.setProperty('--retraso', retraso + 'ms');
+        li.classList.add(clase);
+        var acabar = function () {
+          li.classList.remove(clase);
+          li.style.removeProperty('--retraso');
+        };
+        parte.addEventListener('animationend', acabar, { once: true });
+        window.setTimeout(acabar, truco.ms + retraso + 400);   /* por si la animación no llega a terminar */
+      });
+    };
+    window.setTimeout(hacerTruco, 1500);
+
     document.addEventListener('visibilitychange', seguir);
     if (hayObservador) {
       new IntersectionObserver(function (entradas) {
         enPantalla = entradas[0].isIntersecting;
+        laCinta.classList.toggle('esta-fuera', !enPantalla);
         seguir();
       }).observe(ventanaM);
     }

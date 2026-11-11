@@ -139,10 +139,10 @@ test('la cinta de marcas muestra el logo de cada marca con sus colores, se puede
   const leida = cinta.locator('.marcas__lista:not([aria-hidden])');
   await expect(leida.locator('li')).toHaveCount(MARCAS.length);
   await expect(leida.locator('li:not(:has(img))')).toHaveCount(0);
-  /* El Sol y Wau llevan la tarjeta del color de su propio fondo */
-  await expect(leida.locator('li.marca--sol')).toHaveCSS('background-color', 'rgb(254, 236, 4)');
-  await expect(leida.locator('li.marca--wau')).toHaveCSS('background-color', 'rgb(102, 44, 144)');
-  await expect(leida.locator('li.marca--liquipops')).toHaveCSS('background-color', 'rgb(224, 65, 88)');
+  /* El Sol, Wau y LiquiPops llevan la tarjeta (la cara de la ficha 3D) del color de su propio fondo */
+  await expect(leida.locator('li.marca--sol .marca__cara')).toHaveCSS('background-color', 'rgb(254, 236, 4)');
+  await expect(leida.locator('li.marca--wau .marca__cara')).toHaveCSS('background-color', 'rgb(102, 44, 144)');
+  await expect(leida.locator('li.marca--liquipops .marca__cara')).toHaveCSS('background-color', 'rgb(224, 65, 88)');
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]')).toHaveCount(3);
   for (const img of await cinta.locator('img').all()) expect(await img.evaluate((i) => /** @type {HTMLImageElement} */ (i).naturalWidth)).toBeGreaterThan(0);
   /* Corre sola (más rápido desde el 11-nov) y el botón la detiene y la vuelve a mover */
@@ -199,6 +199,30 @@ test('la cinta de marcas se arrastra a los lados con el mouse y sigue sola al so
   v.sinProblemas();
 });
 
+test('las fichas de la cinta hacen trucos sin deformar ningún logo, y con la pausa se quedan quietas', async ({ page }) => {
+  const v = vigilar(page);
+  await page.goto('/');
+  const cinta = page.locator('[data-marcas]');
+  await cinta.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await expect(cinta.locator('.marca__ficha')).toHaveCount(MARCAS.length * 4);
+  /* Cada logo, dentro de su ficha, guarda su forma: ancho ÷ alto igual al del archivo */
+  const formas = await cinta.locator('img').evaluateAll((is) => is.map((i) => {
+    const img = /** @type {HTMLImageElement} */ (i);
+    return Math.abs(img.offsetWidth / img.offsetHeight - img.naturalWidth / img.naturalHeight) / (img.naturalWidth / img.naturalHeight);
+  }));
+  expect(Math.max(...formas)).toBeLessThan(0.03);
+  /* Sale un truco sin tocar nada */
+  await expect(cinta.locator('li[class*="hace-"]').first()).toBeAttached({ timeout: 7000 });
+  /* Con la pausa no salen más */
+  await cinta.getByRole('button', { name: 'Pausar las marcas' }).click();
+  await page.mouse.move(0, 0);
+  await expect(cinta.locator('li[class*="hace-"]')).toHaveCount(0, { timeout: 4000 });
+  await page.waitForTimeout(5000);
+  await expect(cinta.locator('li[class*="hace-"]')).toHaveCount(0);
+  v.sinProblemas();
+});
+
 test('con «menos movimiento» la cinta de marcas no corre: cada marca una vez y sin botón de pausa', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
@@ -206,6 +230,7 @@ test('con «menos movimiento» la cinta de marcas no corre: cada marca una vez y
   await expect(cinta.locator('#marcasPausa')).toBeHidden();
   await expect(cinta.locator('.marcas__lista[aria-hidden="true"]').first()).toBeHidden();
   await expect(cinta.locator('img:visible')).toHaveCount(MARCAS.length);
+  await expect(cinta.locator('.marca__ficha')).toHaveCount(0);
   /* Ninguna queda cortada por los lados: bajan a otro renglón */
   const lados = await cinta.locator('.marcas__lista:not([aria-hidden]) li').evaluateAll((ls) => ls.map((l) => { const r = l.getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth; }));
   expect(lados).toHaveLength(MARCAS.length);
