@@ -77,8 +77,9 @@
   function precioPorUnidad(p) {
     var c = p.contenido;
     if (!c || typeof c !== 'object' || c.se_mide || typeof c.unidad !== 'string' || !c.unidad) return null;
-    if (typeof c.cantidad !== 'number' || !(c.cantidad > 1) || !(p.precio > 0)) return null;
-    var v = p.precio / c.cantidad, und = c.unidad === 'und';
+    var precio = precioVisto(p);
+    if (typeof c.cantidad !== 'number' || !(c.cantidad > 1) || !(precio > 0)) return null;
+    var v = precio / c.cantidad, und = c.unidad === 'und';
     return { valor: '$' + (v < 100 ? formatoCentavos.format(v) : formato.format(Math.round(v))),
       corto: und ? 'c/u' : 'c/' + c.unidad, largo: und ? 'unidad' : c.unidad };
   }
@@ -188,9 +189,68 @@
     });
     return precio;
   }
+  /* ---------- Promociones ---------- */
+  /* El CRM manda `promo` ({precio, normal, porcentaje, hasta, tope}) solo mientras vale y si rebaja.
+     Se revisa igual aquí: una tienda abierta desde ayer no anuncia la que ya terminó. «hasta» es el
+     último día completo, en hora de Colombia. */
+  function hoyColombia() { return new Date(Date.now() - 5 * 36e5).toISOString().slice(0, 10); }
+  function finDe(promo) { return Date.parse(promo.hasta + 'T23:59:59.999-05:00'); }
+  function promoDe(p) {
+    var x = p && p.promo;
+    if (!x || typeof x !== 'object' || typeof x.precio !== 'number' || !(x.precio > 0) || !(x.precio < p.precio)) return null;
+    if (typeof x.hasta !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x.hasta) || x.hasta < hoyColombia()) return null;
+    return x;
+  }
+  /* Lo que se ve como precio de uno: el de la promoción si hay */
+  function precioVisto(p) { var x = promoDe(p); return x ? x.precio : p.precio; }
+  /* Lo que cuesta llevar `n`: con promoción, sus unidades (hasta el tope) a precio de promoción, que
+     gana al precio por cantidad; lo que pasa del tope, al precio normal de esa cantidad. Igual que el CRM. */
+  function totalDe(p, n) {
+    var x = promoDe(p);
+    if (!x) return n * precioDe(p, n);
+    var en = x.tope > 0 ? Math.min(n, x.tope) : n;
+    return en * x.precio + (n - en) * precioDe(p, n);
+  }
+  /* «Hasta el 15 nov» o, el último día, cuánto falta («Termina en 3 h 12 min»). */
+  var formatoDia = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', timeZone: 'America/Bogota' });
+  function textoFin(x) {
+    var falta = finDe(x) - Date.now();
+    if (x.hasta !== hoyColombia() || !(falta > 0)) return 'Hasta el ' + formatoDia.format(new Date(finDe(x))).replace(' de ', ' ').replace('.', '');
+    var h = Math.floor(falta / 36e5), m = Math.floor(falta % 36e5 / 6e4), sg = Math.floor(falta % 6e4 / 1e3);
+    return 'Termina en ' + (h ? h + ' h ' : '') + (h || m ? m + ' min ' : '') + (h ? '' : sg + ' s');
+  }
+  /* Los textos del último día corren solos (uno por segundo, solo con la pestaña a la vista) */
+  var relojPromos = 0;
+  function vigilarPromos() {
+    if (relojPromos) return;
+    relojPromos = setInterval(function () {
+      if (document.hidden) return;
+      var vivos = document.querySelectorAll('[data-fin-promo]');
+      if (!vivos.length) { clearInterval(relojPromos); relojPromos = 0; return; }
+      vivos.forEach(function (n) { var x = promoDe(por[n.dataset.finPromo]); if (x) n.textContent = textoFin(x); });
+    }, 1000);
+  }
+  /* El precio con su promoción: «-20 %», el de promoción y el normal tachado; y, aparte, hasta cuándo */
+  function pintarPrecio(nodo, p) {
+    var x = promoDe(p);
+    nodo.textContent = '';
+    nodo.classList.toggle('con-promo', !!x);
+    if (!x) { nodo.textContent = pesos(p.precio); return null; }
+    var antes = el('s', 'antes', pesos(p.precio));
+    antes.setAttribute('aria-label', 'Antes ' + pesos(p.precio));
+    nodo.append(el('span', 'ahora', pesos(x.precio)), antes);
+    var fin = el('span', 'fin-promo', textoFin(x));
+    if (x.hasta === hoyColombia()) { fin.dataset.finPromo = p.id; fin.classList.add('ultimo-dia'); vigilarPromos(); }
+    return fin;
+  }
+  function selloPromo(p) {
+    var x = promoDe(p);
+    return x && x.porcentaje > 0 ? el('span', 'sello promo', '-' + x.porcentaje + ' %') : null;
+  }
+
   function cuentas() {
     var n = 0, s = 0;
-    Object.keys(canasta).forEach(function (id) { n += canasta[id]; s += canasta[id] * precioDe(por[id], canasta[id]); });
+    Object.keys(canasta).forEach(function (id) { n += canasta[id]; s += totalDe(por[id], canasta[id]); });
     var d = s === 0 || s >= cat.domicilio.gratis_desde ? 0 : cat.domicilio.tarifa;
     /* Con el cupón del primer domicilio, el pedido que pagaría domicilio no lo paga (el CRM hace la misma cuenta) */
     var cupon = d > 0 ? cuponDomicilio() : '';
@@ -354,7 +414,9 @@
         i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
         f.appendChild(i);
       }
+      var sp = p.disponible ? selloPromo(p) : null;
       if (!p.disponible) f.appendChild(el('span', 'sello agotado', 'Agotado'));
+      else if (sp) f.appendChild(sp);
       else if (p.destacado) f.appendChild(el('span', 'sello', 'Más pedido'));
       if (guardados) f.appendChild(corazon(p.id, favs.indexOf(p.id) >= 0));
       var c = el('div', 'cuerpo');
@@ -367,7 +429,9 @@
       nombre.addEventListener('click', function () { abrirFicha(p.id, true); });
       h3.appendChild(nombre);
       f.addEventListener('click', function (e) { if (!e.target.closest('.puntos, .fav')) abrirFicha(p.id, true); });
-      c.append(h3, el('span', 'unidad', 'Código ' + p.id), el('span', 'precio', pesos(p.precio)));
+      var pr = el('span', 'precio'), finPromo = pintarPrecio(pr, p);
+      c.append(h3, el('span', 'unidad', 'Código ' + p.id), pr);
+      if (finPromo) c.appendChild(finPromo);
       var cu = intentar(function () { return precioPorUnidad(p); });
       if (cu) c.appendChild(el('span', 'por-unidad', cu.valor + ' ' + cu.corto));
       if (p.disponible) { var llega = el('span', 'llega', etiquetaLlega); llega.hidden = !etiquetaLlega; c.appendChild(llega); }
@@ -493,7 +557,10 @@
 
   /* Precio por cantidad: «Desde 12: $900». Solo los que bajan el precio de uno */
   function pintarEscalones(p) {
-    var ul = $('fichaEscalones'), lista = (Array.isArray(p.escalones) ? p.escalones : []).filter(function (e) {
+    /* Con una promoción sin tope no cuenta ninguno: la promoción gana al precio por cantidad.
+       Con tope sí, para lo que pase del tope. */
+    var x = promoDe(p), sinTope = x && !(x.tope > 0);
+    var ul = $('fichaEscalones'), lista = sinTope ? [] : (Array.isArray(p.escalones) ? p.escalones : []).filter(function (e) {
       return e && typeof e.desde === 'number' && e.desde > 1 && typeof e.precio === 'number' && e.precio > 0 && e.precio < p.precio;
     });
     ul.textContent = '';
@@ -520,7 +587,13 @@
     $('fichaCat').textContent = (cats[p.categoria] || {}).nombre || '';
     $('fichaNombre').textContent = p.nombre;
     $('fichaCodigo').textContent = 'Código ' + p.id;
-    $('fichaPrecio').textContent = pesos(p.precio);
+    var finFicha = pintarPrecio($('fichaPrecio'), p), xf = promoDe(p);
+    $('fichaPromo').textContent = '';
+    $('fichaPromo').hidden = !finFicha;
+    if (finFicha) {
+      $('fichaPromo').append(el('span', 'sello promo', '-' + xf.porcentaje + ' %'), finFicha);
+      if (xf.tope > 0) $('fichaPromo').appendChild(el('span', 'tope-promo', 'Hasta ' + formato.format(xf.tope) + ' por pedido a este precio'));
+    }
     var cu = intentar(function () { return precioPorUnidad(p); });
     $('fichaUnidad').textContent = cu ? 'Precio por ' + cu.largo + ': ' + cu.valor : '';
     $('fichaUnidad').hidden = !cu;
@@ -545,7 +618,7 @@
       var li = el('li'), b = el('button', 'parecido'), im = el('img', o.foto ? 'propia' : null);
       b.type = 'button';
       im.src = foto(o); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
-      b.append(im, el('span', 'nm', o.nombre), el('span', 'pr', pesos(o.precio)));
+      b.append(im, el('span', 'nm', o.nombre), el('span', 'pr', pesos(precioVisto(o))));
       if (!o.disponible) b.appendChild(el('span', 'ag', 'Agotado'));
       /* Abre la ficha de ese producto en el mismo lugar: no apila historial */
       b.addEventListener('click', function () { abrirFicha(o.id, false); });
@@ -651,7 +724,7 @@
     var url = location.origin + RAIZ + '#p=' + p.id;
     function porWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComponent(p.nombre + ' ' + url), '_blank', 'noopener'); }
     if (!navigator.share) { porWhatsApp(); return; }
-    navigator.share({ title: p.nombre, text: p.nombre + ' · ' + pesos(p.precio), url: url }).catch(function (e) {
+    navigator.share({ title: p.nombre, text: p.nombre + ' · ' + pesos(precioVisto(p)), url: url }).catch(function (e) {
       if (!e || e.name !== 'AbortError') porWhatsApp();   /* cancelar el menú no es un error */
     });
   }
@@ -747,7 +820,7 @@
     i.src = foto(p); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async';
     f.appendChild(i);
     if (!p.disponible) f.appendChild(el('span', 'sello', 'Agotado'));
-    b.append(f, el('span', 'nm', p.nombre), el('span', 'pr', pesos(p.precio)));
+    b.append(f, el('span', 'nm', p.nombre), el('span', 'pr', pesos(precioVisto(p))));
     b.addEventListener('click', function () { abrirFicha(p.id, true, b); });
     li.appendChild(b);
     return li;
@@ -1218,11 +1291,15 @@
     Object.keys(canasta).forEach(function (id) {
       var p = por[id], li = el('li'), i = el('img', p.foto ? 'propia' : null), mid = el('div');
       i.src = foto(p); i.alt = '';
-      var cadaUno = precioDe(p, canasta[id]);
+      var cadaUno = precioDe(p, canasta[id]), xc = promoDe(p), total = totalDe(p, canasta[id]);
       mid.append(el('div', 'nm', p.nombre), control(p).firstChild);
-      /* Con precio por cantidad, la línea dice a cuánto quedó cada uno */
-      if (cadaUno !== p.precio) mid.appendChild(el('small', 'cada-uno', pesos(cadaUno) + ' cada uno por llevar ' + formato.format(canasta[id])));
-      li.append(i, mid, el('span', 'v', pesos(cadaUno * canasta[id])));
+      /* Con promoción la línea lo dice (y el tope, si se pasa); con precio por cantidad, a cuánto quedó cada uno */
+      if (xc) {
+        var pasa = xc.tope > 0 && canasta[id] > xc.tope;
+        mid.appendChild(el('small', 'cada-uno promo', 'Promoción: ' + pesos(xc.precio) + ' cada uno'
+          + (pasa ? ' hasta ' + formato.format(xc.tope) + '; los demás a ' + pesos(cadaUno) : '')));
+      } else if (cadaUno !== p.precio) mid.appendChild(el('small', 'cada-uno', pesos(cadaUno) + ' cada uno por llevar ' + formato.format(canasta[id])));
+      li.append(i, mid, el('span', 'v', pesos(total)));
       ul.appendChild(li);
     });
     var vacia = c.n === 0;
