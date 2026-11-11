@@ -1388,7 +1388,7 @@
     $('errPago').hidden = true;
     marcarMedio('');
     pintarBilletes();
-    document.querySelectorAll('#pago [data-cancelar]').forEach(function (b) { b.hidden = pedido.puede_cancelar === false; });
+    document.querySelectorAll('#pago [data-cancelar]').forEach(function (b) { b.hidden = pedido.puede_cancelar !== true; });
     vista('pago');
   }
   function marcarMedio(m) {

@@ -36,6 +36,7 @@ test('con el pago a medias la franja se queda y al tocarla vuelve a escoger cóm
   await expect(page.locator('#avisoPedido')).toBeVisible();
   await page.locator('#avisoPedido').click();
   await expect(page.locator('#pago')).toBeVisible();
+  await expect(page.locator('#pago [data-cancelar]')).toBeVisible();
   await page.locator('.medio[data-medio="qr"]').click();
   await expect(page.locator('#pqr')).toBeVisible();
   v.sinProblemas();
@@ -76,4 +77,15 @@ test('ya en camino no se ofrece cancelar', async ({ page }) => {
   await page.locator('#avisoPedido').click();
   await expect(page.locator('#final')).toBeVisible();
   await expect(page.locator('#cancelarFinal')).toBeHidden();
+});
+
+test('si el CRM no dice que se puede cancelar, el botón no sale', async ({ page }) => {
+  const viejo = { ...PEDIDO };
+  delete viejo.puede_cancelar;
+  await crm(page, viejo);
+  await page.addInitScript((p) => { localStorage.setItem('pe-pedido-v1', JSON.stringify({ ...p, secreto: 's' })); }, viejo);
+  await abrirTienda(page);
+  await page.locator('#avisoPedido').click();
+  await expect(page.locator('#pago')).toBeVisible();
+  await expect(page.locator('#pago [data-cancelar]')).toBeHidden();
 });
