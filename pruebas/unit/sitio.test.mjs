@@ -6,11 +6,11 @@ import {
   RAIZ, WHATSAPP, DOMICILIO, leer, existe, paginas, urlDe, archivoDe, resolver, esLocal, referencias,
   scriptsEmbebidos, huellaCsp, directivas, cspMeta, leerHeaders, cabecerasPara,
 } from '../lib.mjs';
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 /* Las que sí se anuncian al público: el inicio, el catálogo (sin precios) y las políticas */
-const PUBLICAS = ['index.html', '404.html', 'productos/index.html', 'privacidad/index.html', 'terminos/index.html'];
+const PUBLICAS = ['index.html', '404.html', 'privacidad/index.html', 'terminos/index.html'];
 
 test('todas las páginas esperadas existen', () => {
   for (const p of [...PUBLICAS, 'tienda/index.html']) assert.ok(existe(p), `falta ${p}`);
@@ -159,7 +159,7 @@ test('las páginas públicas piden la misma versión de la hoja de estilos y de 
   assert.ok(v('index.html', 'css/estilos.css'), 'index.html no versiona estilos.css');
   for (const p of PUBLICAS) {
     assert.equal(v(p, 'css/estilos.css'), v('index.html', 'css/estilos.css'), `${p}: estilos.css`);
-    for (const js of ['js/principal.js', 'js/catalogo.js', 'js/buscar.js']) {
+    for (const js of ['js/principal.js', 'js/buscar.js']) {
       const otra = PUBLICAS.map((q) => v(q, js)).find(Boolean);
       if (v(p, js)) assert.equal(v(p, js), otra, `${p}: ${js}`);
     }
@@ -174,11 +174,12 @@ test('el sitemap anuncia todas las páginas públicas (menos la 404)', () => {
   }
 });
 
-test('el catálogo público no pinta precios ni lleva a la tienda escondida', () => {
-  const js = leer('js/catalogo.js');
-  assert.doesNotMatch(js, /\.precio\b|precio_co|\$\s*\d/, 'js/catalogo.js no debe mostrar precios (art. 26, Ley 1480)');
-  assert.doesNotMatch(js, /['"]\/tienda/, 'js/catalogo.js no debe enlazar a /tienda');
-  assert.match(js, /\/api\/catalogo/);
+test('el catálogo /productos/ ya no existe y nada de la página lleva a él (Johan, 11-nov-2026: todo va a la tienda)', () => {
+  assert.ok(!existsSync(join(RAIZ, 'productos')), 'la carpeta productos/ volvió');
+  assert.ok(!existsSync(join(RAIZ, 'js/catalogo.js')), 'js/catalogo.js volvió');
+  assert.ok(!existsSync(join(RAIZ, 'functions/api/catalogo.js')), 'functions/api/catalogo.js volvió');
+  for (const p of PUBLICAS) assert.doesNotMatch(leer(p), /href="\/productos/, `${p} todavía enlaza a /productos/`);
+  assert.doesNotMatch(leer('sitemap.xml'), /\/productos\//, 'el sitemap todavía anuncia /productos/');
 });
 
 test('CSS y JS del sitio se piden siempre con ?v= (si no, la caché de 7 días esconde los cambios)', () => {

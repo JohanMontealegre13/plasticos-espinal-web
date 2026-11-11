@@ -148,10 +148,13 @@ test('pedir va a la tienda: cabecera, portada y contacto llevan a la tienda; Wha
   await expect(enlaces).toHaveCount(1);
   await expect(page.locator('#contacto a[href^="https://wa.me/"]')).toContainText('¿Dudas?');
   expect(await enlaces.first().getAttribute('href')).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
-  /* Los sectores enseñan lo que se lleva cada negocio: van al catálogo, no a WhatsApp */
+  /* Los sectores y el banner mayorista también van a la tienda (Johan, 11-nov: el catálogo /productos/ desaparece) */
   const sectores = await page.locator('#sectores a.sector').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
   expect(sectores).toHaveLength(6);
-  for (const h of sectores) expect(h).toMatch(/^\/productos\/(\?(categoria|q)=[a-z-]+)?$/);
+  for (const h of sectores) expect(h).toBe(TIENDA);
+  await expect(page.locator('.banner--noche a.boton')).toHaveAttribute('href', TIENDA);
+  await expect(page.locator('.banner--noche a.boton')).toContainText('Ir a la tienda');
+  await expect(page.locator('a[href^="/productos"]')).toHaveCount(0);
 });
 
 /* Las marcas de la cinta, en su orden (confirmadas por Johan, 10-nov-2026; Casa Best sale el 11-nov: ya no es proveedor) */
@@ -361,9 +364,10 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
   await expect(page.locator('#catalogo .cat')).not.toHaveCount(0);
   await expect(page.locator('#catalogo .cat__boton')).toHaveCount(0);
   await expect(page.locator('#catalogo .carrusel__pista')).not.toContainText('Ver productos');
-  for (const href of await page.locator('#catalogo a.cat').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) expect(href).toMatch(/^\/productos\/\?/);
+  /* Johan (11-nov): el catálogo /productos/ desaparece; sin JavaScript, la tarjeta lleva a la tienda */
+  for (const href of await page.locator('#catalogo a.cat').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) expect(href).toBe('https://tienda.plasticosespinal.com/');
   /* Johan (11-nov): la de la foto de aluminio se llama «Moldes de aluminio», no «Bandejas» */
-  await expect(page.locator('#catalogo a.cat', { has: page.getByRole('heading', { name: 'Moldes de aluminio', exact: true }) })).toHaveAttribute('href', '/productos/?categoria=aluminio');
+  await expect(page.locator('#catalogo a.cat', { has: page.getByRole('heading', { name: 'Moldes de aluminio', exact: true }) })).toHaveAttribute('href', 'https://tienda.plasticosespinal.com/');
   await expect(page.locator('#catalogo .cat h3', { hasText: 'Bandejas' })).toHaveCount(0);
   /* Las escenas con productos de verdad (Higgsfield, 10-nov-2026) están puestas y existen */
   for (const nombre of ['cat-portacomidas', 'cat-bolsas-papel', 'cat-aluminio', 'sec-reposteria', 'sec-salsas', 'sec-heladeria']) {
@@ -376,8 +380,6 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
 
 test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni «Ver productos», con el nombre dentro de la foto, aun sin CRM', async ({ page }) => {
   const v = vigilar(page);
-  /* El inicio ya no pide el catálogo: si lo pidiera y fallara, igual tiene que verse */
-  await page.route('**/api/catalogo', (r) => r.fulfill({ status: 503, body: '' }));
   await page.goto('/');
   const tarjetas = page.locator('#en-uso figure.uso');
   await expect(tarjetas).toHaveCount(6);
@@ -427,7 +429,7 @@ test('«Compre por categoría»: tocar una tarjeta abre una ventana con lo que t
   await tarjeta.scrollIntoViewIfNeeded();
   await tarjeta.click();
   /* No navega: sigue en el inicio y se abre la ventana */
-  await expect(page).not.toHaveURL(/productos/);
+  await expect(page).not.toHaveURL(/tienda\.plasticosespinal/);
   const ventana = page.getByRole('dialog', { name: 'Platos' });
   await expect(ventana).toBeVisible();
   await expect(ventana.locator('.resumen__tipos li')).toHaveCount(4);

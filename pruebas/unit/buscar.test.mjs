@@ -1,4 +1,4 @@
-/* Buscador de la tienda (js/buscar.js, lo comparten la tienda y /productos/): plurales, tildes, sinónimos, errores de dedo y orden.
+/* Buscador de la tienda (js/buscar.js): plurales, tildes, sinónimos, errores de dedo y orden.
    Los sinónimos son una copia congelada (fixtures/sinonimos.json): Johan puede agregar o quitar en
    tienda/catalogo.json sin que estas pruebas se pongan rojas. */
 import { test } from 'node:test';
