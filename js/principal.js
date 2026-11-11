@@ -234,6 +234,50 @@
 
   document.querySelectorAll('[data-carrusel]').forEach(function (el) { carrusel(/** @type {HTMLElement} */ (el)); });
 
+  /* 5c. Resumen de categoría (Johan, 11-nov-2026): tocar una tarjeta de «Compre por categoría» abre
+         una ventana con lo que trae esa categoría (foto, nombre, frase y tipos de producto) y el
+         botón a la tienda. Sin JS, o con Ctrl/⌘+clic, la tarjeta sigue llevando al catálogo. */
+  (function () {
+    var dlg = /** @type {HTMLDialogElement|null} */ (document.getElementById('resumenCat'));
+    if (!dlg || typeof dlg.showModal !== 'function') return;
+    var foto = /** @type {HTMLImageElement} */ (document.getElementById('resumenFoto'));
+    var titulo = /** @type {HTMLElement} */ (document.getElementById('resumenTitulo'));
+    var bajada = /** @type {HTMLElement} */ (document.getElementById('resumenBajada'));
+    var tipos = /** @type {HTMLElement} */ (document.getElementById('resumenTipos'));
+    /** @type {HTMLElement|null} */
+    var origen = null;
+    document.querySelectorAll('[data-resumen]').forEach(function (el) {
+      el.addEventListener('click', function (ev) {
+        var e = /** @type {MouseEvent} */ (ev);
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        ev.preventDefault();
+        var tarjeta = /** @type {HTMLElement} */ (el);
+        var img = /** @type {HTMLImageElement|null} */ (tarjeta.querySelector('img'));
+        var h = tarjeta.querySelector('h3');
+        var p = tarjeta.querySelector('p');
+        if (img) { foto.srcset = img.srcset; foto.sizes = '(min-width: 600px) 560px, 100vw'; foto.src = img.src; }
+        titulo.textContent = h ? (h.textContent || '').trim() : '';
+        bajada.textContent = p ? (p.textContent || '').trim() : '';
+        tipos.textContent = '';
+        (tarjeta.dataset.tipos || '').split('|').forEach(function (t) {
+          if (!t) return;
+          var li = document.createElement('li');
+          li.appendChild(icono('i-check'));
+          li.appendChild(document.createTextNode(t));
+          tipos.appendChild(li);
+        });
+        origen = tarjeta;
+        dlg.showModal();
+      });
+    });
+    dlg.addEventListener('click', function (ev) {
+      var t = /** @type {HTMLElement} */ (ev.target);
+      /* Cierra con la X o al tocar fuera de la caja */
+      if (t === dlg || t.closest('[data-cerrar]')) dlg.close();
+    });
+    dlg.addEventListener('close', function () { if (origen) origen.focus(); });
+  })();
+
   /* 5b. Fotos que esperan: las láminas 2 y 3 de la portada traen su foto en data-src/data-srcset
          para que, con datos lentos, la primera foto no comparta la conexión con ellas. Se ponen
          cuando la página terminó de cargar, o antes si alguien desliza o toca la portada (o el

@@ -132,17 +132,22 @@ test('Regresión (e7352f9): al recargar con un #ancla la página abre arriba y s
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test('solo tres botones de WhatsApp (cabecera, portada y contacto), al número del negocio con mensaje', async ({ page }) => {
+test('pedir va a la tienda: cabecera, portada y contacto llevan a la tienda; WhatsApp queda solo para dudas, en contacto', async ({ page }) => {
   await page.goto('/');
-  /* Johan, 10-nov-2026: «le estamos vendiendo demasiado». Ni burbuja, ni WhatsApp en el pie, sectores o banners */
+  /* Johan, 11-nov-2026: «todos los botones de pida por WhatsApp ahora tienen que conducir hacia la tienda» */
+  const TIENDA = 'https://tienda.plasticosespinal.com/';
+  await expect(page.locator('.cabecera a.boton-cabecera')).toHaveAttribute('href', TIENDA);
+  await expect(page.locator('.cabecera a.boton-cabecera')).toContainText('Ir a la tienda');
+  await expect(page.locator('#inicio .lamina').first().getByRole('link', { name: 'Ir a la tienda' })).toHaveAttribute('href', TIENDA);
+  await expect(page.locator('#contacto').getByRole('link', { name: 'Ir a la tienda' })).toHaveAttribute('href', TIENDA);
+  await expect(page.locator('#ecologicos a.boton')).toHaveAttribute('href', TIENDA);
+  /* Ningún botón dice ya «Pida por WhatsApp» ni «Pida ahora» */
+  await expect(page.locator('a.boton', { hasText: /Pida por WhatsApp|Pida ahora/ })).toHaveCount(0);
+  /* WhatsApp: un solo botón, en contacto, para dudas */
   const enlaces = page.locator('a[href^="https://wa.me/"]');
-  await expect(enlaces).toHaveCount(3);
-  await expect(page.locator('.cabecera a[href^="https://wa.me/"]')).toHaveCount(1);
-  await expect(page.locator('#inicio a[href^="https://wa.me/"]')).toHaveCount(1);
-  await expect(page.locator('#contacto a[href^="https://wa.me/"]')).toHaveCount(1);
-  for (const href of await enlaces.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
-    expect(href).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
-  }
+  await expect(enlaces).toHaveCount(1);
+  await expect(page.locator('#contacto a[href^="https://wa.me/"]')).toContainText('¿Dudas?');
+  expect(await enlaces.first().getAttribute('href')).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
   /* Los sectores enseñan lo que se lleva cada negocio: van al catálogo, no a WhatsApp */
   const sectores = await page.locator('#sectores a.sector').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
   expect(sectores).toHaveLength(6);
@@ -369,36 +374,42 @@ test('tarjetas de categoría: sin «Ver productos» (toda la tarjeta lleva al ca
   }
 });
 
-test('«Así se ven en su mesa»: seis líneas, cada una con su foto de IA distinta y su enlace al catálogo, aun sin CRM', async ({ page }) => {
+test('«Así se ven en su mesa»: seis fotos de muestra distintas, sin enlace ni «Ver productos», con el nombre pequeño encima, aun sin CRM', async ({ page }) => {
   const v = vigilar(page);
   /* El inicio ya no pide el catálogo: si lo pidiera y fallara, igual tiene que verse */
   await page.route('**/api/catalogo', (r) => r.fulfill({ status: 503, body: '' }));
   await page.goto('/');
-  const tarjetas = page.locator('#en-uso a.uso');
+  const tarjetas = page.locator('#en-uso figure.uso');
   await expect(tarjetas).toHaveCount(6);
-  await expect(page.locator('#en-uso h3')).toHaveText(['Platos', 'Platos biodegradables', 'Bandejas', 'Vasos', 'Portacomidas', 'Bolsas']);
-  const datos = await tarjetas.evaluateAll((as) => as.map((a) => ({ href: a.getAttribute('href'), foto: /** @type {HTMLImageElement} */ (a.querySelector('img')).getAttribute('src') })));
+  await expect(page.locator('#en-uso .uso__nombre')).toHaveText(['Platos', 'Platos biodegradables', 'Bandejas', 'Vasos', 'Portacomidas', 'Bolsas']);
+  /* Johan (11-nov): «son solo imágenes de demostración y no llevan a ningún sitio» */
+  await expect(page.locator('#en-uso a')).toHaveCount(0);
+  await expect(page.locator('#en-uso')).not.toContainText('Ver productos');
+  const fotos = await tarjetas.evaluateAll((fs) => fs.map((f) => /** @type {HTMLImageElement} */ (f.querySelector('img')).getAttribute('src')));
   /* Johan: «no hay que repetir productos o fotos» */
-  expect(new Set(datos.map((d) => d.foto)).size).toBe(6);
-  for (const d of datos) {
-    expect(d.href).toMatch(/^\/productos\/\?(categoria=[a-z-]+|q=[a-z%0-9]+)$/);
-    expect(d.foto).toMatch(/^img\/en-uso\/[a-z-]+-360\.webp$/);
-  }
+  expect(new Set(fotos).size).toBe(6);
+  for (const f of fotos) expect(f).toMatch(/^img\/en-uso\/[a-z-]+-360\.webp$/);
   for (let i = 0; i < 6; i++) {
     const img = tarjetas.nth(i).locator('img');
     await img.scrollIntoViewIfNeeded();
     await expect.poll(() => img.evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
     expect(await img.getAttribute('alt')).toBeTruthy();
   }
+  /* El nombre va encima de la foto, pequeño: no más alto que una cuarta parte de la foto */
+  for (let i = 0; i < 6; i++) {
+    const caja = await tarjetas.nth(i).locator('img').boundingBox();
+    const nombre = await tarjetas.nth(i).locator('.uso__nombre').boundingBox();
+    expect(caja && nombre).toBeTruthy();
+    if (!caja || !nombre) continue;
+    expect(nombre.y).toBeGreaterThanOrEqual(caja.y);
+    expect(nombre.y + nombre.height).toBeLessThanOrEqual(caja.y + caja.height + 0.5);
+    expect(nombre.height).toBeLessThanOrEqual(caja.height / 4);
+  }
   /* Ya no queda la sección vieja de pestañas ni el script del catálogo en el inicio */
   await expect(page.locator('#destacados')).toHaveCount(0);
   await expect(page.locator('script[src*="catalogo.js"]')).toHaveCount(0);
-  /* Sin precios, y «Ver productos» en un renglón */
   await expect(page.locator('#en-uso')).not.toContainText('$');
-  const botones = await page.locator('.uso__boton').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height - parseFloat(getComputedStyle(e).minHeight)));
-  for (const b of botones) expect(b).toBeLessThanOrEqual(4);
-  /* Columnas parejas: las seis miden lo mismo de alto */
-  /* Sin Math.round: 246,5 y 246,48 px (la rejilla reparte en 1/64 de px) se redondean a 247 y 246 */
+  /* Columnas parejas: las seis miden lo mismo de alto (sin Math.round: la rejilla reparte en 1/64 de px) */
   const altos = await tarjetas.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
   expect(Math.max(...altos) - Math.min(...altos), `altos: ${altos.join(', ')}`).toBeLessThanOrEqual(1);
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -406,13 +417,41 @@ test('«Así se ven en su mesa»: seis líneas, cada una con su foto de IA disti
   v.sinProblemas();
 });
 
-test('las tarjetas de «Así se ven en su mesa» abren su línea en el catálogo', async ({ page }) => {
+test('«Compre por categoría»: tocar una tarjeta abre una ventana con lo que trae esa categoría y el botón a la tienda', async ({ page }) => {
+  const v = vigilar(page);
   await page.goto('/');
-  await page.locator('#en-uso a.uso', { has: page.getByRole('heading', { name: 'Platos', exact: true }) }).click();
-  await expect(page).toHaveURL(/\/productos\/\?categoria=platos$/);
-  await page.goBack();
-  await page.locator('#en-uso a.uso', { has: page.getByRole('heading', { name: 'Bolsas', exact: true }) }).click();
-  await expect(page).toHaveURL(/\/productos\/\?q=bolsa$/);
+  const tarjeta = page.locator('#catalogo a.cat', { has: page.getByRole('heading', { name: 'Platos', exact: true }) });
+  await tarjeta.scrollIntoViewIfNeeded();
+  await tarjeta.click();
+  /* No navega: sigue en el inicio y se abre la ventana */
+  await expect(page).not.toHaveURL(/productos/);
+  const ventana = page.getByRole('dialog', { name: 'Platos' });
+  await expect(ventana).toBeVisible();
+  await expect(ventana.locator('.resumen__tipos li')).toHaveCount(4);
+  await expect(ventana).toContainText('Hondos');
+  await expect(ventana.getByRole('link', { name: 'Ver en la tienda' })).toHaveAttribute('href', 'https://tienda.plasticosespinal.com/');
+  await expect.poll(() => ventana.locator('img').evaluate((/** @type {HTMLImageElement} */ e) => e.complete && e.naturalWidth > 0)).toBe(true);
+  /* Se cierra con la X y el foco vuelve a la tarjeta */
+  await ventana.getByRole('button', { name: 'Cerrar' }).click();
+  await expect(ventana).toBeHidden();
+  await expect(tarjeta).toBeFocused();
+  /* Cada tarjeta trae su resumen; otra categoría muestra lo suyo y Escape la cierra */
+  await expect(page.locator('#catalogo a.cat:not([data-tipos])')).toHaveCount(0);
+  const vasos = page.locator('#catalogo a.cat', { has: page.getByRole('heading', { name: 'Vasos', exact: true }) });
+  await vasos.click();
+  await expect(page.getByRole('dialog', { name: 'Vasos' })).toContainText('Línea Gold');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  v.sinProblemas();
+});
+
+test('el título de la página (el que sale en Google) es el de la portada', async ({ page }) => {
+  await page.goto('/');
+  const T = 'Plásticos Espinal — Empaques plásticos, desechables y biodegradables para su negocio y hogar';
+  await expect(page).toHaveTitle(T);
+  expect(await page.locator('meta[property="og:title"]').getAttribute('content')).toBe(T);
+  expect(await page.locator('meta[name="twitter:title"]').getAttribute('content')).toBe(T);
+  expect(await page.locator('meta[name="description"]').getAttribute('content')).not.toMatch(/WhatsApp/);
 });
 
 test('títulos que pidió Johan: «Así se ven en su mesa» y la bajada de sectores', async ({ page }) => {
@@ -423,27 +462,20 @@ test('títulos que pidió Johan: «Así se ven en su mesa» y la bajada de secto
   await expect(page.locator('body')).not.toContainText('cumpleaños en casa');
 });
 
-test('«Así se ven en su mesa» va claro y corto: solo el nombre y «Ver productos», sin frases', async ({ page }) => {
-  await page.goto('/');
-  /* Johan (11-nov): «lo que dice no me gusta… algo más claro y conciso» */
-  await expect(page.locator('#en-uso p')).toHaveCount(0);
-  for (const t of await page.locator('#en-uso a.uso').allInnerTexts()) expect(t.replace(/\s+/g, ' ').trim().split(' ').length).toBeLessThanOrEqual(4);
-});
-
 /* ---------- Ronda de color y detalles (10-nov-2026) ---------- */
 
 test('contacto explica cómo se pide en tres pasos numerados, sin sumar botones', async ({ page }) => {
   await page.goto('/');
   const pasos = page.locator('#contacto .pasos li');
   await expect(pasos).toHaveCount(3);
-  await expect(pasos.nth(0)).toContainText('Busque en el catálogo');
-  await expect(pasos.nth(1)).toContainText('Escríbanos por WhatsApp');
+  await expect(pasos.nth(0)).toContainText('Entre a la tienda');
+  await expect(pasos.nth(1)).toContainText('Arme su pedido');
   await expect(pasos.nth(2)).toContainText('Reciba su pedido');
   /* El número lo pone el CSS, en un círculo amarillo con letra azul noche */
   const numeros = await pasos.evaluateAll((els) => els.map((e) => { const s = getComputedStyle(e, '::before'); return { n: s.content, fondo: s.backgroundColor, letra: s.color }; }));
   expect(numeros.map((n) => n.fondo)).toEqual(Array(3).fill('rgb(255, 201, 51)'));
   expect(numeros.map((n) => n.letra)).toEqual(Array(3).fill('rgb(14, 26, 71)'));
-  /* Los pasos no traen enlaces ni botones: el único WhatsApp de la sección sigue siendo el de abajo */
+  /* Los pasos no traen enlaces ni botones: los botones (tienda y dudas por WhatsApp) van abajo */
   await expect(page.locator('#contacto .pasos a')).toHaveCount(0);
 });
 

@@ -73,10 +73,13 @@ test('el catálogo no muestra precios ni WhatsApp en cada tarjeta: la tarjeta ab
   await expect(page.locator('#catRejilla .sello-ref').first()).toHaveText('Foto de referencia');
   /* el agotado va de último */
   await expect(page.locator('#catRejilla > li').last()).toContainText('Agotado');
-  /* tocar la tarjeta (no solo el nombre) abre la ficha, con su WhatsApp y el código */
+  /* tocar la tarjeta (no solo el nombre) abre la ficha: se pide en la tienda (el mismo producto) y
+     WhatsApp queda para dudas, con el nombre y el código (Johan, 11-nov-2026) */
   await tarjeta.click();
   await expect(page).toHaveURL(/\/productos\/\?p=141$/);
-  const href = decodeURIComponent(String(await page.locator('#fichaPedir').getAttribute('href')));
+  await expect(page.locator('#fichaPedir')).toHaveAttribute('href', 'https://tienda.plasticosespinal.com/#p=141');
+  await expect(page.locator('#fichaPedirTexto')).toHaveText('Pedir en la tienda');
+  const href = decodeURIComponent(String(await page.locator('#fichaPreguntar').getAttribute('href')));
   expect(href).toMatch(/^https:\/\/wa\.me\/573183555246\?text=/);
   expect(href).toContain('Contenedor icopor J1 x25 und (código 141)');
   await sinDesborde(page);
@@ -286,7 +289,7 @@ test('una categoría partida en el CRM sale entera: «Aluminio» trae también l
   v.sinProblemas();
 });
 
-test('la ficha: nombre, código, pestañas, pedir por WhatsApp, parecidos y volver', async ({ page }) => {
+test('la ficha: nombre, código, pestañas, pedir en la tienda, parecidos y volver', async ({ page }) => {
   const v = vigilar(page);
   await simularCatalogo(page);
   await page.goto('/productos/?categoria=contenedores');
@@ -299,7 +302,8 @@ test('la ficha: nombre, código, pestañas, pedir por WhatsApp, parecidos y volv
   await expect(page.locator('#fichaCodigo')).toHaveText('Código 141');
   await expect(page.locator('#fichaDisp')).toHaveText('Disponible hoy');
   await expect(page.locator('#fichaRef')).toBeVisible();
-  expect(decodeURIComponent(String(await page.locator('#fichaPedir').getAttribute('href')))).toContain('(código 141)');
+  await expect(page.locator('#fichaPedir')).toHaveAttribute('href', 'https://tienda.plasticosespinal.com/#p=141');
+  expect(decodeURIComponent(String(await page.locator('#fichaPreguntar').getAttribute('href')))).toContain('(código 141)');
   await expect(page).toHaveTitle('Contenedor icopor J1 x25 und — Plásticos Espinal');
   /* Pestañas: descripción abierta; flecha → características */
   await expect(page.locator('#tabDesc')).toHaveAttribute('aria-selected', 'true');
@@ -338,7 +342,7 @@ test('ficha de un producto sin descripción ni detalles: abre «Domicilio y pago
   await expect(page.locator('#tabCaract')).toBeHidden();
   await expect(page.locator('#tabEnvio')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#fichaDisp')).toContainText('Agotado');
-  await expect(page.locator('#fichaPedirTexto')).toHaveText('Preguntar por WhatsApp');
+  await expect(page.locator('#fichaPedirTexto')).toHaveText('Ver en la tienda');
 });
 
 test('si el catálogo no carga, la página lo dice y ofrece WhatsApp con lo que buscaba', async ({ page }) => {
