@@ -349,7 +349,7 @@
       /* Abierto = se puede abrir en la tienda desde cualquier equipo de la cuenta: terminar el pago, seguirlo o
          cancelarlo (el CRM lo da con la sesión, aunque este celular no tenga su secreto) */
       var abre = !!p.abierto;
-      var falta = abre && p.estado === 'POR_CONFIRMAR' && (!p.medio || (p.medio === 'qr' && !p.pago_avisado));
+      var falta = abre && p.estado === 'POR_CONFIRMAR' && 'medio' in p && (!p.medio || (p.medio === 'qr' && !p.pago_avisado));
       var fila = el(abre ? 'button' : 'div', 'compra' + (abre ? ' en-curso' : ''));
       if (abre) {
         fila.type = 'button';
