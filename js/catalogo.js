@@ -12,6 +12,7 @@
   var API = '/api/catalogo';
   var FOTOS = '/api/foto/';
   var WA = '573183555246';
+  var TIENDA = 'https://tienda.plasticosespinal.com/';
   var REF = '/img/productos/';
   /* Foto de referencia (Pexels, ver img/productos/CREDITS.txt) para un producto sin foto propia.
      Nunca una escena hecha con IA: en una tarjeta de producto parecería el producto que se vende.
@@ -138,7 +139,7 @@
   function llaveDe(v) { return norm(v).replace(/\s+/g, ' ').trim(); }
   /** @param {Producto} p */
   function enlaceWa(p) {
-    var texto = 'Hola, Plásticos Espinal 👋 Quiero pedir: ' + p.nombre + ' (código ' + p.id + '). ¿Me confirman precio y disponibilidad?';
+    var texto = 'Hola, Plásticos Espinal 👋 Tengo una pregunta sobre: ' + p.nombre + ' (código ' + p.id + ').';
     return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(texto);
   }
   /** @param {string} texto */
@@ -515,9 +516,12 @@
     var disp = $('fichaDisp');
     disp.textContent = p.disponible ? 'Disponible hoy' : 'Agotado por ahora: pregúntenos cuándo llega';
     disp.classList.toggle('es-agotado', !p.disponible);
+    /* Se pide en la tienda (Johan, 11-nov-2026): la ficha abre el mismo producto allá; WhatsApp queda para dudas */
     var pedir = /** @type {HTMLAnchorElement} */ ($('fichaPedir'));
-    pedir.href = enlaceWa(p);
-    $('fichaPedirTexto').textContent = p.disponible ? 'Pedir por WhatsApp' : 'Preguntar por WhatsApp';
+    pedir.href = TIENDA + '#p=' + encodeURIComponent(String(p.id));
+    $('fichaPedirTexto').textContent = p.disponible ? 'Pedir en la tienda' : 'Ver en la tienda';
+    var preguntar = /** @type {HTMLAnchorElement} */ ($('fichaPreguntar'));
+    if (preguntar) preguntar.href = enlaceWa(p);
 
     /* Pestañas: descripción (si la hay), características (si las hay) y domicilio */
     var desc = p.descripcion || '';
