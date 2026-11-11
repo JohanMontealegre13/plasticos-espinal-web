@@ -60,6 +60,7 @@
   var enlaceUbicacion = '';       /* enlace del mapa de ESTE pedido; solo en memoria, nunca en pe-cliente-v1 */
   var busquedaGps = 0;            /* número de la búsqueda de ubicación en curso; subirlo descarta la respuesta que llegue tarde */
   var enBuscador = false;         /* el cursor está en el buscador: abajo se marca «Buscar» */
+  var soloFavoritos = false;      /* «Favoritos» de abajo: la vitrina muestra solo lo guardado con el corazón */
   var pintadoCon = null;          /* con qué categoría, orden y modo se pintó la vitrina la última vez: si cambia, las tarjetas entran con movimiento */
   var llevaba = null, eraGratis = null;   /* lo último que mostró la canasta de abajo: salta solo si cambia y celebra solo al LLEGAR al domicilio gratis */
   /* La persona pidió menos movimiento en su celular: nada vuela, salta ni cae */
@@ -125,6 +126,10 @@
       b.addEventListener('click', function () { tira.scrollTo({ left: n * tira.clientWidth, behavior: 'smooth' }); });
       puntos.appendChild(b);
     });
+    /* Mientras la persona la toca, esa tarjeta deja de pasar sola un rato (pasarFotos) */
+    var tocar = function () { tira.dataset.tocada = String(Date.now()); };
+    tira.addEventListener('pointerdown', tocar, { passive: true });
+    puntos.addEventListener('click', tocar);
     tira.addEventListener('scroll', function () {
       var n = Math.round(tira.scrollLeft / Math.max(1, tira.clientWidth));
       Array.prototype.forEach.call(puntos.children, function (b, k) { b.setAttribute('aria-current', String(k === n)); });
@@ -226,7 +231,7 @@
         return w;
       }
       b.setAttribute('aria-label', 'Agregar ' + p.nombre + ' a la canasta');
-      b.addEventListener('click', function () { cambiar(p.id, 1); intentar(function () { volar(p.id); }); });
+      b.addEventListener('click', function () { var r = b.getBoundingClientRect(); cambiar(p.id, 1); intentar(function () { volar(p.id); agregado(r); }); });
       w.appendChild(b);
       return w;
     }
@@ -243,7 +248,7 @@
     o.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); o.blur(); } });
     o.addEventListener('change', function () { poner(p.id, o.value); });
     m.addEventListener('click', function () { cambiar(p.id, -1); });
-    s.addEventListener('click', function () { cambiar(p.id, 1); intentar(function () { volar(p.id); }); });
+    s.addEventListener('click', function () { var r = s.getBoundingClientRect(); cambiar(p.id, 1); intentar(function () { volar(p.id); agregado(r); }); });
     c.append(m, o, s);
     w.appendChild(c);
     return w;
@@ -267,6 +272,11 @@
      (PE.buscar: el código exacto va primero); con otro orden, el que escogió la persona. */
   function listar() {
     var PE = window.PE || {}, consulta = filtro.q.trim(), modo = $('orden').value;   /* PE: tienda/buscar.js */
+    /* Favoritos: lo guardado con el corazón, el último primero (solo lo que sigue en la tienda) */
+    if (soloFavoritos) {
+      var favs = guardados ? idsDe(guardados.favoritos).filter(function (id) { return por[id]; }).map(function (id) { return por[id]; }) : [];
+      return { lista: favs, consulta: '', buscando: false };
+    }
     var base = cat.productos.filter(function (p) {
       if (filtro.cat && p.categoria !== filtro.cat) return false;
       return filtro.todo || p.destacado;
@@ -291,17 +301,20 @@
     /* Buscando quedan solo los resultados, pegados a la cabecera (tienda.css esconde lo demás); al empezar a
        buscar la página sube, que es donde salen */
     document.documentElement.classList.toggle('buscando', buscando);
+    document.documentElement.classList.toggle('en-favoritos', soloFavoritos);
     if (empiezaABuscar) window.scrollTo(0, 0);
     /* Las tarjetas entran con movimiento cuando cambia lo que se ve (categoría, orden, entrar o salir de la
        búsqueda), no con cada letra que se escribe. Al abrir la tienda no: mientras cargan las letras y las
        fotos de arriba, una animación ahí le quita al navegador el ancla con la que deja quieta la vitrina */
-    var con = [filtro.cat, filtro.todo, $('orden').value, buscando].join('|');
+    var con = [filtro.cat, filtro.todo, $('orden').value, buscando, soloFavoritos].join('|');
     g.classList.remove('entra');
     if (pintadoCon !== null && con !== pintadoCon && !QUIETO) { void g.offsetWidth; g.classList.add('entra'); }
     pintadoCon = con;
-    var titulo = filtro.cat ? (cats[filtro.cat] || {}).nombre
+    var titulo = soloFavoritos ? 'Sus favoritos' : filtro.cat ? (cats[filtro.cat] || {}).nombre
       : (r.buscando ? 'Resultados para «' + r.consulta + '»' : (filtro.todo ? 'Todos los productos' : 'Lo más pedido'));
     $('tituloVitrina').textContent = titulo;
+    /* «Ver todo» al lado del título: sobra cuando ya se ve todo */
+    $('verTodo').hidden = filtro.todo && !filtro.cat && !r.buscando && !soloFavoritos;
     /* Con filtro: cuántos productos hay y el filtro puesto, que se quita con su ✕ (deja ver todo) */
     var conFiltro = !!(filtro.cat || r.buscando), puesto = filtro.cat ? titulo : '«' + r.consulta.trim() + '»';
     $('filtroLinea').hidden = !conFiltro;
@@ -312,7 +325,8 @@
     $('limpiar').setAttribute('aria-label', conFiltro ? 'Quitar ' + puesto + ' y ver todos los productos' : 'Ver todos los productos');
     $('avisoFicha').textContent = '';
     document.querySelectorAll('.cat').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === filtro.cat)); });
-    $('estado').textContent = lista.length ? '' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.';
+    $('estado').textContent = lista.length ? ''
+      : (soloFavoritos ? 'Toque el corazón de un producto y lo encuentra aquí.' : 'No lo encontramos. Escríbanos por WhatsApp y se lo conseguimos.');
     /* Buscó y no hay nada: el pedido se lo llevamos nosotros, con lo que escribió */
     var pedirlo = $('pedirloWa'), sinNada = r.buscando && !lista.length && !!cat.whatsapp;
     pedirlo.hidden = !sinNada;
@@ -348,6 +362,7 @@
       g.appendChild(li);
     });
     intentar(marcarSeccion);
+    intentar(vigilarFotos);
   }
 
   /* ---------- Ficha del producto (<dialog id="ficha">, con su dirección #p=ID para compartir) ---------- */
@@ -701,6 +716,7 @@
     /* la tarjeta de la vitrina y el corazón de la ficha son el mismo favorito */
     document.querySelectorAll('[data-fav="' + id + '"]').forEach(function (b) { pintarCorazon(b, i < 0); });
     pintarGuardados();
+    if (soloFavoritos) pintar();   /* viendo Favoritos, el que se quitó se va y el nuevo aparece */
   }
   function recordarVisto(id) {
     if (!guardados) return;
@@ -723,7 +739,7 @@
   }
   /* Con algo escrito en el buscador se esconden: los resultados quedan arriba */
   function verGuardados() {
-    ['favoritos', 'vistos'].forEach(function (z) { $(z).hidden = buscando || !Number($(z).dataset.n); });
+    ['favoritos', 'vistos'].forEach(function (z) { $(z).hidden = buscando || soloFavoritos || !Number($(z).dataset.n); });
   }
   function pintarGuardados() {
     if (!guardados) return;
@@ -980,6 +996,10 @@
     if (pago.qr) $('qrImg').src = pago.qr;
     $('qrLlave').hidden = !llave;
     $('qrLlaveNum').textContent = llave;
+    /* A nombre de quién le sale en su banco: así sabe que la plata va a la tienda */
+    var titular = typeof pago.titular === 'string' ? pago.titular.trim() : '';
+    $('qrTitular').hidden = !titular;
+    $('qrTitular').textContent = titular ? 'Le sale a nombre de ' + titular : '';
     $('pqr').classList.toggle('celular', celular);
     $('pasosCelu').hidden = !celular;
     $('pasosCompu').hidden = celular;
@@ -1081,11 +1101,19 @@
     }, CADA);
   }
   /* Cinta del pedido en curso sobre la tienda: vuelve a su pantalla en un toque */
+  /* La franja del pedido se ve unos segundos cuando algo cambia (o al volver a la tienda) y se va: ocupa mucho
+     en el celular (pedido del dueño, 11-nov-2026). El pedido sigue en Mis pedidos, en el menú de la cuenta. */
+  var AVISO_SEGUNDOS = 10, avisoDe = '', relojAviso = null;
   function pintarAviso() {
     var a = $('avisoPedido');
-    if (!pedido || !pedido.codigo) { a.hidden = true; return; }
-    $('avisoTexto').textContent = pedido.codigo + ' · ' + (pedido.titulo || 'Pedido por confirmar');
+    if (!pedido || !pedido.codigo) { a.hidden = true; avisoDe = ''; clearTimeout(relojAviso); return; }
+    var texto = pedido.codigo + ' · ' + (pedido.titulo || 'Pedido por confirmar');
+    $('avisoTexto').textContent = texto;
+    if (texto === avisoDe) return;
+    avisoDe = texto;
     a.hidden = false;
+    clearTimeout(relojAviso);
+    relojAviso = setTimeout(function () { a.hidden = true; }, AVISO_SEGUNDOS * 1000);
   }
   function abrirPedido() {
     abrir();
@@ -1132,7 +1160,7 @@
     $('panel').hidden = true; $('velo').hidden = true;
     vista('canasta');
   }
-  function verTodo() { filtro = { cat: '', q: '', todo: true }; $('q').value = ''; pintar(); }
+  function verTodo() { soloFavoritos = false; filtro = { cat: '', q: '', todo: true }; $('q').value = ''; pintar(); }
 
   /* ---------- Abajo (celular): la canasta en su círculo y la tira del domicilio gratis ---------- */
   /* El círculo dice cuántos productos lleva (y el total, para quien lo oye) y su aro se llena hacia el domicilio
@@ -1224,32 +1252,93 @@
     setTimeout(function () { caja.remove(); }, 2300);
   }
 
+  /* Al agregar un producto: un chulo verde brota donde se tocó, con su aro, y un «+1» sube (tienda.css) */
+  function agregado(r) {
+    if (QUIETO || !document.body.animate || !r || !r.width) return;
+    var casa = encima(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    var chulo = el('span', 'agregado'), uno = el('span', 'mas-uno', '+1'), ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg'), linea = document.createElementNS(ns, 'path');
+    svg.setAttribute('viewBox', '0 0 24 24'); linea.setAttribute('d', 'M5 12.5l4.5 4.5L19 7.5');
+    svg.appendChild(linea); chulo.appendChild(svg);
+    chulo.setAttribute('aria-hidden', 'true'); uno.setAttribute('aria-hidden', 'true');
+    [chulo, uno].forEach(function (n) { n.style.left = x + 'px'; n.style.top = y + 'px'; casa.appendChild(n); });
+    var a = chulo.animate([
+      { transform: 'scale(.3)', opacity: 0, boxShadow: '0 0 0 0 rgba(15,122,67,.45)' },
+      { transform: 'scale(1.12)', opacity: 1, offset: 0.35 },
+      { transform: 'scale(1)', opacity: 1, boxShadow: '0 0 0 18px rgba(15,122,67,0)', offset: 0.75 },
+      { transform: 'scale(.85)', opacity: 0, boxShadow: '0 0 0 18px rgba(15,122,67,0)' }
+    ], { duration: 850, easing: 'ease-out' });
+    var b = uno.animate([
+      { transform: 'translate(-50%,-50%)', opacity: 0 },
+      { transform: 'translate(-50%,-130%)', opacity: 1, offset: 0.3 },
+      { transform: 'translate(-50%,-280%)', opacity: 0 }
+    ], { duration: 950, easing: 'ease-out' });
+    a.onfinish = a.oncancel = function () { chulo.remove(); };
+    b.onfinish = b.oncancel = function () { uno.remove(); };
+  }
+  /* Las tarjetas con varias fotos las pasan solas, rápido y cada una a su tiempo (pedido del dueño, 11-nov-2026):
+     en cada vuelta pasa la mitad. Se quedan quietas las que no se ven, la que la persona acaba de tocar, con la
+     ficha o la canasta abiertas, con la pestaña escondida o si pidió menos movimiento. */
+  var vueltaFotos = 0, relojFotos = null;
+  /* El reloj arranca la primera vez que la vitrina trae una tarjeta con varias fotos */
+  function vigilarFotos() {
+    if (!relojFotos && document.querySelector('#grilla .tira')) relojFotos = setInterval(function () { intentar(pasarFotos); }, 1200);
+  }
+  function pasarFotos() {
+    vueltaFotos++;
+    if (QUIETO || document.hidden || $('ficha').open || !$('panel').hidden) return;
+    var ahora = Date.now(), alto = window.innerHeight;
+    Array.prototype.forEach.call(document.querySelectorAll('#grilla .tira'), function (tira, k) {
+      if ((vueltaFotos + k) % 2 || Number(tira.dataset.tocada || 0) > ahora - 6000) return;
+      var r = tira.getBoundingClientRect();
+      if (!r.width || r.bottom < 0 || r.top > alto) return;
+      var sigue = (Math.round(tira.scrollLeft / r.width) + 1) % tira.children.length;
+      tira.scrollTo({ left: sigue * r.width, behavior: 'smooth' });
+    });
+  }
+  /* Con algo en la canasta, el círculo da un saltico cada tanto: recuerda que el pedido está a un toque */
+  function recordarCanasta() {
+    if (cuentas().n && $('panel').hidden && !$('ficha').open && !document.hidden) saltar(canastaVisible());
+  }
+
   /* ---------- Abajo (celular): la pastilla de secciones ---------- */
-  /* La rayita amarilla va a la sección abierta: Pedidos mientras «Mis pedidos» está encima de la tienda
-     (mi-cuenta/menu.js marca <html class="con-ventana">), Buscar con el cursor en el buscador o algo escrito,
-     e Inicio en lo demás. */
+  /* La rayita amarilla va a la sección abierta: Favoritos mientras la vitrina muestra solo lo guardado, Buscar con
+     el cursor en el buscador o algo escrito, e Inicio en lo demás. Mis pedidos vive en el menú de la cuenta. */
   function marcarSeccion() {
-    var en = document.documentElement.classList.contains('con-ventana') ? 'pedidos' : (buscando || enBuscador ? 'buscar' : 'inicio');
+    var en = soloFavoritos ? 'favoritos' : (buscando || enBuscador ? 'buscar' : 'inicio');
     $('pastilla').dataset.en = en;
-    [['buscar', 'abBuscar'], ['inicio', 'abInicio'], ['pedidos', 'abPedidos']].forEach(function (x) {
+    [['buscar', 'abBuscar'], ['inicio', 'abInicio'], ['favoritos', 'abFavoritos']].forEach(function (x) {
       if (x[0] === en) $(x[1]).setAttribute('aria-current', 'true'); else $(x[1]).removeAttribute('aria-current');
     });
   }
-  /* Inicio: la tienda como al abrirla (sin búsqueda ni categoría) y arriba del todo */
+  /* Inicio: la tienda como al abrirla (sin búsqueda, categoría ni favoritos) y arriba del todo */
   function vistaInicial() {
+    soloFavoritos = false;
     filtro = { cat: '', q: '', todo: !cat.productos.some(function (p) { return p.destacado; }) };
     $('q').value = '';
     pintar();
   }
   function irAlInicio() { $('q').blur(); vistaInicial(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   /* Buscar: el cursor al buscador (en el celular sale el teclado) y arriba, donde salen los resultados */
-  function irABuscar() { $('q').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function irABuscar() {
+    if (soloFavoritos) { soloFavoritos = false; pintar(); }
+    $('q').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  /* Favoritos: la vitrina con lo guardado con el corazón, arriba del todo (lo demás se esconde, como buscando) */
+  function irAFavoritos() {
+    $('q').blur();
+    soloFavoritos = true;
+    filtro = { cat: '', q: '', todo: true };
+    $('q').value = '';
+    pintar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   function eventosAbajo() {
     $('abInicio').addEventListener('click', irAlInicio);
     $('abBuscar').addEventListener('click', irABuscar);
+    $('abFavoritos').addEventListener('click', irAFavoritos);
     $('q').addEventListener('focus', function () { enBuscador = true; marcarSeccion(); });
     $('q').addEventListener('blur', function () { enBuscador = false; marcarSeccion(); });
-    if (window.MutationObserver) new MutationObserver(marcarSeccion).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     marcarSeccion();
   }
   /* La cabecera suelta una sombra cuando la página ya bajó */
@@ -1266,7 +1355,7 @@
   function eventos() {
     document.addEventListener('click', function (e) {
       var b = e.target.closest('[data-cat]');
-      if (b) { filtro = { cat: b.dataset.cat, q: '', todo: true }; $('q').value = ''; pintar(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); }
+      if (b) { soloFavoritos = false; filtro = { cat: b.dataset.cat, q: '', todo: true }; $('q').value = ''; pintar(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); }
       if (e.target.closest('[data-abrir]')) { vista('canasta'); abrir(); }
       var medio = e.target.closest('.medio');
       if (medio) elegirMedio(medio.dataset.medio);
@@ -1279,7 +1368,7 @@
     $('verTodo').addEventListener('click', function () { verTodo(); $('vitrina').scrollIntoView({ behavior: 'smooth' }); });
     $('ultimaVez').addEventListener('click', pedirLoDeLaUltimaVez);
     $('limpiar').addEventListener('click', function (e) { e.preventDefault(); verTodo(); });
-    $('q').addEventListener('input', function () { filtro = { cat: '', q: this.value, todo: true }; pintar(); });
+    $('q').addEventListener('input', function () { soloFavoritos = false; filtro = { cat: '', q: this.value, todo: true }; pintar(); });
     $('orden').addEventListener('change', pintar);
     /* Enter o «Buscar»: a los resultados (buscando están arriba del todo); en el celular Enter además guarda el
        teclado para verlos */
@@ -1394,6 +1483,7 @@
       vigilar();
       intentar(fichaDeLaDireccion);   /* un enlace con #p=ID abre esa ficha */
       setInterval(pintarLlegada, 60000);   /* la hora de llegada corre sola mientras la página está abierta */
+      setInterval(function () { intentar(recordarCanasta); }, 15000);
     })
     .catch(function (e) {
       $('esqueleto').hidden = true;

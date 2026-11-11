@@ -1,9 +1,9 @@
-/* Abajo, solo en el celular y flotando sobre la tienda: la pastilla de secciones (Buscar, Inicio y Pedidos, con la
+/* Abajo, solo en el celular y flotando sobre la tienda: la pastilla de secciones (Buscar, Inicio y Favoritos, con la
    rayita amarilla en la que está abierta) y, aparte, la canasta en su círculo (cuántos lleva y un aro que se llena
    hacia el domicilio gratis). Encima, con algo en la canasta, la tira que dice cuánto falta. En el celular es la
    única canasta (la de arriba se esconde); en el computador nada de esto sale y queda la de arriba. */
 import { test, expect } from '@playwright/test';
-import { abrirTienda, vigilar } from './ayudas.js';
+import { abrirTienda, vigilar, CATALOGO_CRM } from './ayudas.js';
 
 const CELULAR = { width: 390, height: 844 };
 const AGREGAR_J1 = 'Agregar Contenedor icopor J1 x25 und a la canasta';
@@ -18,13 +18,13 @@ async function seccion(/** @type {import('@playwright/test').Page} */ page) {
   }));
 }
 
-test('en el celular abajo van Buscar, Inicio y Pedidos en ese orden, flotando y sin tapar el pie', async ({ page }) => {
+test('en el celular abajo van Buscar, Inicio y Favoritos en ese orden, flotando y sin tapar el pie', async ({ page }) => {
   const v = vigilar(page);
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
   const barra = page.locator('#abajo');
   await expect(barra).toBeVisible();
-  expect(await page.locator('#pastilla .abajo-btn').allInnerTexts()).toEqual(['Buscar', 'Inicio', 'Pedidos']);
+  expect(await page.locator('#pastilla .abajo-btn').allInnerTexts()).toEqual(['Buscar', 'Inicio', 'Favoritos']);
   await expect(barra.locator('#barra')).toHaveAccessibleName('Canasta vacía');
   const m = await page.evaluate(() => {
     const cajas = [...document.querySelectorAll('#pastilla, #barra')].map((x) => x.getBoundingClientRect());
@@ -96,7 +96,7 @@ test('Buscar pone el cursor en el buscador y se marca; al escribir quedan solo l
   await page.locator('#q').pressSequentially('vaso');
   await expect(page.locator('#tituloVitrina')).toHaveText('Resultados para «vaso»');
   /* buscando, lo de la portada se esconde y los resultados quedan pegados a la cabecera */
-  for (const fuera of ['#cats', '.portada', '.benef', '.como']) await expect(page.locator(fuera)).toBeHidden();
+  for (const fuera of ['#cats', '.benef', '.como']) await expect(page.locator(fuera)).toBeHidden();
   const hueco = await page.evaluate(() => document.querySelector('#tituloVitrina').getBoundingClientRect().top - document.querySelector('.cab').getBoundingClientRect().bottom);
   expect(hueco).toBeGreaterThanOrEqual(0);
   expect(hueco).toBeLessThan(80);
@@ -116,16 +116,16 @@ test('empezar a buscar con la página abajo la sube: los resultados salen arriba
   await expect(page.locator('#grilla li').first()).toBeInViewport();
 });
 
-test('Inicio borra la búsqueda, devuelve la portada y vuelve arriba', async ({ page }) => {
+test('Inicio borra la búsqueda, devuelve lo de arriba y vuelve arriba', async ({ page }) => {
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
   await page.locator('#q').fill('vaso');
   await expect(page.locator('#tituloVitrina')).toHaveText('Resultados para «vaso»');
-  await expect(page.locator('.portada')).toBeHidden();
+  await expect(page.locator('.benef')).toBeHidden();
   await page.locator('#abInicio').click();
   await expect(page.locator('#q')).toHaveValue('');
   await expect(page.locator('#tituloVitrina')).toHaveText('Lo más pedido');
-  await expect(page.locator('.portada')).toBeVisible();
+  await expect(page.locator('.benef')).toBeVisible();
   await expect(page.locator('#cats')).toBeVisible();
   expect(await seccion(page)).toEqual({ rayita: 'inicio', marcadas: ['abInicio'] });
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
@@ -139,19 +139,68 @@ test('Inicio con la página abajo y sin búsqueda vuelve arriba', async ({ page 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test('Pedidos abre «Mis pedidos» encima de la tienda y se marca mientras está abierto', async ({ page }) => {
+test('Favoritos muestra solo lo guardado con el corazón; Inicio vuelve a todo', async ({ page }) => {
+  const v = vigilar(page);
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
-  /* Relativo: lleva a /tienda/mi-cuenta/pedidos/ aquí y a /mi-cuenta/pedidos/ en el subdominio */
-  const pedidos = page.locator('#abajo').getByRole('link', { name: 'Pedidos' });
-  await expect(pedidos).toHaveJSProperty('href', new URL('/tienda/mi-cuenta/pedidos/', page.url()).href);
-  await page.route('**/tienda/mi-cuenta/api/pedidos', (r) => r.fulfill({ json: { ok: true, pedidos: [] } }));
-  await pedidos.click();
-  await expect(page.locator('.ventana-cuenta')).toBeVisible();
-  expect(await seccion(page)).toEqual({ rayita: 'pedidos', marcadas: ['abPedidos'] });
-  await page.locator('.vc-cerrar').click();
-  await expect(page.locator('.ventana-cuenta')).toHaveCount(0);
+  await page.locator('#abFavoritos').click();
+  await expect(page.locator('#tituloVitrina')).toHaveText('Sus favoritos');
+  await expect(page.locator('#estado')).toHaveText('Toque el corazón de un producto y lo encuentra aquí.');
+  expect(await seccion(page)).toEqual({ rayita: 'favoritos', marcadas: ['abFavoritos'] });
+  await expect(page.locator('#cats')).toBeHidden();
+  await page.locator('#abInicio').click();
+  await page.locator('#grilla li', { hasText: 'Contenedor icopor J1' }).getByRole('button', { name: 'Guardar en favoritos' }).click();
+  await page.locator('#abFavoritos').click();
+  await expect(page.locator('#grilla li')).toHaveCount(1);
+  await expect(page.locator('#grilla li h3')).toHaveText('Contenedor icopor J1 x25 und');
+  /* quitarle el corazón ahí mismo lo saca de la lista */
+  await page.locator('#grilla li').getByRole('button', { name: 'Quitar de favoritos' }).click();
+  await expect(page.locator('#grilla li')).toHaveCount(0);
+  await page.locator('#abInicio').click();
+  await expect(page.locator('#tituloVitrina')).toHaveText('Lo más pedido');
   expect(await seccion(page)).toEqual({ rayita: 'inicio', marcadas: ['abInicio'] });
+  v.sinProblemas();
+});
+
+test('Mis pedidos ya no va abajo: queda en el menú de la cuenta', async ({ page }) => {
+  await page.setViewportSize(CELULAR);
+  await abrirTienda(page);
+  await expect(page.locator('#abajo').getByText('Pedidos', { exact: true })).toHaveCount(0);
+  await page.locator('.cab .btn-cuenta').click();
+  await expect(page.locator('#menu-cuenta').getByRole('link', { name: /Mis pedidos/ })).toBeVisible();
+});
+
+test('sin portada: la tienda abre en los productos, con «Ver todo» al lado del título', async ({ page }) => {
+  await page.setViewportSize(CELULAR);
+  await abrirTienda(page);
+  await expect(page.getByText('Todo para su negocio')).toHaveCount(0);
+  await expect(page.locator('h1')).toHaveText('Tienda en línea de Plásticos Espinal');
+  await expect(page.locator('#verTodo')).toBeVisible();
+  await page.locator('#verTodo').click();
+  await expect(page.locator('#tituloVitrina')).toHaveText('Todos los productos');
+  await expect(page.locator('#verTodo')).toBeHidden();
+});
+
+test('las tarjetas con varias fotos las pasan solas; la que se toca se queda quieta', async ({ page }) => {
+  await page.setViewportSize(CELULAR);
+  const c = structuredClone(CATALOGO_CRM);
+  for (const p of c.productos) { p.fotos = ['uno.jpg', 'dos.jpg']; p.foto = 'uno.jpg'; }
+  await abrirTienda(page, { catalogo: c });
+  const pasada = () => page.evaluate(() => [...document.querySelectorAll('#grilla .tira')].slice(0, 2)
+    .map((t) => Math.round(t.scrollLeft / t.clientWidth)));
+  /* las dos primeras se turnan: en unos segundos las dos ya pasaron de foto */
+  await expect.poll(async () => (await pasada()).includes(1), { timeout: 6000 }).toBe(true);
+  /* el punto sigue a la foto que se ve */
+  await expect(page.locator('#grilla li').first().locator('.punto[aria-current="true"]')).toHaveCount(1);
+});
+
+test('al agregar brota un chulo verde con «+1» y se va solo', async ({ page }) => {
+  await page.setViewportSize(CELULAR);
+  await abrirTienda(page);
+  await page.getByRole('button', { name: AGREGAR_J1 }).click();
+  await expect(page.locator('.agregado')).toHaveCount(1);
+  await expect(page.locator('.mas-uno')).toHaveText('+1');
+  await expect(page.locator('.agregado, .mas-uno')).toHaveCount(0);
 });
 
 test('la canasta del círculo cuenta los productos, dice el total a quien lo oye y abre la canasta', async ({ page }) => {
@@ -232,7 +281,7 @@ test('quien pidió menos movimiento ve el aviso del domicilio gratis, sin papeli
   await page.setViewportSize(CELULAR);
   await abrirTienda(page);
   await page.getByRole('button', { name: AGREGAR_J1 }).click();
-  await expect(page.locator('.volando')).toHaveCount(0);
+  await expect(page.locator('.volando, .agregado, .mas-uno')).toHaveCount(0);
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').fill('6');
   await page.locator('#grilla').getByLabel('Cantidad de Contenedor icopor J1 x25 und').blur();
   await expect(page.locator('#tostada')).toHaveText('¡Su domicilio ya es gratis!');

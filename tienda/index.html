@@ -10,13 +10,13 @@
   <meta name="theme-color" content="#0e1a47">
   <link rel="preload" href="/fonts/archivoblack-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/tienda/tienda.css?v=25">
+  <link rel="stylesheet" href="/tienda/tienda.css?v=26">
   <script src="/tienda/llegada.js?v=3" defer></script>
   <script src="/js/buscar.js?v=2" defer></script>
   <script src="/tienda/guardados.js?v=2" defer></script>
   <script src="/tienda/ubicacion.js?v=1" defer></script>
   <script src="/tienda/vendedor.js?v=1" defer></script>
-  <script src="/tienda/tienda.js?v=26" defer></script>
+  <script src="/tienda/tienda.js?v=27" defer></script>
   <link rel="stylesheet" href="/tienda/mi-cuenta/cuenta.css?v=6">
   <script src="/tienda/mi-cuenta/menu.js?v=5" defer></script>
 </head>
@@ -41,23 +41,11 @@
   <p class="aviso-ficha" id="avisoFicha" role="status"></p>
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
 
-  <section class="portada">
-    <div class="banner">
-      <span class="chip">Nuevo · pida en línea</span>
-      <h1>Todo para su negocio, en su puerta en 1 hora</h1>
-      <p>Desechables, empaques y aseo de las marcas que ya conoce. Arme la canasta y la recibe hoy.</p>
-      <button class="acc" type="button" id="verTodo">Ver productos</button>
-    </div>
-  </section>
+  <!-- Sin portada (pedido del dueño, 11-nov-2026): la tienda abre directo en los productos. El título queda para
+       lectores de pantalla y buscadores. -->
+  <h1 class="solo-lector">Tienda en línea de Plásticos Espinal</h1>
 
   <div class="ultima" id="ultima" hidden><button class="ultima-btn" id="ultimaVez" type="button">Pedir lo de la última vez</button></div>
-
-  <section class="benef" aria-label="Por qué comprar aquí">
-    <div><svg class="ico" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span><b>Llega en 1 hora</b>En horario de tienda</span></div>
-    <div><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></svg><span><b>Pago con Bre-B</b>O efectivo al recibir</span></div>
-    <div><svg class="ico" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span><b>Del paquete a la caja</b>Lleve solo lo que necesita</span></div>
-    <div><svg class="ico" viewBox="0 0 24 24"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><b>Le confirmamos por WhatsApp</b>Al 318 355 5246</span></div>
-  </section>
 
   <section class="sec guardados" id="favoritos" aria-labelledby="favoritosTit" hidden>
     <div class="sec-cab"><h2 id="favoritosTit">Sus favoritos</h2></div>
@@ -71,6 +59,7 @@
 
   <section class="sec" id="vitrina">
     <div class="sec-cab"><h2 id="tituloVitrina">Lo más pedido</h2>
+      <button class="ver-todo" type="button" id="verTodo">Ver todo</button>
       <label class="orden" for="orden">Ordenar por <select id="orden">
         <option value="pedidos">Más pedidos</option>
         <option value="menor">Menor precio</option>
@@ -85,6 +74,13 @@
     <!-- Mientras llega el catálogo: tarjetas grises en el lugar de los productos (tienda.js las quita) -->
     <ul class="grilla esqueleto" id="esqueleto" aria-hidden="true"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
     <ul class="grilla" id="grilla"></ul>
+  </section>
+
+  <section class="benef" aria-label="Por qué comprar aquí">
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span><b>Llega en 1 hora</b>En horario de tienda</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7M14 20h3"/></svg><span><b>Pago con Bre-B</b>O efectivo al recibir</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span><b>Del paquete a la caja</b>Lleve solo lo que necesita</span></div>
+    <div><svg class="ico" viewBox="0 0 24 24"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><b>Le confirmamos por WhatsApp</b>Al 318 355 5246</span></div>
   </section>
 
   <section class="sec como">
@@ -105,17 +101,17 @@
   <p class="vendedor" data-vendedor-linea hidden></p>
 </div></footer>
 
-<!-- Abajo, solo en el celular y flotando sobre la tienda: la pastilla de secciones (Buscar, Inicio y Pedidos; la
+<!-- Abajo, solo en el celular y flotando sobre la tienda: la pastilla de secciones (Buscar, Inicio y Favoritos; la
      rayita amarilla se corre a la que está abierta) y, aparte, la canasta en su círculo, con cuántos lleva y un aro
      que se llena hacia el domicilio gratis. Encima, con algo en la canasta, la tira que dice cuánto falta.
-     En el celular la canasta de arriba se esconde: esta es la única. -->
+     En el celular la canasta de arriba se esconde: esta es la única. Mis pedidos vive en el menú de la cuenta. -->
 <button class="flota" type="button" id="flota" data-abrir hidden><span id="flotaTxt"></span><span class="tubo" aria-hidden="true"><i id="flotaTubo"></i></span></button>
 <nav class="abajo" id="abajo" aria-label="Secciones">
   <div class="pastilla" id="pastilla" data-en="inicio">
     <span class="rayita" aria-hidden="true"></span>
     <button class="abajo-btn" type="button" id="abBuscar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>Buscar</span></button>
     <button class="abajo-btn" type="button" id="abInicio" aria-current="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Inicio</span></button>
-    <a class="abajo-btn" id="abPedidos" href="mi-cuenta/pedidos/"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Pedidos</span></a>
+    <button class="abajo-btn" type="button" id="abFavoritos"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button>
   </div>
   <button class="abajo-canasta" type="button" id="barra" data-abrir aria-label="Canasta vacía"><span class="adentro"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg></span><span class="n" id="barraN" hidden>0</span></button>
 </nav>
@@ -263,7 +259,7 @@
       <li>En la app de su banco, envíe el total a esa llave</li>
       <li>Vuelva aquí y toque «PAGO CONFIRMADO»</li>
     </ol>
-    <div class="llave" id="qrLlave" hidden><span>Llave Bre-B</span><b id="qrLlaveNum"></b><button class="copiar" type="button" id="copiarLlave">Copiar llave</button></div>
+    <div class="llave" id="qrLlave" hidden><span>Llave Bre-B</span><b id="qrLlaveNum"></b><button class="copiar" type="button" id="copiarLlave">Copiar llave</button><small class="titular" id="qrTitular" hidden></small></div>
     <p class="copiado" id="copiado" role="status" aria-live="polite"></p>
     <div class="espera" id="qrEspera"><span>Preparando el botón para avisarnos…</span><i></i></div>
     <button class="enviar" type="button" id="yaPague" hidden>PAGO CONFIRMADO</button>
