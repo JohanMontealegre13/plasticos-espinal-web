@@ -10,9 +10,9 @@ import { vigilar, sitioDe, sinSesion, CATALOGO_CRM } from './ayudas.js';
 
 const YO = { ok: true, nombre: 'Ana <b>Pérez</b>', estado: 'activa', tipo_documento: 'CC', documento: '1105678901', celular: '318 355 5246', correo: 'ana@ejemplo.com', municipio: 'El Espinal', barrio: 'El Centro', direccion: 'Calle 7 # 5-35', indicaciones: '' };
 const PEDIDOS = { ok: true, pedidos: [
-  { id: 12, numero: 'FE-0012', fecha: '2026-10-01 10:00', canal: 'Domicilio', total: 61000, por_pagar: false, entrega: 'Entregado' },
+  { id: 12, numero: 'FE-0012', fecha: '2026-10-01 10:00', canal: 'Tienda en línea', total: 61000, por_pagar: false, entrega: 'Entregado' },
 ] };
-const PEDIDO = { ok: true, id: 12, numero: 'FE-0012', fecha: '2026-10-01 10:00', canal: 'Domicilio', forma_pago: 'Bre-B', total: 61000, descuento: 0, lineas: [{ producto: 'Vaso grande', cantidad: 2, valor: 57000 }], tiene_recibo: true };
+const PEDIDO = { ok: true, id: 12, numero: 'FE-0012', fecha: '2026-10-01 10:00', canal: 'Tienda en línea', forma_pago: 'Bre-B', total: 61000, descuento: 0, lineas: [{ producto: 'Vaso grande', cantidad: 2, valor: 57000 }], tiene_recibo: true };
 const CLAVE_BUENA = 'una-clave-larga';
 const SIN_SESION = sinSesion();
 
@@ -228,6 +228,8 @@ test('un enlace guardado a Mis pedidos, sin sesión, pide entrar y después abre
   await entrar(page);
   await expect(page).toHaveURL(/\/tienda\/#cuenta=%2Ftienda%2Fmi-cuenta%2Fpedidos%2F$/);
   await expect(marco(page).locator('#lista')).toContainText('FE-0012');
+  /* Cada compra dice dónde se hizo, y la de la tienda en línea va resaltada */
+  await expect(marco(page).locator('#lista .chip.dom')).toHaveText('Tienda en línea');
 });
 
 for (const [caso, volver] of [

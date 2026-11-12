@@ -9,6 +9,9 @@
   var RAIZ = /^\/tienda(\/|$)/.test(location.pathname) ? '/tienda/' : '/';
   var BASE = RAIZ + 'mi-cuenta/';
   var formato = new Intl.NumberFormat('es-CO');
+  /* Lo que se pidió por la tienda en línea va resaltado; lo demás es la tienda física (el CRM lo dice
+     en «canal»). «Domicilio» es como lo llamaba el CRM antes del 12-nov-2026. */
+  var EN_LINEA = ['Tienda en línea', 'Domicilio'];
 
   function $(id) { return document.getElementById(id); }
   function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
@@ -328,7 +331,7 @@
         var a = el('a', 'compra');
         a.href = BASE + 'pedido/?id=' + encodeURIComponent(p.id);
         var izq = el('span');
-        izq.appendChild(el('span', 'chip' + (p.canal === 'Domicilio' ? ' dom' : ''), p.canal));
+        izq.appendChild(el('span', 'chip' + (EN_LINEA.indexOf(p.canal) !== -1 ? ' dom' : ''), p.canal));
         if (p.por_pagar) izq.appendChild(el('span', 'chip pend', 'Por pagar'));
         if (p.entrega) izq.appendChild(el('span', 'chip', p.entrega));
         izq.appendChild(el('span', 'det', fecha(p.fecha) + ' · ' + p.numero));
